@@ -113,3 +113,64 @@ data "aws_iam_policy_document" "github_repo_backup_execution_role_policy" {
     ]
   }
 }
+
+resource "aws_cloudwatch_event_rule" "github_repo_backup" {
+  name                = "github-repo-backup"
+  schedule_expression = var.cron_repo_backup
+}
+
+resource "aws_cloudwatch_event_target" "github_repo_backup" {
+  rule     = aws_cloudwatch_event_rule.github_repo_backup.id
+  arn      = module.github_repo_backup.sfn_state_machine_id
+  role_arn = aws_iam_role.cloudwatch_repo_backup.arn
+}
+
+resource "aws_iam_role" "cloudwatch_repo_backup" {
+  name               = "cloudwatch-repo-backup"
+  assume_role_policy = data.aws_iam_policy_document.cloudwatch_repo_backup_assume_policy.json
+  tags               = var.tags
+}
+
+data "aws_iam_policy_document" "cloudwatch_repo_backup_assume_policy" {
+  statement {
+    actions = [
+      "sts:AssumeRole"
+    ]
+
+    principals {
+      type = "Service"
+      identifiers = [
+        "events.amazonaws.com"
+      ]
+    }
+  }
+}
+
+resource "aws_iam_role_policy" "cloudwatch_repo_backup_policy" {
+  name   = "cloudwatch-repo-backup"
+  role   = aws_iam_role.cloudwatch_repo_backup.id
+  policy = data.aws_iam_policy_document.cloudwatch_repo_backup_policy.json
+}
+
+data "aws_iam_policy_document" "cloudwatch_repo_backup_policy" {
+  statement {
+    sid    = "RunStepFunction"
+    effect = "Allow"
+    actions = [
+      "states:StartExecution"
+    ]
+    resources = [
+      module.github_repo_backup.sfn_state_machine_id
+    ]
+  }
+}
+
+resource "aws_ssm_parameter" "github_token" {
+  name  = "/sfn/github-token"
+  type  = "SecureString"
+  value = "undefined"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
