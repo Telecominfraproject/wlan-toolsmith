@@ -3,7 +3,7 @@ set -x
 set -e
 
 export AWS_DEFAULT_REGION=us-east-1
-export DOCKER_REPO=$(aws ecr describe-repositories --query 'repositories[?repositoryName==`repo-backup`].[repositoryUri][0][0]' --output text)
+export DOCKER_REPO=$(aws ecr describe-repositories --query 'repositories[?repositoryName==`github-repo-backup`].[repositoryUri][0][0]' --output text)
 
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $DOCKER_REPO
 docker build -t repo-backup .

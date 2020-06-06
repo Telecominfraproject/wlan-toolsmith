@@ -50,6 +50,7 @@ data "aws_iam_policy_document" "sfn_repo_backup_policy" {
       aws_iam_role.fargate_repo_backup_execution_role.arn
     ]
   }
+
   statement {
     sid    = "SNSPublish"
     effect = "Allow"
