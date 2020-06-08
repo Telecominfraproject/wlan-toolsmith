@@ -129,6 +129,5 @@ resource "aws_sns_topic" "repo_backup" {
 }
 
 output "github_repo_backup_ecr_url" {
-  value = module.github_repo_backup_ecs_task.
-  ecr_url
+  value = module.github_repo_backup_ecs_task.ecr_url
 }
