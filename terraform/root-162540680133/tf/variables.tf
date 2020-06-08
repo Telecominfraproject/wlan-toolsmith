@@ -29,10 +29,16 @@ variable "github_organization" {
   type        = string
 }
 
-variable "cron_repo_backup" {
+variable "repo_backup_schedule" {
   description = "Repo backup cron schedule"
   type        = string
   default     = "cron(0 9 * * ? *)"
+}
+
+variable "atlassian_backup_schedule" {
+  description = "Atlasssian cloud backup cron schedule"
+  type        = string
+  default     = "cron(0 2 * * ? *)"
 }
 
 variable "s3_bucket_backup_name" {
@@ -50,4 +56,9 @@ variable "repo_blacklist" {
   description = "Comma separated list of repositories to exclude from backup"
   type        = set(string)
   default     = []
+}
+
+variable "atlassian_account_id" {
+  description = "Atlassian cloud account id"
+  type        = string
 }

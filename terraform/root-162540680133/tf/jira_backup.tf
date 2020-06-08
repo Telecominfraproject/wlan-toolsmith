@@ -4,11 +4,11 @@ module "jira_backup_ecs_task" {
   task_environment = [
     { name : "AWS_REGION", value : var.aws_region },
     { name : "BACKUP_BUCKET", value : aws_s3_bucket.repo_backup.id },
-    { name : "GITHUB_ORGANIZATION", value : var.github_organization },
-    { name : "REPO_BLACKLIST", value : "${join("|", var.repo_blacklist)}" }
+    { name : "ATLASSIAN_ACCOUNT_ID", value : var.atlassian_account_id },
   ]
   task_secrets = [
-    { name : "GITHUB_TOKEN", valueFrom : aws_ssm_parameter.github_token.arn },
+    { name : "ATLASSIAN_USER", valueFrom : aws_ssm_parameter.atlassian_user.arn },
+    { name : "ATLASSIAN_TOKEN", valueFrom : aws_ssm_parameter.atlassian_token.arn },
   ]
   task_role_policy          = data.aws_iam_policy_document.jira_backup_task_role_policy.json
   ecs_execution_role_policy = data.aws_iam_policy_document.jira_backup_execution_role_policy.json
@@ -17,7 +17,7 @@ module "jira_backup_ecs_task" {
 module "jira_backup" {
   name                     = "jira-backup"
   source                   = "../modules/aws_stepfunction"
-  cron_schedule            = "cron(0 2 * * ? *)"
+  cron_schedule            = var.atlassian_backup_schedule
   step_function_definition = <<EOF
 {
   "Comment": "Runs periodical backups from jira to s3",
@@ -58,7 +58,7 @@ module "jira_backup" {
           "ExecutionId.$": "$$.Execution.Id",
           "Error.$": "$.error"
         },
-        "TopicArn": "${aws_sns_topic.repo_backup.arn}"
+        "TopicArn": "${aws_sns_topic.atlassian_cloud_backup.arn}"
       },
       "Next": "FailState"
     },
@@ -109,29 +109,30 @@ data "aws_iam_policy_document" "jira_backup_execution_role_policy" {
     ]
 
     resources = [
-      aws_ssm_parameter.github_token.arn
+      aws_ssm_parameter.atlassian_user.arn,
+      aws_ssm_parameter.atlassian_token.arn,
     ]
   }
 }
 
 resource "aws_cloudwatch_event_rule" "jira_backup" {
   name                = "jira-backup"
-  schedule_expression = var.cron_repo_backup
+  schedule_expression = var.atlassian_backup_schedule
 }
 
 resource "aws_cloudwatch_event_target" "jira_backup" {
   rule     = aws_cloudwatch_event_rule.jira_backup.id
   arn      = module.jira_backup.sfn_state_machine_id
-  role_arn = aws_iam_role.cloudwatch_repo_backup.arn
+  role_arn = aws_iam_role.cloudwatch_atlassian_cloud_backup.arn
 }
 
-resource "aws_iam_role" "cloudwatch_repo_backup" {
-  name               = "cloudwatch-repo-backup"
-  assume_role_policy = data.aws_iam_policy_document.cloudwatch_repo_backup_assume_policy.json
+resource "aws_iam_role" "cloudwatch_atlassian_cloud_backup" {
+  name               = "cloudwatch-atlassian-cloud-backup"
+  assume_role_policy = data.aws_iam_policy_document.cloudwatch_atlassian_cloud_backup_assume_policy.json
   tags               = var.tags
 }
 
-data "aws_iam_policy_document" "cloudwatch_repo_backup_assume_policy" {
+data "aws_iam_policy_document" "cloudwatch_atlassian_cloud_backup_assume_policy" {
   statement {
     actions = [
       "sts:AssumeRole"
@@ -146,13 +147,13 @@ data "aws_iam_policy_document" "cloudwatch_repo_backup_assume_policy" {
   }
 }
 
-resource "aws_iam_role_policy" "cloudwatch_repo_backup_policy" {
-  name   = "cloudwatch-repo-backup"
-  role   = aws_iam_role.cloudwatch_repo_backup.id
-  policy = data.aws_iam_policy_document.cloudwatch_repo_backup_policy.json
+resource "aws_iam_role_policy" "cloudwatch_atlassian_cloud_backup_policy" {
+  name   = "cloudwatch-atlassian-cloud-backup"
+  role   = aws_iam_role.cloudwatch_atlassian_cloud_backup.id
+  policy = data.aws_iam_policy_document.cloudwatch_atlassian_cloud_backup_policy.json
 }
 
-data "aws_iam_policy_document" "cloudwatch_repo_backup_policy" {
+data "aws_iam_policy_document" "cloudwatch_atlassian_cloud_backup_policy" {
   statement {
     sid    = "RunStepFunction"
     effect = "Allow"
@@ -165,8 +166,8 @@ data "aws_iam_policy_document" "cloudwatch_repo_backup_policy" {
   }
 }
 
-resource "aws_ssm_parameter" "github_token" {
-  name  = "/sfn/github-token"
+resource "aws_ssm_parameter" "atlassian_user" {
+  name  = "/sfn/atlassian-user"
   type  = "SecureString"
   value = "undefined"
 
@@ -175,6 +176,16 @@ resource "aws_ssm_parameter" "github_token" {
   }
 }
 
-resource "aws_sns_topic" "jira_backup" {
-  name = "jira-backup"
+resource "aws_ssm_parameter" "atlassian_token" {
+  name  = "/sfn/atlassian-token"
+  type  = "SecureString"
+  value = "undefined"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "aws_sns_topic" "atlassian_cloud_backup" {
+  name = "atlassian-cloud-backup"
 }

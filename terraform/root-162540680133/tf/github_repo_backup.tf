@@ -116,7 +116,7 @@ data "aws_iam_policy_document" "github_repo_backup_execution_role_policy" {
 
 resource "aws_cloudwatch_event_rule" "github_repo_backup" {
   name                = "github-repo-backup"
-  schedule_expression = var.cron_repo_backup
+  schedule_expression = var.repo_backup_schedule
 }
 
 resource "aws_cloudwatch_event_target" "github_repo_backup" {

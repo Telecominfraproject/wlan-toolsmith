@@ -12,3 +12,5 @@ repo_blacklist = [
   "TelecomInfraSWStack",
   "OpenCellular",
 ]
+
+atlassian_account_id = "telecominfraproject"
