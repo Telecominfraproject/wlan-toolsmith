@@ -138,3 +138,7 @@ resource "aws_ssm_parameter" "atlassian_token" {
 resource "aws_sns_topic" "atlassian_cloud_backup" {
   name = "atlassian-cloud-backup"
 }
+
+output "jira_backup_ecr_url" {
+  value = module.jira_backup_ecs_task.ecr_url
+}

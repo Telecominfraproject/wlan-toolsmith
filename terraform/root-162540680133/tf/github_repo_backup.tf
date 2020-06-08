@@ -127,3 +127,8 @@ resource "aws_ssm_parameter" "github_token" {
 resource "aws_sns_topic" "repo_backup" {
   name = "repo_backup"
 }
+
+output "github_repo_backup_ecr_url" {
+  value = module.github_repo_backup_ecs_task.
+  ecr_url
+}

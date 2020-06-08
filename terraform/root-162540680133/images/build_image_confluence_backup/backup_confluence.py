@@ -1,0 +1,119 @@
+#!/usr/bin/env python
+
+import requests
+import time
+import re
+import argparse
+import os
+
+
+CONFLUENCE_URL = "https://{}.atlassian.net"
+
+
+class AtlassianBackup:
+    def __init__(self, account_id, base_url, user_name, token):
+        self.account_id = account_id
+        self.base_url = base_url
+        self.user_name = user_name
+        self.token = token
+        self.session = self._get_session()
+
+    def _get_session(self):
+        session = requests.Session()
+        session.auth = (self.user_name, self.token)
+        session.headers.update(
+            {"Accept": "application/json", "Content-Type": "application/json"}
+        )
+        return session
+
+    def create_backup(self):
+        url = requests.compat.urljoin(self.base_url, "/wiki/rest/obm/1.0/runbackup")
+        backup_request = self.session.post(
+            url, data=b'{"cbAttachments": "true", "exportToCloud": "true"}'
+        )
+
+        if not backup_request.ok:
+            print(f"Error: {backup_request.text}")
+            print(backup_request.status_code)
+            exit(1)
+
+    def wait_for_backup(self):
+        backup_progress_url = requests.compat.urljoin(
+            self.base_url, "/wiki/rest/obm/1.0/getprogress"
+        )
+
+        for _ in range(100):
+            backup_progress_res = self.session.get(backup_progress_url).json()
+            print(f"Debug: {backup_progress_res}")
+
+            if backup_progress_res["alternativePercentage"] == "100%":
+                return backup_progress_res["fileName"]
+
+            else:
+                print(
+                    f"Backup is {backup_progress_res['alternativePercentage']} ready, waiting for 100% completion."
+                )
+                time.sleep(10)
+
+        print("Backup timed out")
+        exit(1)
+
+    def download_backup(self, backup_url: str, destination_dir: str):
+        ts = time.strftime("%Y%m%d_%H%M")
+        backup_name = f"backup_confluence_{self.account_id}_{ts}.zip"
+
+        with self.session.get(
+            requests.compat.urljoin(self.base_url, "/wiki/download/") + backup_url,
+            stream=True,
+        ) as r:
+            r.raise_for_status()
+            with open(os.path.join(destination_dir, backup_name), "wb") as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    f.write(chunk)
+
+        print(f"Saved to {os.path.join(destination_dir, backup_name)} successfully.")
+
+
+def main():
+    parser = argparse.ArgumentParser("Cloud Jira & Confluence backup")
+    parser.add_argument(
+        "-a",
+        "--account-id",
+        help="Atlassian Cloud account id, https://<account-id>.atlassian.net",
+        default=os.getenv("ATLASSIAN_ACCOUNT_ID"),
+    )
+    parser.add_argument(
+        "-u",
+        "--user",
+        help="Email address for Atlassian Cloud account",
+        default=os.getenv("ATLASSIAN_USER_ID"),
+    )
+    parser.add_argument(
+        "-t",
+        "--token",
+        help="API token for the user account",
+        default=os.getenv("ATLASSIAN_TOKEN"),
+    )
+    parser.add_argument(
+        "-d",
+        "--destination",
+        help="Destination directory for the backup file",
+        default=".",
+    )
+
+    args = parser.parse_args()
+
+    a = AtlassianBackup(
+        account_id=args.account_id,
+        base_url=CONFLUENCE_URL.format(args.account_id),
+        user_name=args.user,
+        token=args.token,
+    )
+
+    backup_task_id = a.create_backup()
+    backup_url = a.wait_for_backup()
+    a.download_backup(backup_url=backup_url, destination_dir=args.destination)
+
+
+if __name__ == "__main__":
+    main()

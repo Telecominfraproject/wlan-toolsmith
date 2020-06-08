@@ -9,3 +9,7 @@ output "ecs_task_role" {
 output "ecs_task_definition" {
   value = aws_ecs_task_definition.sfn.arn
 }
+
+output "ecr_url" {
+  value = aws_ecr_repository.main.repository_url
+}

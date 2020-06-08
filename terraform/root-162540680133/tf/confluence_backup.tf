@@ -72,3 +72,7 @@ EOF
   ecs_task_execution_role  = module.confluence_backup_ecs_task.ecs_execution_role
   ecs_task_role            = module.confluence_backup_ecs_task.ecs_task_role
 }
+
+output "confluence_backup_ecr_url" {
+  value = module.confluence_backup_ecs_task.ecr_url
+}
