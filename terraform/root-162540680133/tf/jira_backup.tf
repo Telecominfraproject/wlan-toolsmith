@@ -1,6 +1,6 @@
-module "github_repo_backup_ecs_task" {
+module "jira_backup_ecs_task" {
   source = "../modules/aws_ecs_task"
-  name   = "github-repo-backup"
+  name   = "jira-backup"
   task_environment = [
     { name : "AWS_REGION", value : var.aws_region },
     { name : "BACKUP_BUCKET", value : aws_s3_bucket.repo_backup.id },
@@ -10,17 +10,17 @@ module "github_repo_backup_ecs_task" {
   task_secrets = [
     { name : "GITHUB_TOKEN", valueFrom : aws_ssm_parameter.github_token.arn },
   ]
-  task_role_policy          = data.aws_iam_policy_document.github_repo_backup_task_role_policy.json
-  ecs_execution_role_policy = data.aws_iam_policy_document.github_repo_backup_execution_role_policy.json
+  task_role_policy          = data.aws_iam_policy_document.jira_backup_task_role_policy.json
+  ecs_execution_role_policy = data.aws_iam_policy_document.jira_backup_execution_role_policy.json
 }
 
-module "github_repo_backup" {
-  name                     = "github-repo-backup"
+module "jira_backup" {
+  name                     = "jira-backup"
   source                   = "../modules/aws_stepfunction"
   cron_schedule            = "cron(0 2 * * ? *)"
   step_function_definition = <<EOF
 {
-  "Comment": "Runs periodical backups from github repositories to s3",
+  "Comment": "Runs periodical backups from jira to s3",
   "StartAt": "StartFargateTask",
   "States": {
     "StartFargateTask": {
@@ -30,7 +30,7 @@ module "github_repo_backup" {
       "Parameters":{
         "LaunchType":"FARGATE",
         "Cluster": "${aws_ecs_cluster.automation.arn}",
-        "TaskDefinition": "${module.github_repo_backup_ecs_task.ecs_task_definition}",
+        "TaskDefinition": "${module.jira_backup_ecs_task.ecs_task_definition}",
         "NetworkConfiguration": {
           "AwsvpcConfiguration": {
             "Subnets": [
@@ -68,12 +68,12 @@ module "github_repo_backup" {
   }
 }
 EOF
-  ecs_task_definition      = module.github_repo_backup_ecs_task.ecs_task_definition
-  ecs_task_execution_role  = module.github_repo_backup_ecs_task.ecs_execution_role
-  ecs_task_role            = module.github_repo_backup_ecs_task.ecs_task_role
+  ecs_task_definition      = module.jira_backup_ecs_task.ecs_task_definition
+  ecs_task_execution_role  = module.jira_backup_ecs_task.ecs_execution_role
+  ecs_task_role            = module.jira_backup_ecs_task.ecs_task_role
 }
 
-data "aws_iam_policy_document" "github_repo_backup_task_role_policy" {
+data "aws_iam_policy_document" "jira_backup_task_role_policy" {
   statement {
     effect = "Allow"
     actions = [
@@ -99,7 +99,7 @@ data "aws_iam_policy_document" "github_repo_backup_task_role_policy" {
   }
 }
 
-data "aws_iam_policy_document" "github_repo_backup_execution_role_policy" {
+data "aws_iam_policy_document" "jira_backup_execution_role_policy" {
   statement {
     sid    = "SSMParater"
     effect = "Allow"
@@ -114,14 +114,14 @@ data "aws_iam_policy_document" "github_repo_backup_execution_role_policy" {
   }
 }
 
-resource "aws_cloudwatch_event_rule" "github_repo_backup" {
-  name                = "github-repo-backup"
+resource "aws_cloudwatch_event_rule" "jira_backup" {
+  name                = "jira-backup"
   schedule_expression = var.cron_repo_backup
 }
 
-resource "aws_cloudwatch_event_target" "github_repo_backup" {
-  rule     = aws_cloudwatch_event_rule.github_repo_backup.id
-  arn      = module.github_repo_backup.sfn_state_machine_id
+resource "aws_cloudwatch_event_target" "jira_backup" {
+  rule     = aws_cloudwatch_event_rule.jira_backup.id
+  arn      = module.jira_backup.sfn_state_machine_id
   role_arn = aws_iam_role.cloudwatch_repo_backup.arn
 }
 
@@ -160,7 +160,7 @@ data "aws_iam_policy_document" "cloudwatch_repo_backup_policy" {
       "states:StartExecution"
     ]
     resources = [
-      module.github_repo_backup.sfn_state_machine_id
+      module.jira_backup.sfn_state_machine_id
     ]
   }
 }
@@ -175,6 +175,6 @@ resource "aws_ssm_parameter" "github_token" {
   }
 }
 
-resource "aws_sns_topic" "repo_backup" {
-  name = "repo_backup"
+resource "aws_sns_topic" "jira_backup" {
+  name = "jira-backup"
 }
