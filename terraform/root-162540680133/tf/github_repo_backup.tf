@@ -131,3 +131,21 @@ resource "aws_sns_topic" "repo_backup" {
 output "github_repo_backup_ecr_url" {
   value = module.github_repo_backup_ecs_task.ecr_url
 }
+
+resource "aws_cloudformation_stack" "github_repo_backup_email_notification" {
+  name          = "github-repo-backup"
+  template_body = <<EOT
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+%{~for subscription in var.sns_backup_notification}
+  Subscription${md5(subscription["endpoint"])}:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: "${subscription["endpoint"]}"
+      Protocol: "${subscription["protocol"]}"
+      TopicArn: "${aws_sns_topic.repo_backup.arn}"
+%{endfor~}
+EOT
+
+  tags = var.tags
+}
