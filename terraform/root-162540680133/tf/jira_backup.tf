@@ -115,57 +115,6 @@ data "aws_iam_policy_document" "jira_backup_execution_role_policy" {
   }
 }
 
-resource "aws_cloudwatch_event_rule" "jira_backup" {
-  name                = "jira-backup"
-  schedule_expression = var.atlassian_backup_schedule
-}
-
-resource "aws_cloudwatch_event_target" "jira_backup" {
-  rule     = aws_cloudwatch_event_rule.jira_backup.id
-  arn      = module.jira_backup.sfn_state_machine_id
-  role_arn = aws_iam_role.cloudwatch_atlassian_cloud_backup.arn
-}
-
-resource "aws_iam_role" "cloudwatch_atlassian_cloud_backup" {
-  name               = "cloudwatch-atlassian-cloud-backup"
-  assume_role_policy = data.aws_iam_policy_document.cloudwatch_atlassian_cloud_backup_assume_policy.json
-  tags               = var.tags
-}
-
-data "aws_iam_policy_document" "cloudwatch_atlassian_cloud_backup_assume_policy" {
-  statement {
-    actions = [
-      "sts:AssumeRole"
-    ]
-
-    principals {
-      type = "Service"
-      identifiers = [
-        "events.amazonaws.com"
-      ]
-    }
-  }
-}
-
-resource "aws_iam_role_policy" "cloudwatch_atlassian_cloud_backup_policy" {
-  name   = "cloudwatch-atlassian-cloud-backup"
-  role   = aws_iam_role.cloudwatch_atlassian_cloud_backup.id
-  policy = data.aws_iam_policy_document.cloudwatch_atlassian_cloud_backup_policy.json
-}
-
-data "aws_iam_policy_document" "cloudwatch_atlassian_cloud_backup_policy" {
-  statement {
-    sid    = "RunStepFunction"
-    effect = "Allow"
-    actions = [
-      "states:StartExecution"
-    ]
-    resources = [
-      module.jira_backup.sfn_state_machine_id
-    ]
-  }
-}
-
 resource "aws_ssm_parameter" "atlassian_user" {
   name  = "/sfn/atlassian-user"
   type  = "SecureString"

@@ -17,7 +17,7 @@ module "github_repo_backup_ecs_task" {
 module "github_repo_backup" {
   name                     = "github-repo-backup"
   source                   = "../modules/aws_stepfunction"
-  cron_schedule            = "cron(0 2 * * ? *)"
+  cron_schedule            = var.repo_backup_schedule
   step_function_definition = <<EOF
 {
   "Comment": "Runs periodical backups from github repositories to s3",
@@ -110,57 +110,6 @@ data "aws_iam_policy_document" "github_repo_backup_execution_role_policy" {
 
     resources = [
       aws_ssm_parameter.github_token.arn
-    ]
-  }
-}
-
-resource "aws_cloudwatch_event_rule" "github_repo_backup" {
-  name                = "github-repo-backup"
-  schedule_expression = var.repo_backup_schedule
-}
-
-resource "aws_cloudwatch_event_target" "github_repo_backup" {
-  rule     = aws_cloudwatch_event_rule.github_repo_backup.id
-  arn      = module.github_repo_backup.sfn_state_machine_id
-  role_arn = aws_iam_role.cloudwatch_repo_backup.arn
-}
-
-resource "aws_iam_role" "cloudwatch_repo_backup" {
-  name               = "cloudwatch-repo-backup"
-  assume_role_policy = data.aws_iam_policy_document.cloudwatch_repo_backup_assume_policy.json
-  tags               = var.tags
-}
-
-data "aws_iam_policy_document" "cloudwatch_repo_backup_assume_policy" {
-  statement {
-    actions = [
-      "sts:AssumeRole"
-    ]
-
-    principals {
-      type = "Service"
-      identifiers = [
-        "events.amazonaws.com"
-      ]
-    }
-  }
-}
-
-resource "aws_iam_role_policy" "cloudwatch_repo_backup_policy" {
-  name   = "cloudwatch-repo-backup"
-  role   = aws_iam_role.cloudwatch_repo_backup.id
-  policy = data.aws_iam_policy_document.cloudwatch_repo_backup_policy.json
-}
-
-data "aws_iam_policy_document" "cloudwatch_repo_backup_policy" {
-  statement {
-    sid    = "RunStepFunction"
-    effect = "Allow"
-    actions = [
-      "states:StartExecution"
-    ]
-    resources = [
-      module.github_repo_backup.sfn_state_machine_id
     ]
   }
 }
