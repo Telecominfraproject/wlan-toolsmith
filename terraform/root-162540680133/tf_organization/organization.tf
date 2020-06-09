@@ -13,15 +13,12 @@ resource "aws_organizations_account" "wifi" {
   name      = "wifi"
   email     = "wifi-admin@telecominfraproject.com"
   parent_id = aws_organizations_organizational_unit.default.id
-  //  iam_user_access_to_billing = "DENY"
 }
 
 resource "aws_organizations_account" "cicd" {
   name      = "cicd"
   email     = "cicd-admin@telecominfraproject.com"
   parent_id = aws_organizations_organizational_unit.default.id
-  //  iam_user_access_to_billing = "DENY"
-  //  role_name                  = "org-admin"
 }
 
 resource "aws_organizations_organizational_unit" "default" {
