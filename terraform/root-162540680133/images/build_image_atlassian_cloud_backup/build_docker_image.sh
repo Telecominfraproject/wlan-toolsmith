@@ -2,7 +2,7 @@
 set -x
 set -e
 
-export PROJECT_NAME=confluence-backup
+export PROJECT_NAME=backup-atlassian-cloud
 export AWS_DEFAULT_REGION=us-east-1
 export DOCKER_REPO=$(aws ecr describe-repositories --query "repositories[?repositoryName==\`$PROJECT_NAME\`].[repositoryUri][0][0]" --output text)
 

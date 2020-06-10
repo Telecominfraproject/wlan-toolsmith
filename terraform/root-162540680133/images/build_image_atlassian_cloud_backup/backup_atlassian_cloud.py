@@ -7,16 +7,22 @@ import argparse
 import os
 
 
-CONFLUENCE_URL = "https://{}.atlassian.net"
+BASE_URL = "https://{}.atlassian.net"
 
 
 class AtlassianBackup:
-    def __init__(self, account_id, base_url, user_name, token):
+    def __init__(self, account_id, base_url, user_name, token, component):
         self.account_id = account_id
         self.base_url = base_url
         self.user_name = user_name
         self.token = token
         self.session = self._get_session()
+
+        if component in ["confluence", "jira"]:
+            self.component = component
+        else:
+            raise NotImplementedError
+
 
     def _get_session(self):
         session = requests.Session()
@@ -26,7 +32,7 @@ class AtlassianBackup:
         )
         return session
 
-    def create_backup(self):
+    def create_backup_confluence(self):
         url = requests.compat.urljoin(self.base_url, "/wiki/rest/obm/1.0/runbackup")
         backup_request = self.session.post(
             url, data=b'{"cbAttachments": "true", "exportToCloud": "true"}'
@@ -37,7 +43,25 @@ class AtlassianBackup:
             print(backup_request.status_code)
             exit(1)
 
-    def wait_for_backup(self):
+    def create_backup_jira(self):
+        url = requests.compat.urljoin(
+            self.base_url, "/rest/backup/1/export/runbackup")
+        backup_request = self.session.post(
+            url, data=b'{"cbAttachments": "true", "exportToCloud": "true"}'
+        )
+
+        if not backup_request.ok:
+            print(f"Error: {backup_request.text}")
+            exit(1)
+
+        url = requests.compat.urljoin(
+            self.base_url, "/rest/backup/1/export/lastTaskId")
+        task_request = self.session.get(url)
+        task_id = task_request.text
+
+        return task_id
+
+    def wait_for_backup_confluence(self):
         backup_progress_url = requests.compat.urljoin(
             self.base_url, "/wiki/rest/obm/1.0/getprogress"
         )
@@ -58,12 +82,37 @@ class AtlassianBackup:
         print("Backup timed out")
         exit(1)
 
+    def wait_for_backup_jira(self, task_id):
+        backup_progress_url = requests.compat.urljoin(
+            self.base_url, f"/rest/backup/1/export/getProgress?taskId={task_id}"
+        )
+
+        for _ in range(100):
+            backup_progress_res = self.session.get(backup_progress_url).json()
+            if backup_progress_res["status"] == "Success":
+                return backup_progress_res["result"]
+            else:
+                print(
+                    f"Backup is not ready yet, status is {backup_progress_res['status']}, progress: {backup_progress_res['progress']}"
+                )
+                time.sleep(10)
+
+        print("Backup timed out")
+        exit(1)
+
     def download_backup(self, backup_url: str, destination_dir: str):
         ts = time.strftime("%Y%m%d_%H%M")
-        backup_name = f"backup_confluence_{self.account_id}_{ts}.zip"
+
+        if self.component == "jira":
+            backup_name = f"backup_jira_{self.account_id}_{ts}.zip"
+            url_prefix = "/plugins/servlet/"
+        elif self.component == "confluence":
+            backup_name = f"backup_jira_{self.account_id}_{ts}.zip"
+            url_prefix = "/wiki/download/"
 
         with self.session.get(
-            requests.compat.urljoin(self.base_url, "/wiki/download/") + backup_url,
+            requests.compat.urljoin(
+                self.base_url, url_prefix) + backup_url,
             stream=True,
         ) as r:
             r.raise_for_status()
@@ -71,7 +120,8 @@ class AtlassianBackup:
                 for chunk in r.iter_content(chunk_size=8192):
                     f.write(chunk)
 
-        print(f"Saved to {os.path.join(destination_dir, backup_name)} successfully.")
+        print(
+            f"Saved to {os.path.join(destination_dir, backup_name)} successfully.")
 
 
 def main():
@@ -103,16 +153,31 @@ def main():
 
     args = parser.parse_args()
 
-    a = AtlassianBackup(
+
+    confluence_backup = AtlassianBackup(
         account_id=args.account_id,
-        base_url=CONFLUENCE_URL.format(args.account_id),
+        base_url=BASE_URL.format(args.account_id),
         user_name=args.user,
         token=args.token,
+        component="confluence"
     )
 
-    backup_task_id = a.create_backup()
-    backup_url = a.wait_for_backup()
-    a.download_backup(backup_url=backup_url, destination_dir=args.destination)
+    backup_task_id = confluence_backup.create_backup_confluence()
+    backup_url = confluence_backup.wait_for_backup_confluence()
+    confluence_backup.download_backup(backup_url=backup_url, destination_dir=args.destination)
+
+
+    jira_backup = AtlassianBackup(
+        account_id=args.account_id,
+        base_url=BASE_URL.format(args.account_id),
+        user_name=args.user,
+        token=args.token,
+        component="jira"
+    )
+
+    backup_task_id = jira_backup.create_backup_jira()
+    backup_url = jira_backup.wait_for_backup_jira(task_id=backup_task_id)
+    jira_backup.download_backup(backup_url=backup_url, destination_dir=args.destination)
 
 
 if __name__ == "__main__":
