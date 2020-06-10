@@ -17,5 +17,5 @@ atlassian_account_id = "telecominfraproject"
 
 sns_backup_notification = [
   { "protocol" = "email", "endpoint" = "eugene@opsfleet.com" },
-  //  { "protocol" = "email", "endpoint" = "tipdevops@launchcg.com" },
+  { "protocol" = "email", "endpoint" = "tipdevops@launchcg.com" },
 ]
