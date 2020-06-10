@@ -27,8 +27,7 @@ resource "aws_organizations_organizational_unit" "default" {
 }
 
 resource "aws_organizations_policy" "default" {
-  name = "default"
-
+  name    = "default"
   content = data.aws_iam_policy_document.default.json
   type    = "SERVICE_CONTROL_POLICY"
 }
