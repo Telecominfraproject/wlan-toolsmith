@@ -72,3 +72,8 @@ variable "cloudwatch_logs_retention_period" {
   description = "Cloudwatch Logs retention period, days"
   type = number
 }
+
+variable "backup_retention_period" {
+  description = "Backup retention period, days"
+  type = number
+}

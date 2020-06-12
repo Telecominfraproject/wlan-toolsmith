@@ -27,3 +27,5 @@ sns_backup_notification = [
 ]
 
 cloudwatch_logs_retention_period = 30
+
+backup_retention_period = 60
