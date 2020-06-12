@@ -9,6 +9,8 @@ python3 /backup_atlassian_cloud.py --account-id $ATLASSIAN_ACCOUNT_ID --user $AT
 echo "Generated backup successfully $(ls $BACKUP_DIR/*.zip)"
 
 echo "Uploading to s3 bucket $BACKUP_BUCKET"
-aws s3 cp $BACKUP_DIR/*.zip s3://${BACKUP_BUCKET}/atlassian_cloud/
+for f in $(ls $BACKUP_DIR/*.zip); do
+    aws s3 cp $f s3://${BACKUP_BUCKET}/atlassian_cloud/
+done
 
 echo "Done."
