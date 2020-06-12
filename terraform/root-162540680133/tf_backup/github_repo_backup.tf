@@ -12,6 +12,7 @@ module "github_repo_backup_ecs_task" {
   ]
   task_role_policy          = data.aws_iam_policy_document.github_repo_backup_task_role_policy.json
   ecs_execution_role_policy = data.aws_iam_policy_document.github_repo_backup_execution_role_policy.json
+  cw_logs_retention_period = var.cloudwatch_logs_retention_period
 }
 
 module "github_repo_backup" {

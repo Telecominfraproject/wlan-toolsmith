@@ -60,10 +60,15 @@ variable "repo_blacklist" {
 
 variable "atlassian_account_id" {
   description = "Atlassian cloud account id"
-  type        = string
+  type = string
 }
 
 variable "sns_backup_notification" {
   description = "Backup SNS notifications"
-  type        = set(map(string))
+  type = set(map(string))
+}
+
+variable "cloudwatch_logs_retention_period" {
+  description = "Cloudwatch Logs retention period, days"
+  type = number
 }
