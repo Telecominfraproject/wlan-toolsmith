@@ -32,13 +32,11 @@ variable "github_organization" {
 variable "repo_backup_schedule" {
   description = "Repo backup cron schedule"
   type        = string
-  default     = "cron(0 9 * * ? *)"
 }
 
 variable "atlassian_backup_schedule" {
   description = "Atlasssian cloud backup cron schedule"
   type        = string
-  default     = "cron(0 2 * * ? *)"
 }
 
 variable "s3_bucket_backup_name" {
@@ -60,20 +58,20 @@ variable "repo_blacklist" {
 
 variable "atlassian_account_id" {
   description = "Atlassian cloud account id"
-  type = string
+  type        = string
 }
 
 variable "sns_backup_notification" {
   description = "Backup SNS notifications"
-  type = set(map(string))
+  type        = set(map(string))
 }
 
 variable "cloudwatch_logs_retention_period" {
   description = "Cloudwatch Logs retention period, days"
-  type = number
+  type        = number
 }
 
 variable "backup_retention_period" {
   description = "Backup retention period, days"
-  type = number
+  type        = number
 }
