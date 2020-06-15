@@ -104,10 +104,10 @@ class AtlassianBackup:
         ts = time.strftime("%Y%m%d_%H%M")
 
         if self.component == "jira":
-            backup_name = f"backup_jira_{self.account_id}_{ts}.zip"
+            backup_name = f"backup_{self.component}_{self.account_id}_{ts}.zip"
             url_prefix = "/plugins/servlet/"
         elif self.component == "confluence":
-            backup_name = f"backup_jira_{self.account_id}_{ts}.zip"
+            backup_name = f"backup_{self.component}_{self.account_id}_{ts}.zip"
             url_prefix = "/wiki/download/"
 
         with self.session.get(
