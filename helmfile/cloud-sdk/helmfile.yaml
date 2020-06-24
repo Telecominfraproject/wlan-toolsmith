@@ -4,7 +4,13 @@ repositories:
 
 environments:
   azure:
+    values:
+    - domain: tip.4c74356b41.com
+    - storageClass: default
   amazon:
+    values:
+    - domain: tip.4c74356b41.com
+    - storageClass: gp2
 
 releases:
 # core setup
@@ -34,9 +40,6 @@ releases:
   labels:
     app: elasticsearch
     role: setup
-  set:
-  - name: output.host
-    value: elasticsearch-client.monitoring.svc.cluster.local
 - name: prometheus-postgres-exporter
   namespace: monitoring
   chart: stable/prometheus-postgres-exporter
@@ -58,4 +61,36 @@ releases:
     role: payload
   values:
   - tip-wlan/resources/environments/dev.yaml
-  - tip-wlan/resources/environments/dev-{{ .Environment.Name }}.yaml
+  - wlan-cloud-graphql-gw:
+      env:
+        portalsvc: graphql.{{ .Environment.Values.domain }}
+      ingress:
+        hosts:
+        - host: graphql.{{ .Environment.Values.domain }}
+          paths:
+          - "/"
+  - wlan-cloud-static-portal:
+      ingress:
+        hosts:
+        - host: portal.{{ .Environment.Values.domain }}
+          paths:
+          - "/"
+  - nginx-ingress-controller:
+      controller:
+        config:
+          externalStatusAddress: api.{{ .Environment.Values.domain }}
+  - opensync-mqtt-broker:
+      persistence:
+        storageClass: "{{ .Environment.Values.storageClass }}"
+  - zookeeper:
+      persistence:
+        storageClass: "{{ .Environment.Values.storageClass }}"
+  - kafka:
+      persistence:
+        storageClass: "{{ .Environment.Values.storageClass }}"
+  - cassandra:
+      persistence:
+        storageClass: "{{ .Environment.Values.storageClass }}"
+  - postgresql:
+      persistence:
+        storageClass: "{{ .Environment.Values.storageClass }}"
