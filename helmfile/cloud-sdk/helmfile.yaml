@@ -1,0 +1,61 @@
+repositories:
+- name: stable
+  url: https://kubernetes-charts.storage.googleapis.com
+
+environments:
+  azure:
+  amazon:
+
+releases:
+# core setup
+- name: prometheus-operator
+  namespace: monitoring
+  chart: stable/prometheus-operator
+  labels:
+    app: prometheus-operator
+    role: setup
+  set:
+  - name: prometheusOperator.manageCrds
+    value: true
+  - name: prometheusOperator.createCustomResource
+    value: false
+- name: fluentd
+  namespace: monitoring
+  chart: stable/fluentd
+  labels:
+    app: fluentd
+    role: setup
+  set:
+  - name: output.host
+    value: elasticsearch-client.monitoring.svc.cluster.local
+- name: elasticsearch
+  namespace: monitoring
+  chart: stable/elasticsearch
+  labels:
+    app: elasticsearch
+    role: setup
+  set:
+  - name: output.host
+    value: elasticsearch-client.monitoring.svc.cluster.local
+- name: prometheus-postgres-exporter
+  namespace: monitoring
+  chart: stable/prometheus-postgres-exporter
+  labels:
+    app: postgress-exporter
+    role: setup
+  set:
+  - name: config.datasource.host
+    value: "tip-postgresql.tip.svc.cluster.local"
+  - name: config.datasource.password
+    value: "cG9zdGdyZXMxMjM: "
+
+# cloud sdk
+- name: tip
+  namespace: tip
+  chart: tip-wlan
+  labels:
+    app: cloudsdk
+    role: payload
+  values:
+  - tip-wlan/resources/environments/dev.yaml
+  - tip-wlan/resources/environments/dev-{{ .Environment.Name }}.yaml
