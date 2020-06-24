@@ -47,7 +47,7 @@ opensync-mqtt-broker:
   replicaCount: 1
   persistence:
     enabled: true
-    storageClass: "default"
+    storageClass: "gp2"
 wlan-cloud-graphql-gw:
   enabled: true
   env:
@@ -84,13 +84,13 @@ zookeeper:
   replicaCount: 1
   persistence:
     enabled: true
-    storageClass: "default"
+    storageClass: "gp2"
 kafka:
   enabled: true
   replicaCount: 1
   persistence:
     enabled: true
-    storageClass: "default"
+    storageClass: "gp2"
 cassandra:
   enabled: true
   config:
@@ -102,7 +102,7 @@ cassandra:
     seed_size: 1
   persistence:
     enabled: true
-    storageClass: "default"
+    storageClass: "gp2"
 postgresql:
   enabled: true
 ## NOTE: If we are using glusterfs as Storage class, we don't really need 
@@ -115,4 +115,4 @@ postgresql:
     slaveReplicas: 1
   persistence:
     enabled: true
-    storageClass: "default"
+    storageClass: "gp2"
