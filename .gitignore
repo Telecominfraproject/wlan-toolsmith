@@ -34,3 +34,7 @@ terraform.rc
 
 .idea
 .vscode
+
+# Ignore development files
+notes.md
+config
