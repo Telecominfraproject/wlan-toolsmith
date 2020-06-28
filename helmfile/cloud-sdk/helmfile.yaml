@@ -1,19 +1,54 @@
 repositories:
 - name: stable
   url: https://kubernetes-charts.storage.googleapis.com
+- name: loki
+  url: https://grafana.github.io/loki/charts
 
 environments:
   azure:
     values:
     - domain: tip.4c74356b41.com
     - storageClass: default
+    - autoscaler:
+        enabled: false
+    - elastic:
+        enabled: false
+    - postgres-exporter:
+        enabled: false
   amazon:
     values:
     - domain: tip.4c74356b41.com
     - storageClass: gp2
+    - autoscaler:
+        enabled: false
+    - elastic:
+        enabled: false
+    - postgres-exporter:
+        enabled: false
 
-releases:
+helmDefaults:
+  wait: true
+  force: true
+  timeout: 600
+
+templates:
+  default: &default
+    namespace: kube-system
+    missingFileHandler: Warn
+    values:
+    - envs/common/{{`{{ .Release.Name }}`}}.yaml.gotmpl
+    - envs/{{`{{ .Environment.Name }}`}}/{{`{{ .Release.Name }}`}}.yaml.gotmp
+
 # core setup
+releases:
+- name: cluster-autoscaler
+  condition: autoscaler.enabled
+  <<: *default
+  chart: stable/cluster-autoscaler
+  version: 7.3.2
+  labels:
+    group: system
+
 - name: prometheus-operator
   namespace: monitoring
   chart: stable/prometheus-operator
@@ -25,32 +60,37 @@ releases:
     value: true
   - name: prometheusOperator.createCustomResource
     value: false
-- name: fluentd
+  - name: prometheus.Enabled
+    value: true
+  - name: prometheus.prometheusSpec.remoteWrite[0].url
+    value: https://prometheus-us-central1.grafana.net/api/prom/push
+  - name: prometheus.prometheusSpec.remoteWrite[0].basicAuth.username.name
+    value: grafana-auth
+  - name: prometheus.prometheusSpec.remoteWrite[0].basicAuth.username.key
+    value: username
+  - name: prometheus.prometheusSpec.remoteWrite[0].basicAuth.password.name
+    value: grafana-auth
+  - name: prometheus.prometheusSpec.remoteWrite[0].basicAuth.password.key
+    value: password
+  # - name: prometheus.prometheusSpec.remoteWrite[0].name
+  #   value: tip.grafana
+- name: promtail
   namespace: monitoring
-  chart: stable/fluentd
+  chart: loki/promtail
   labels:
-    app: fluentd
+    app: prometheus-tail
     role: setup
   set:
-  - name: output.host
-    value: elasticsearch-client.monitoring.svc.cluster.local
-- name: elasticsearch
-  namespace: monitoring
-  chart: stable/elasticsearch
-  labels:
-    app: elasticsearch
-    role: setup
-- name: prometheus-postgres-exporter
-  namespace: monitoring
-  chart: stable/prometheus-postgres-exporter
-  labels:
-    app: postgress-exporter
-    role: setup
-  set:
-  - name: config.datasource.host
-    value: "tip-postgresql.tip.svc.cluster.local"
-  - name: config.datasource.password
-    value: "cG9zdGdyZXMxMjM: "
+  - name: loki.serviceScheme
+    value: https
+  - name: loki.servicePort
+    value: 443
+  - name: loki.serviceName
+    value: logs-prod-us-central1.grafana.net
+  - name: loki.user
+    value: 4372
+  - name: loki.password
+    value: eyJrIjoiZmQxYjljYWRiYmUxODg1OGIyOGNmZmZlYTRiZTFiZTZiYWNiZTI4MSIsIm4iOiJjbG91ZC1zZGstaGVsbWZpbGUiLCJpZCI6MzcyMDE2fQ==
 
 # cloud sdk
 - name: tip
@@ -76,6 +116,8 @@ releases:
           paths:
           - "/"
   - nginx-ingress-controller:
+      prometheus:
+        create: true
       controller:
         config:
           externalStatusAddress: api.{{ .Environment.Values.domain }}
@@ -92,5 +134,49 @@ releases:
       persistence:
         storageClass: "{{ .Environment.Values.storageClass }}"
   - postgresql:
+      postgresqlDatabase: tip
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+          namespace: monitoring
       persistence:
         storageClass: "{{ .Environment.Values.storageClass }}"
+  - wlan-ssc-service:
+      enabled: false
+
+
+# obsolete
+- name: prometheus-postgres-exporter
+  condition: postgres-exporter.enabled
+  namespace: monitoring
+  chart: stable/prometheus-postgres-exporter
+  labels:
+    app: postgress-exporter
+    role: setup
+  set:
+  - name: config.datasource.host
+    value: "tip-postgresql.tip.svc.cluster.local"
+  - name: config.datasource.password
+    value: cG9zdGdyZXMxMjM=
+  - name: config.datasource.database
+    value: postgres
+- name: fluentd
+  condition: elastic.enabled
+  namespace: monitoring
+  chart: stable/fluentd
+  labels:
+    app: fluentd
+    role: setup
+  set:
+  - name: plugins.enabled
+    value: true
+  - name: plugins.pluginsList[0]
+    value: fluent-plugin-grafana-loki
+- name: elasticsearch
+  condition: elastic.enabled
+  namespace: monitoring
+  chart: stable/elasticsearch
+  labels:
+    app: elasticsearch
+    role: setup
