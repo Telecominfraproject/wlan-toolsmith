@@ -10,5 +10,5 @@ variable "billing_alarm_notify_emails" {
 
 variable "budget_montly_limit" {
   description = "Montly budget limit, USD"
-  type        = number
+  type        = string
 }

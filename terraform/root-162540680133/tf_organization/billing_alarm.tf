@@ -6,6 +6,10 @@ resource "aws_budgets_budget" "main" {
   time_unit         = "MONTHLY"
   time_period_start = formatdate("YYYY-MM-DD_00:00", timestamp())
 
+  lifecycle {
+    ignore_changes = [time_period_start]
+  }
+
   notification {
     comparison_operator        = "GREATER_THAN"
     threshold                  = 100

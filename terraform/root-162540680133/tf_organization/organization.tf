@@ -25,22 +25,3 @@ resource "aws_organizations_organizational_unit" "default" {
   name      = "default"
   parent_id = aws_organizations_organization.org.roots.0.id
 }
-
-resource "aws_organizations_policy" "default" {
-  name    = "default"
-  content = data.aws_iam_policy_document.default.json
-  type    = "SERVICE_CONTROL_POLICY"
-}
-
-data "aws_iam_policy_document" "default" {
-  statement {
-    effect    = "Allow"
-    actions   = ["*"]
-    resources = ["*"]
-  }
-}
-
-resource "aws_organizations_policy_attachment" "default" {
-  policy_id = aws_organizations_policy.default.id
-  target_id = aws_organizations_organizational_unit.default.id
-}
