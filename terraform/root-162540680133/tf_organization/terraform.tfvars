@@ -4,4 +4,19 @@ billing_alarm_notify_emails = [
   "eugene@opsfleet.com"
 ]
 
-budget_montly_limit = "100.0"
+budget_montly_limit = {
+  "cicd" = "100.0"
+  "wifi" = "100.0"
+}
+
+org_accounts = {
+  "cicd" = {
+    "email"         = "cicd-admin@telecominfraproject.com"
+    "montly_budget" = "500.0"
+  }
+
+  "wifi" = {
+    "email"         = "wifi-admin@telecominfraproject.com"
+    "montly_budget" = "1000.0"
+  }
+}

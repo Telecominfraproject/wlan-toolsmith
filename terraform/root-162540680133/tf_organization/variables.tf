@@ -10,5 +10,9 @@ variable "billing_alarm_notify_emails" {
 
 variable "budget_montly_limit" {
   description = "Montly budget limit, USD"
-  type        = string
+  type        = map(string)
+}
+
+variable "org_accounts" {
+  description = "Organization accounts"
 }
