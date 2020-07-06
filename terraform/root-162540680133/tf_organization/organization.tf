@@ -3,9 +3,7 @@ resource "aws_organizations_organization" "org" {
     "cloudtrail.amazonaws.com",
     "sso.amazonaws.com",
   ]
-
-  feature_set = "ALL"
-
+  feature_set          = "ALL"
   enabled_policy_types = ["SERVICE_CONTROL_POLICY"]
 }
 

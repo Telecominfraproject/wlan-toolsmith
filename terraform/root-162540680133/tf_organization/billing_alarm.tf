@@ -20,6 +20,6 @@ resource "aws_budgets_budget" "default" {
     threshold                  = 100
     threshold_type             = "PERCENTAGE"
     notification_type          = "ACTUAL"
-    subscriber_email_addresses = var.billing_alarm_notify_emails
+    subscriber_email_addresses = each.value["billing_alarm_notify_emails"]
   }
 }
