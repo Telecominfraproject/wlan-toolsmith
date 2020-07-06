@@ -1,9 +1,12 @@
 terraform {
-  required_version = ">= 0.12.0"
+  required_version = ">= 0.12.2"
+
   backend "s3" {
-    bucket = "tfstate-20200529173901447300000001"
-    key    = "organization"
-    region = "us-east-1"
+    region         = "us-east-1"
+    bucket         = "tip-org-tfstate"
+    key            = "tip-org"
+    dynamodb_table = "terraform-state-lock"
+    encrypt        = true
   }
 }
 
