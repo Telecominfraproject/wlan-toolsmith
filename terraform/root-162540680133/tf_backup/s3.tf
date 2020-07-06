@@ -21,7 +21,7 @@ resource "aws_s3_bucket" "repo_backup" {
     }
 
     noncurrent_version_expiration {
-      days = 8
+      days = var.backup_retention_period
     }
   }
 
