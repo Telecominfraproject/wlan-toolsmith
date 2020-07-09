@@ -1,8 +1,8 @@
 repositories:
 - name: stable
   url: https://kubernetes-charts.storage.googleapis.com
-- name: loki
-  url: https://grafana.github.io/loki/charts
+- name: kiwigrid 
+  url: https://kiwigrid.github.io
 
 environments:
   azure:
@@ -11,23 +11,27 @@ environments:
     - storageClass: default
     - autoscaler:
         enabled: false
+    - ingress:
+        enabled: true
     - elastic:
-        enabled: false
-    - postgres-exporter:
-        enabled: false
+        enabled: true
+    - prometheus:
+        enabled: true
   amazon:
     values:
     - domain: tip.4c74356b41.com
     - storageClass: gp2
     - autoscaler:
         enabled: false
+    - ingress:
+        enabled: true
     - elastic:
-        enabled: false
-    - postgres-exporter:
-        enabled: false
+        enabled: true
+    - prometheus:
+        enabled: true
 
 helmDefaults:
-  wait: true
+  wait: false
   force: true
   timeout: 600
 
@@ -35,9 +39,9 @@ templates:
   default: &default
     namespace: kube-system
     missingFileHandler: Warn
-    values:
-    - envs/common/{{`{{ .Release.Name }}`}}.yaml.gotmpl
-    - envs/{{`{{ .Environment.Name }}`}}/{{`{{ .Release.Name }}`}}.yaml.gotmp
+    # values:
+    # - envs/common/{{`{{ .Release.Name }}`}}.yaml.gotmpl
+    # - envs/{{`{{ .Environment.Name }}`}}/{{`{{ .Release.Name }}`}}.yaml.gotmp
 
 # core setup
 releases:
@@ -48,6 +52,24 @@ releases:
   version: 7.3.2
   labels:
     group: system
+    role: setup
+    app: autoscaler
+- name: nginx-ingress
+  condition: ingress.enabled
+  <<: *default
+  chart: stable/nginx-ingress
+  version: 1.40.2
+  labels:
+    group: system
+    role: setup
+    app: nginx-ingress
+  set:
+  - name: controller.metrics.enabled
+    value: true
+  - name: controller.metrics.serviceMonitor.enabled
+    value: true
+  - name: controller.metrics.serviceMonitor.additionalLabels.release
+    value: prometheus-operator
 
 - name: prometheus-operator
   namespace: monitoring
@@ -60,37 +82,82 @@ releases:
     value: true
   - name: prometheusOperator.createCustomResource
     value: false
-  - name: prometheus.Enabled
+  - name: prometheus.enabled
     value: true
-  - name: prometheus.prometheusSpec.remoteWrite[0].url
-    value: https://prometheus-us-central1.grafana.net/api/prom/push
-  - name: prometheus.prometheusSpec.remoteWrite[0].basicAuth.username.name
-    value: grafana-auth
-  - name: prometheus.prometheusSpec.remoteWrite[0].basicAuth.username.key
-    value: username
-  - name: prometheus.prometheusSpec.remoteWrite[0].basicAuth.password.name
-    value: grafana-auth
-  - name: prometheus.prometheusSpec.remoteWrite[0].basicAuth.password.key
-    value: password
-  # - name: prometheus.prometheusSpec.remoteWrite[0].name
-  #   value: tip.grafana
-- name: promtail
+  - name: grafana.ingress.enabled
+    value: true
+  - name: grafana.dashboardProviders.dashboardproviders\.yaml.apiVersion
+    value: 1
+  - name: grafana.dashboardProviders.dashboardproviders\.yaml.providers[0].name
+    value: default
+  - name: grafana.dashboardProviders.dashboardproviders\.yaml.providers[0].orgId
+    value: 1
+  - name: grafana.dashboardProviders.dashboardproviders\.yaml.providers[0].folder
+    value: imported
+  - name: grafana.dashboardProviders.dashboardproviders\.yaml.providers[0].type
+    value: file
+  - name: grafana.dashboardProviders.dashboardproviders\.yaml.providers[0].disableDeletion
+    value: false
+  - name: grafana.dashboardProviders.dashboardproviders\.yaml.providers[0].editable
+    value: true
+  - name: grafana.dashboardProviders.dashboardproviders\.yaml.providers[0].options.path
+    value: /var/lib/grafana/dashboards/default
+  - name: grafana.ingress.hosts[0]
+    value: grafana.{{ .Environment.Values.domain }}
+  - name: grafana.dashboards.default.nginx-ingress.gnetId
+    value: 9614
+  - name: grafana.dashboards.default.nginx-ingress.revision
+    value: 1
+  - name: grafana.dashboards.default.nginx-ingress.datasource
+    value: Prometheus
+  - name: grafana.dashboards.default.postgres.gnetId
+    value: 6742
+  - name: grafana.dashboards.default.postgres.revision
+    value: 1
+  - name: grafana.dashboards.default.postgres.datasource
+    value: Prometheus
+  - name: grafana.testFramework.enabled
+    value: false
+
+- name: fluentd
+  condition: elastic.enabled
   namespace: monitoring
-  chart: loki/promtail
+  chart: kiwigrid/fluentd-elasticsearch
   labels:
-    app: prometheus-tail
+    app: fluentd
     role: setup
   set:
-  - name: loki.serviceScheme
-    value: https
-  - name: loki.servicePort
-    value: 443
-  - name: loki.serviceName
-    value: logs-prod-us-central1.grafana.net
-  - name: loki.user
-    value: 4372
-  - name: loki.password
-    value: eyJrIjoiZmQxYjljYWRiYmUxODg1OGIyOGNmZmZlYTRiZTFiZTZiYWNiZTI4MSIsIm4iOiJjbG91ZC1zZGstaGVsbWZpbGUiLCJpZCI6MzcyMDE2fQ==
+  - name: elasticsearch.hosts[0]
+    value: elasticsearch-client.monitoring.svc.cluster.local
+  - name: serviceAccount.create
+    value: true
+  - name: awsSigningSidecar.enabled
+    value: false
+- name: elasticsearch
+  condition: elastic.enabled
+  namespace: monitoring
+  chart: stable/elasticsearch
+  labels:
+    app: elasticsearch
+    role: setup
+- name: kibana
+  condition: elastic.enabled
+  namespace: monitoring
+  chart: stable/kibana
+  labels:
+    app: kibana
+    role: setup
+  set:
+  - name: testFramework.enabled
+    value: false
+  - name: image.tag
+    value: "6.8.6" # else it complains about version mismatch with elastic
+  - name: files.kibana\.yml.elasticsearch\.hosts
+    value: http://elasticsearch-client.monitoring.svc.cluster.local:9200
+  - name: ingress.enabled
+    value: true
+  - name: ingress.hosts[0]
+    value: kibana.{{ .Environment.Values.domain }}
 
 # cloud sdk
 - name: tip
@@ -116,6 +183,7 @@ releases:
           paths:
           - "/"
   - nginx-ingress-controller:
+      enabled: false
       prometheus:
         create: true
       controller:
@@ -144,39 +212,3 @@ releases:
         storageClass: "{{ .Environment.Values.storageClass }}"
   - wlan-ssc-service:
       enabled: false
-
-
-# obsolete
-- name: prometheus-postgres-exporter
-  condition: postgres-exporter.enabled
-  namespace: monitoring
-  chart: stable/prometheus-postgres-exporter
-  labels:
-    app: postgress-exporter
-    role: setup
-  set:
-  - name: config.datasource.host
-    value: "tip-postgresql.tip.svc.cluster.local"
-  - name: config.datasource.password
-    value: cG9zdGdyZXMxMjM=
-  - name: config.datasource.database
-    value: postgres
-- name: fluentd
-  condition: elastic.enabled
-  namespace: monitoring
-  chart: stable/fluentd
-  labels:
-    app: fluentd
-    role: setup
-  set:
-  - name: plugins.enabled
-    value: true
-  - name: plugins.pluginsList[0]
-    value: fluent-plugin-grafana-loki
-- name: elasticsearch
-  condition: elastic.enabled
-  namespace: monitoring
-  chart: stable/elasticsearch
-  labels:
-    app: elasticsearch
-    role: setup

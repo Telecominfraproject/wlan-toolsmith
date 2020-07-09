@@ -36,6 +36,5 @@ terraform.rc
 .vscode
 
 # Ignore development files
-notes.md
 config
-basic-auth-secret.yaml
+helmfile
