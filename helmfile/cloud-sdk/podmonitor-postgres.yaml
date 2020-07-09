@@ -1,3 +1,4 @@
+# this needs to be moved to a separate fake chart
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
@@ -12,22 +13,5 @@ spec:
       release: tip
   podMetricsEndpoints:
   - port: http-metrics
-  namespaceSelector:
-    any: true
-
----
-apiVersion: monitoring.coreos.com/v1
-kind: PodMonitor
-metadata:
-  name: nginx-ingress-exporter
-  namespace: monitoring
-  labels:
-    release: prometheus-operator
-spec:
-  selector:
-    matchLabels:
-      app: tip-nginx-ingress-controller
-  podMetricsEndpoints:
-  - port: prometheus
   namespaceSelector:
     any: true
