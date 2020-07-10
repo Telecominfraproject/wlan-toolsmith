@@ -29,4 +29,13 @@ org_accounts = {
       "chrisbusch@fb.com",
     ]
   }
+
+  "openautomation" = {
+    "email"         = "netauto-admin@telecominfraproject.com"
+    "montly_budget" = "500.0"
+    "billing_alarm_notify_emails" = [
+      "dorongivoni@fb.com",
+      "jcrosby@launchcg.com",
+    ]
+  }
 }
