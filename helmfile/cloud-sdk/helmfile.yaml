@@ -3,6 +3,8 @@ repositories:
   url: https://kubernetes-charts.storage.googleapis.com
 - name: kiwigrid 
   url: https://kiwigrid.github.io
+- name: tip-cloudsdk
+  url: https://tip.jfrog.io/artifactory/tip-wlan-cloud-helm-virtual-repo
 
 environments:
   azure:
@@ -85,10 +87,22 @@ releases:
   - prometheus:
       enabled: true
   - grafana:
+      grafana.ini:
+        users:
+          viewers_can_edit: true
+        auth:
+          disable_login_form: true
+          disable_signout_menu: true
+        auth.anonymous:
+          enabled: true
+          org_role: Viewer
       testFramework:
         enabled: false
       ingress:
         enabled: true
+        annotations:
+          nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+          nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
         hosts:
         - grafana.{{ .Environment.Values.domain }}
       dashboardProviders:
@@ -154,13 +168,16 @@ releases:
         elasticsearch.hosts: http://elasticsearch-client.monitoring.svc.cluster.local:9200
   - ingress:
       enabled: true
+      annotations:
+        nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
       hosts:
       - kibana.{{ .Environment.Values.domain }}
 
 # cloud sdk
 - name: tip
   namespace: tip
-  chart: tip-wlan
+  chart: tip-cloudsdk/tip-wlan
   labels:
     app: cloudsdk
     role: payload
