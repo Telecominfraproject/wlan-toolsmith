@@ -37,5 +37,5 @@ terraform.rc
 
 # Ignore development files
 config
-helmfile
 tip-wlan
+local
