@@ -1,0 +1,229 @@
+repositories:
+- name: stable
+  url: https://kubernetes-charts.storage.googleapis.com
+- name: kiwigrid 
+  url: https://kiwigrid.github.io
+- name: tip-cloudsdk
+  url: https://tip.jfrog.io/artifactory/tip-wlan-cloud-helm-virtual-repo
+
+environments:
+  azure:
+    values:
+    - domain: tip.4c74356b41.com
+    - storageClass: default
+    - autoscaler:
+        enabled: false
+    - ingress:
+        enabled: true
+    - elastic:
+        enabled: true
+    - prometheus:
+        enabled: true
+  amazon:
+    values:
+    - domain: tip.4c74356b41.com
+    - storageClass: gp2
+    - autoscaler:
+        enabled: false
+    - ingress:
+        enabled: true
+    - elastic:
+        enabled: true
+    - prometheus:
+        enabled: true
+
+helmDefaults:
+  wait: false
+  force: true
+  timeout: 600
+
+templates:
+  default: &default
+    namespace: kube-system
+    missingFileHandler: Warn
+    # values:
+    # - envs/common/{{`{{ .Release.Name }}`}}.yaml.gotmpl
+    # - envs/{{`{{ .Environment.Name }}`}}/{{`{{ .Release.Name }}`}}.yaml.gotmp
+
+# core setup
+releases:
+- name: cluster-autoscaler
+  condition: autoscaler.enabled
+  <<: *default
+  chart: stable/cluster-autoscaler
+  version: 7.3.2
+  labels:
+    group: system
+    role: setup
+    app: autoscaler
+- name: nginx-ingress
+  condition: ingress.enabled
+  <<: *default
+  chart: stable/nginx-ingress
+  version: 1.40.2
+  labels:
+    group: system
+    role: setup
+    app: nginx-ingress
+  values:
+  - controller:
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+          additionalLabels:
+            release: prometheus-operator
+
+- name: prometheus-operator
+  namespace: monitoring
+  chart: stable/prometheus-operator
+  labels:
+    app: prometheus-operator
+    role: setup
+  values:
+  - prometheusOperator:
+      manageCrds: true
+      createCustomResource: false
+  - prometheus:
+      enabled: true
+  - grafana:
+      grafana.ini:
+        users:
+          viewers_can_edit: true
+        auth:
+          disable_login_form: true
+          disable_signout_menu: true
+        auth.anonymous:
+          enabled: true
+          org_role: Viewer
+      testFramework:
+        enabled: false
+      ingress:
+        enabled: true
+        annotations:
+          nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+          nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+        hosts:
+        - grafana.{{ .Environment.Values.domain }}
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+          - name: 'default'
+            orgId: 1
+            folder: imported
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
+      dashboards:
+        default:
+          nginx-ingress:
+            gnetId: 9614
+            revision: 1
+            datasource: Prometheus
+          postgres:
+            gnetId: 6742
+            revision: 1
+            datasource: Prometheus
+
+- name: fluentd
+  condition: elastic.enabled
+  namespace: monitoring
+  chart: kiwigrid/fluentd-elasticsearch
+  labels:
+    app: fluentd
+    role: setup
+  values:
+  - elasticsearch:
+      serviceAccount:
+        create: true
+      awsSigningSidecar:
+        enabled: false
+      hosts:
+      - elasticsearch-client.monitoring.svc.cluster.local 
+
+- name: elasticsearch
+  condition: elastic.enabled
+  namespace: monitoring
+  chart: stable/elasticsearch
+  labels:
+    app: elasticsearch
+    role: setup
+- name: kibana
+  condition: elastic.enabled
+  namespace: monitoring
+  chart: stable/kibana
+  labels:
+    app: kibana
+    role: setup
+  values:
+  - testFramework:
+      enabled: false
+  - image:
+      tag: "6.8.6"
+  - files:
+      kibana.yml:
+        elasticsearch.hosts: http://elasticsearch-client.monitoring.svc.cluster.local:9200
+  - ingress:
+      enabled: true
+      annotations:
+        nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+      hosts:
+      - kibana.{{ .Environment.Values.domain }}
+
+# cloud sdk
+- name: tip
+  namespace: tip
+  chart: tip-cloudsdk/tip-wlan
+  labels:
+    app: cloudsdk
+    role: payload
+  values:
+  - tip-wlan/resources/environments/dev.yaml
+  - wlan-cloud-graphql-gw:
+      env:
+        portalsvc: graphql.{{ .Environment.Values.domain }}
+      ingress:
+        hosts:
+        - host: graphql.{{ .Environment.Values.domain }}
+          paths:
+          - "/"
+  - wlan-cloud-static-portal:
+      ingress:
+        hosts:
+        - host: portal.{{ .Environment.Values.domain }}
+          paths:
+          - "/"
+  - nginx-ingress-controller:
+      enabled: false
+      prometheus:
+        create: true
+      controller:
+        config:
+          externalStatusAddress: api.{{ .Environment.Values.domain }}
+  - opensync-mqtt-broker:
+      persistence:
+        storageClass: "{{ .Environment.Values.storageClass }}"
+  - zookeeper:
+      persistence:
+        storageClass: "{{ .Environment.Values.storageClass }}"
+  - kafka:
+      persistence:
+        storageClass: "{{ .Environment.Values.storageClass }}"
+  - cassandra:
+      persistence:
+        storageClass: "{{ .Environment.Values.storageClass }}"
+  - postgresql:
+      postgresqlDatabase: tip
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+          namespace: monitoring
+      persistence:
+        storageClass: "{{ .Environment.Values.storageClass }}"
+  - wlan-ssc-service:
+      enabled: false
