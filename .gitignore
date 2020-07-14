@@ -34,3 +34,8 @@ terraform.rc
 
 .idea
 .vscode
+
+# Ignore development files
+config
+tip-wlan
+local
