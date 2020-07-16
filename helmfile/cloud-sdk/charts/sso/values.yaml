@@ -1,0 +1,9 @@
+monitoring:
+  namespace: monitoring
+  domain: example.com
+
+oidc:
+  issuerUrl: 'https://workplace-integration40-dev.auth0.com/'
+  clientId: clientId
+  clientSecret: clientSecret
+  cookieSecret: egh24Y$GB2rh2t # arbitrary random string, not really a secret
