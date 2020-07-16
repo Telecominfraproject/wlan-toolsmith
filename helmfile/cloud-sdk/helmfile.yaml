@@ -56,6 +56,16 @@ releases:
     group: system
     role: setup
     app: autoscaler
+- name: external-dns
+  condition: external-dns.enabled
+  <<: *default
+  chart: stable/external-dns
+  version: 7.3.2
+  labels:
+    group: system
+    role: setup
+    app: external-dns
+
 - name: nginx-ingress
   condition: ingress.enabled
   <<: *default
@@ -127,6 +137,8 @@ releases:
             gnetId: 6742
             revision: 1
             datasource: Prometheus
+      datasources:
+        enabled: true
 
 - name: fluentd
   condition: elastic.enabled
