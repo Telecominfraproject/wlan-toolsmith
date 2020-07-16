@@ -1,0 +1,24 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: prometheus-operator-grafana-oauth
+  namespace: {{ .Values.monitoring.namespace }}
+  annotations:
+    meta.helm.sh/release-name: prometheus-operator
+    meta.helm.sh/release-namespace: monitoring
+  labels:
+    app.kubernetes.io/instance: prometheus-operator
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/version: 7.0.3
+    helm.sh/chart: grafana-5.3.0
+spec:
+  rules:
+  - host: grafana.{{ .Values.monitoring.domain }}
+    http:
+      paths:
+        - path: /oauth2
+          backend:
+            serviceName: oauth2-proxy
+            servicePort: 4180

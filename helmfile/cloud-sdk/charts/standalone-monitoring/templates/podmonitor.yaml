@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: postgres-exporter
+  namespace: {{ .Values.monitoring.namespace }}
+  labels:
+    release: prometheus-operator
+spec:
+  selector:
+    matchLabels:
+      app: postgresql
+      release: tip
+  podMetricsEndpoints:
+  - port: http-metrics
+  namespaceSelector:
+    any: true

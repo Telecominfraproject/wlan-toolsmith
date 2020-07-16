@@ -5,10 +5,14 @@ repositories:
   url: https://kiwigrid.github.io
 - name: tip-cloudsdk
   url: https://tip.jfrog.io/artifactory/tip-wlan-cloud-helm-virtual-repo
+  username: placeholder
+  password: placeholder
 
 environments:
   azure:
     values:
+    - monitoring:
+        namespace: monitoring
     - domain: tip.4c74356b41.com
     - storageClass: default
     - autoscaler:
@@ -17,10 +21,16 @@ environments:
         enabled: true
     - elastic:
         enabled: true
+    - kibana:
+        enabled: true
     - prometheus:
+        enabled: true
+    - external-dns:
         enabled: true
   amazon:
     values:
+    - monitoring:
+        namespace: monitoring
     - domain: tip.4c74356b41.com
     - storageClass: gp2
     - autoscaler:
@@ -29,7 +39,11 @@ environments:
         enabled: true
     - elastic:
         enabled: true
+    - kibana:
+        enabled: true
     - prometheus:
+        enabled: true
+    - external-dns:
         enabled: true
 
 helmDefaults:
@@ -60,7 +74,7 @@ releases:
   condition: external-dns.enabled
   <<: *default
   chart: stable/external-dns
-  version: 7.3.2
+  version: 2.20.4
   labels:
     group: system
     role: setup
@@ -85,7 +99,7 @@ releases:
             release: prometheus-operator
 
 - name: prometheus-operator
-  namespace: monitoring
+  namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: stable/prometheus-operator
   labels:
     app: prometheus-operator
@@ -96,6 +110,13 @@ releases:
       createCustomResource: false
   - prometheus:
       enabled: true
+      ingress:
+        enabled: true
+        annotations:
+          nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+          nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+        hosts:
+        - prometheus.{{ .Environment.Values.domain }}
   - grafana:
       grafana.ini:
         users:
@@ -138,11 +159,39 @@ releases:
             revision: 1
             datasource: Prometheus
       datasources:
-        enabled: true
+       datasources.yaml:
+        apiVersion: 1
+        datasources:
+        - name: Prometheus
+          type: prometheus
+          url: http://prometheus-operated:9090
+          access: proxy
+          isDefault: true
+
+- name: prometheus-operator-helper
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+  chart: charts/standalone-monitoring
+  labels:
+    app: prometheus-operator
+    role: setup
+  values:
+  - monitoring:
+      namespace: monitoring
+- name: prometheus-operator-ingress-auth
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+  chart: charts/sso
+  labels:
+    app: prometheus-operator
+    role: setup
+  values:
+  - charts/sso/values.local.yaml # temporary solution
+  - monitoring:
+      namespace: monitoring
+      domain: {{ .Environment.Values.domain }} 
 
 - name: fluentd
   condition: elastic.enabled
-  namespace: monitoring
+  namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: kiwigrid/fluentd-elasticsearch
   labels:
     app: fluentd
@@ -154,18 +203,17 @@ releases:
       awsSigningSidecar:
         enabled: false
       hosts:
-      - elasticsearch-client.monitoring.svc.cluster.local 
-
+      - elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local 
 - name: elasticsearch
   condition: elastic.enabled
-  namespace: monitoring
+  namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: stable/elasticsearch
   labels:
     app: elasticsearch
     role: setup
 - name: kibana
-  condition: elastic.enabled
-  namespace: monitoring
+  condition: kibana.enabled
+  namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: stable/kibana
   labels:
     app: kibana
@@ -177,7 +225,7 @@ releases:
       tag: "6.8.6"
   - files:
       kibana.yml:
-        elasticsearch.hosts: http://elasticsearch-client.monitoring.svc.cluster.local:9200
+        elasticsearch.hosts: http://elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local:9200
   - ingress:
       enabled: true
       annotations:
@@ -218,24 +266,24 @@ releases:
           externalStatusAddress: api.{{ .Environment.Values.domain }}
   - opensync-mqtt-broker:
       persistence:
-        storageClass: "{{ .Environment.Values.storageClass }}"
+        storageClass: {{ .Environment.Values.storageClass }}
   - zookeeper:
       persistence:
-        storageClass: "{{ .Environment.Values.storageClass }}"
+        storageClass: {{ .Environment.Values.storageClass }}
   - kafka:
       persistence:
-        storageClass: "{{ .Environment.Values.storageClass }}"
+        storageClass: {{ .Environment.Values.storageClass }}
   - cassandra:
       persistence:
-        storageClass: "{{ .Environment.Values.storageClass }}"
+        storageClass: {{ .Environment.Values.storageClass }}
   - postgresql:
       postgresqlDatabase: tip
       metrics:
         enabled: true
         serviceMonitor:
           enabled: true
-          namespace: monitoring
+          namespace: {{ .Environment.Values.monitoring.namespace }}
       persistence:
-        storageClass: "{{ .Environment.Values.storageClass }}"
+        storageClass: {{ .Environment.Values.storageClass }}
   - wlan-ssc-service:
       enabled: false

@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oauth2-proxy
+  namespace: {{ .Values.monitoring.namespace }}
+spec:
+  type: ExternalName
+  externalName: oauth2-proxy.{{ .Values.monitoring.namespace }}.svc.cluster.local
