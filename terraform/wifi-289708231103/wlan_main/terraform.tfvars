@@ -7,3 +7,13 @@ env = "main"
 project = "wlan"
 
 org = "tip"
+
+node_group_settings = {
+  desired_capacity = 1
+  max_capacity     = 4
+  min_capacity     = 1
+  instance_type    = "t3.small"
+  disk_size        = 20
+}
+
+cluster_version = "1.17"
