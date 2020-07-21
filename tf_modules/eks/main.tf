@@ -14,8 +14,3 @@ terraform {
     encrypt        = true
   }
 }
-
-resource "aws_key_pair" "wlan" {
-  key_name   = "wlan"
-  public_key = file("id_rsa.pub")
-}
