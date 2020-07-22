@@ -16,10 +16,10 @@ data "aws_eks_cluster_auth" "cluster" {
 
 module "eks" {
   source       = "git::https://github.com/terraform-aws-modules/terraform-aws-eks?ref=v12.2.0"
-  cluster_name = local.cluster_name
-  subnets      = module.vpc_main.private_subnets
-  vpc_id       = module.vpc_main.vpc_id
-  tags         = merge({ "Name" = local.cluster_name }, local.tags)
+  cluster_name = var.cluster_name
+  subnets      = length(var.vpc_id) > 0 ? module.vpc_main.private_subnets : var.private_subnets
+  vpc_id       = length(var.vpc_id) > 0 ? module.vpc_main.vpc_id : var.vpc_id
+  tags         = { "Name" = var.cluster_name }
 
   node_groups_defaults = {
     ami_type  = "AL2_x86_64"
@@ -35,7 +35,6 @@ module "eks" {
       k8s_labels = {
         role = "default"
       }
-      additional_tags = local.tags
     }
   }
 
@@ -56,22 +55,6 @@ module "eks" {
 locals {
   oidc_provider_url           = split("https://", module.eks.cluster_oidc_issuer_url)[1]
   cluster_main_node_group_asg = length(module.eks.node_groups) > 0 ? module.eks.node_groups["main"]["resources"][0]["autoscaling_groups"][0]["name"] : ""
-  public_subnets_merged       = join(" ", module.vpc_main.public_subnets)
-  private_subnets_merged      = join(" ", module.vpc_main.private_subnets)
-  cluster_name                = "${var.org}-${var.project}-${var.env}"
-  tags = {
-    "Env"     = var.env
-    "Project" = var.project
-  }
-}
-
-output "kubeconfig" {
-  value = <<EOF
-
-========
-${module.eks.kubeconfig}
-========
-EOF
 }
 
 module "cluster_autoscaler_cluster_role" {
@@ -84,7 +67,7 @@ module "cluster_autoscaler_cluster_role" {
 
 resource "aws_iam_policy" "cluster_autoscaler" {
   name_prefix = "cluster-autoscaler"
-  description = "EKS cluster-autoscaler policy for cluster ${local.cluster_name}"
+  description = "EKS cluster-autoscaler policy for cluster ${var.cluster_name}"
   policy      = data.aws_iam_policy_document.cluster_autoscaler.json
 }
 
@@ -118,7 +101,7 @@ data "aws_iam_policy_document" "cluster_autoscaler" {
 
     condition {
       test     = "StringEquals"
-      variable = "autoscaling:ResourceTag/kubernetes.io/cluster/${local.cluster_name}"
+      variable = "autoscaling:ResourceTag/kubernetes.io/cluster/${var.cluster_name}"
       values   = ["owned"]
     }
 
@@ -132,4 +115,8 @@ data "aws_iam_policy_document" "cluster_autoscaler" {
 
 output "cluster_autoscaler_role_arn" {
   value = module.cluster_autoscaler_cluster_role.this_iam_role_arn
+}
+
+output "kubeconfig" {
+  value = module.eks.kubeconfig
 }
