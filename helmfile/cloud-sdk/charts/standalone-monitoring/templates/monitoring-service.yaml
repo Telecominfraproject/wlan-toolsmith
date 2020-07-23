@@ -4,6 +4,8 @@ kind: Service
 metadata:
   name: oauth2-proxy
   namespace: {{ .Values.monitoring.namespace }}
+  labels:
+    k8s-app: oauth2-proxy
 spec:
   type: ExternalName
-  externalName: oauth2-proxy.{{ .Values.monitoring.namespace }}.svc.cluster.local
+  externalName: oauth2-proxy.{{ .Values.proxy.namespace }}.svc.cluster.local

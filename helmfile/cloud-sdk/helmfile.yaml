@@ -31,7 +31,7 @@ environments:
     values:
     - monitoring:
         namespace: monitoring
-    - domain: tip.4c74356b41.com
+    - domain: lab.wlan.tip.build
     - storageClass: gp2
     - autoscaler:
         enabled: false
@@ -47,9 +47,12 @@ environments:
         enabled: true
 
 helmDefaults:
-  wait: false
   force: true
   timeout: 600
+  wait: false
+  # # dont seem to work
+  # recreatePods: true
+  # verify: true
 
 templates:
   default: &default
@@ -150,6 +153,10 @@ releases:
               path: /var/lib/grafana/dashboards/default
       dashboards:
         default:
+          mosquitto: # metrics are there, but have no data
+            gnetId: 11542
+            revision: 1
+            datasource: Prometheus
           nginx-ingress:
             gnetId: 9614
             revision: 1
@@ -166,28 +173,32 @@ releases:
           type: prometheus
           url: http://prometheus-operated:9090
           access: proxy
-          isDefault: true
+          isDefault: false
 
 - name: prometheus-operator-helper
   namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: charts/standalone-monitoring
   labels:
     app: prometheus-operator
+    sub: helper
     role: setup
   values:
   - monitoring:
       namespace: monitoring
+      domain: {{ .Environment.Values.domain }}
+    proxy:
+      namespace: kube-system
 - name: prometheus-operator-ingress-auth
-  namespace: {{ .Environment.Values.monitoring.namespace }}
+  <<: *default
   chart: charts/sso
   labels:
     app: prometheus-operator
+    sub: oAuth
     role: setup
   values:
-  - charts/sso/values.local.yaml # temporary solution
+  - charts/sso/values.local.yaml # temporary solution to workaround secrets in plain text in the repo
   - monitoring:
-      namespace: monitoring
-      domain: {{ .Environment.Values.domain }} 
+      namespace: {{ .Environment.Values.monitoring.namespace }}
 
 - name: fluentd
   condition: elastic.enabled
@@ -237,7 +248,8 @@ releases:
 # cloud sdk
 - name: tip
   namespace: tip
-  chart: tip-cloudsdk/tip-wlan
+  chart: tip-wlan
+  # chart: tip-cloudsdk/tip-wlan
   labels:
     app: cloudsdk
     role: payload
