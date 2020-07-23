@@ -4,15 +4,8 @@ kind: Ingress
 metadata:
   name: prometheus-operator-grafana-oauth
   namespace: {{ .Values.monitoring.namespace }}
-  annotations:
-    meta.helm.sh/release-name: prometheus-operator
-    meta.helm.sh/release-namespace: monitoring
   labels:
-    app.kubernetes.io/instance: prometheus-operator
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: grafana
-    app.kubernetes.io/version: 7.0.3
-    helm.sh/chart: grafana-5.3.0
+    k8s-app: oauth2-proxy
 spec:
   rules:
   - host: grafana.{{ .Values.monitoring.domain }}

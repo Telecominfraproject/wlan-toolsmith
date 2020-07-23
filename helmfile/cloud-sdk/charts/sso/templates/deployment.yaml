@@ -3,7 +3,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: oauth2-proxy
-  namespace: {{ .Values.monitoring.namespace }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    k8s-app: oauth2-proxy
 spec:
   replicas: 1
   selector:

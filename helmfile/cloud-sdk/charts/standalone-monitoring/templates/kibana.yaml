@@ -4,15 +4,8 @@ kind: Ingress
 metadata:
   name: kibana-oauth
   namespace: {{ .Values.monitoring.namespace }}
-  annotations:
-    meta.helm.sh/release-name: kibana
-    meta.helm.sh/release-namespace: monitoring
   labels:
-    app: kibana
-    app.kubernetes.io/managed-by: Helm
-    chart: kibana-3.2.6
-    heritage: Helm
-    release: kibana
+    k8s-app: oauth2-proxy
 spec:
   rules:
   - host: kibana.{{ .Values.monitoring.domain }}
