@@ -21,7 +21,7 @@ data "aws_ami" "wlan_tws_1" {
 resource "aws_instance" "wlan_tws_1" {
   ami                    = data.aws_ami.wlan_tws_1.id
   instance_type          = "t3.micro"
-  subnet_id              = module.vpc_main.public_subnets[0]
+  subnet_id              = module.vpc_main.public_subnets[1]
   vpc_security_group_ids = [aws_security_group.wlan.id]
   key_name               = aws_key_pair.wlan.id
 
