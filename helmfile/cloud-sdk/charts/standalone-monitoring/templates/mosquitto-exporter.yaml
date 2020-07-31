@@ -24,24 +24,23 @@ spec:
         - "--bind-address"
         - "0.0.0.0:9234"
         - "--cert"
-        - "/certs/mqttservercert.pem"
+        - "/certs/clientcert.pem"
         - "--key"
-        - "/certs/mqttserverkey_dec.pem"
+        - "/certs/clientkey.pem"
+        command:
+        - /mosquitto_exporter
         name: mosquitto-exporter
         image: sapcc/mosquitto-exporter:0.6.0
         ports:
         - name: http-metrics
           containerPort: 9234
         volumeMounts:
-        - mountPath: /certs/cacert.pem
+        - mountPath: /certs/clientcert.pem
           name: opensync-mqtt-broker-truststore
-          subPath: cacert.pem
-        - mountPath: /certs/mqttservercert.pem
+          subPath: clientcert.pem
+        - mountPath: /certs/clientkey.pem
           name: opensync-mqtt-broker-truststore
-          subPath: servercert.pem
-        - mountPath: /certs/mqttserverkey_dec.pem
-          name: opensync-mqtt-broker-truststore
-          subPath: serverkey_dec.pem
+          subPath: clientkey_dec.pem
       volumes:
       - name: opensync-mqtt-broker-truststore
         secret:

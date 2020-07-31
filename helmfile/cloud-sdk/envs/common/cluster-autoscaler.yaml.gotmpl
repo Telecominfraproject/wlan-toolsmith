@@ -1,0 +1,12 @@
+replicaCount: 1
+image:
+  repository: us.gcr.io/k8s-artifacts-prod/autoscaling/cluster-autoscaler
+  tag: v1.17.3
+autoDiscovery:
+  clusterName: {{ .Environment.Values.eks.clusterName }}
+awsRegion: {{ .Environment.Values.eks.awsRegion }}
+rbac:
+  create: true
+  pspEnabled: true
+  serviceAccountAnnotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Environment.Values.eks.awsAccountID }}:role/tip-wlan-main-cluster-autoscaler
