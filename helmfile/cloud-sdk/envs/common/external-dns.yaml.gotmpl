@@ -1,0 +1,8 @@
+podAnnotations:
+  iam.amazonaws.com/role: arn:aws:iam::{{ .Environment.Values.eks.awsAccountID }}:role/external-dns-role
+aws.region: us-east-2
+domainFilters:
+- {{ .Environment.Values.domain }}
+sources:
+- ingress
+txtOwnerId: /hostedzone/{{ .Environment.Values.eks.hostedZoneId }}
