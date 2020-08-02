@@ -65,68 +65,10 @@ module "cluster_autoscaler_cluster_role" {
   create_role      = true
 }
 
-module "external_dns_cluster_role" {
-  source           = "git::https://github.com/terraform-aws-modules/terraform-aws-iam.git//modules/iam-assumable-role-with-oidc?ref=v2.12.0"
-  role_name        = "${module.eks.cluster_id}-external-dns"
-  provider_url     = local.oidc_provider_url
-  role_policy_arns = [aws_iam_policy.external_dns.arn]
-  create_role      = true
-}
-
 resource "aws_iam_policy" "cluster_autoscaler" {
   name_prefix = "cluster-autoscaler"
   description = "EKS cluster-autoscaler policy for cluster ${var.cluster_name}"
   policy      = data.aws_iam_policy_document.cluster_autoscaler.json
-}
-
-resource "aws_iam_policy" "external_dns" {
-  name_prefix = "external-dns"
-  description = "EKS external-dns policy for cluster ${var.cluster_name}"
-  policy      = data.aws_iam_policy_document.external_dns.json
-}
-
-data "aws_iam_policy_document" "external_dns" {
-  statement {
-    sid = "GrantModifyAccessToDomains"
-
-    actions = [
-      "route53:ChangeResourceRecordSets",
-    ]
-
-    effect = "Allow"
-
-    resources = [
-      "${formatlist("arn:aws:route53:::hostedzone/%s", data.aws_route53_zone.main.*.zone_id)}",
-    ]
-  }
-
-  statement {
-    sid = "GrantListAccessToDomains"
-
-    # route53:ListHostedZonesByName is not needed by external-dns, but is needed by cert-manager
-    actions = [
-      "route53:ListHostedZones",
-      "route53:ListHostedZonesByName",
-      "route53:ListResourceRecordSets",
-    ]
-
-    effect = "Allow"
-
-    resources = ["*"]
-  }
-
-  # route53:GetChange is not needed by external-dns, but is needed by cert-manager
-  statement {
-    sid = "GrantGetChangeStatus"
-
-    actions = [
-      "route53:GetChange",
-    ]
-
-    effect = "Allow"
-
-    resources = ["arn:aws:route53:::change/*"]
-  }
 }
 
 data "aws_iam_policy_document" "cluster_autoscaler" {
@@ -169,10 +111,6 @@ data "aws_iam_policy_document" "cluster_autoscaler" {
       values   = ["true"]
     }
   }
-}
-
-output "external_dns_role_arn" {
-  value = module.external_dns_cluster_role.this_iam_role_arn
 }
 
 output "cluster_autoscaler_role_arn" {
