@@ -276,16 +276,16 @@ releases:
   - tip-wlan/resources/environments/dev.yaml
   - wlan-cloud-graphql-gw:
       env:
-        portalsvc: graphql.{{ .Environment.Values.domain }}
+        portalsvc: graphql.tip.{{ .Environment.Values.domain }}
       ingress:
         hosts:
-        - host: graphql.{{ .Environment.Values.domain }}
+        - host: graphql.tip.{{ .Environment.Values.domain }}
           paths:
           - "/"
   - wlan-cloud-static-portal:
       ingress:
         hosts:
-        - host: portal.{{ .Environment.Values.domain }}
+        - host: portal.tip.{{ .Environment.Values.domain }}
           paths:
           - "/"
   - nginx-ingress-controller:
@@ -294,7 +294,7 @@ releases:
         create: true
       controller:
         config:
-          externalStatusAddress: api.{{ .Environment.Values.domain }}
+          externalStatusAddress: api.tip.{{ .Environment.Values.domain }}
   - opensync-mqtt-broker:
       persistence:
         storageClass: {{ .Environment.Values.storageClass }}
