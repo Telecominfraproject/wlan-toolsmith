@@ -12,7 +12,7 @@ node_group_settings = {
   desired_capacity = 1
   max_capacity     = 6
   min_capacity     = 1
-  instance_type    = "t3.medium"
+  instance_type    = "t3.large"
   disk_size        = 20
 }
 
