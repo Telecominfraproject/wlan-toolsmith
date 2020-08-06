@@ -32,7 +32,7 @@ environments:
         region: us-east-2
         accountID: 289708231103
         hostedZoneId: Z09534373UTXT2L1YL912
-        certificateARN: arn:aws:acm:us-east-2:289708231103:certificate/7300bc18-1c72-4f6a-8bd7-d7cd4041a72a
+        certificateARN: arn:aws:acm:us-east-2:289708231103:certificate/510429bd-1a3d-4c43-90ce-8e340795a888
     - monitoring:
         namespace: monitoring
     - domain: lab.wlan.tip.build
