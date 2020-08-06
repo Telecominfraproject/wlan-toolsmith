@@ -59,3 +59,9 @@ variable "cluster_version" {
   description = "EKS cluster version"
   type        = string
 }
+
+variable "eks_admin_roles" {
+  description = "List of role names with system:masters permissions on EKS"
+  type        = set(string)
+  default     = []
+}
