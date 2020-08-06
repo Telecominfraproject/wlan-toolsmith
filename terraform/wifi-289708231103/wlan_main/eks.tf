@@ -51,6 +51,7 @@ module "eks" {
   cluster_version               = var.cluster_version
   write_kubeconfig              = false
   cluster_log_retention_in_days = var.cluster_log_retention_in_days
+  map_roles                     = local.admin_roles
 }
 
 locals {
@@ -63,6 +64,11 @@ locals {
     "Env"     = var.env
     "Project" = var.project
   }
+  admin_roles = [for role in var.eks_admin_roles : {
+    rolearn  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${role}"
+    username = "admin",
+    groups   = ["system:masters"]
+  }]
 }
 
 output "kubeconfig" {

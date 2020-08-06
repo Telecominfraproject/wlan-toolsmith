@@ -19,3 +19,5 @@ resource "aws_key_pair" "wlan" {
   key_name   = "wlan"
   public_key = var.ssh_key
 }
+
+data "aws_caller_identity" "current" {}
