@@ -4,10 +4,10 @@ image:
   tag: v1.17.3
 autoDiscovery:
   clusterName: {{ .Environment.Values.eks.clusterName }}
-awsRegion: {{ .Environment.Values.eks.awsRegion }}
+awsRegion: {{ .Environment.Values.eks.region }}
 priorityClassName: system-cluster-critical
 rbac:
   create: true
   pspEnabled: true
   serviceAccountAnnotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Environment.Values.eks.awsAccountID }}:role/tip-wlan-main-cluster-autoscaler
+    eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/tip-wlan-main-cluster-autoscaler
