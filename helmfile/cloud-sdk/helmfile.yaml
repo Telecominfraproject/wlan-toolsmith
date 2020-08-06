@@ -4,9 +4,7 @@ repositories:
 - name: kiwigrid 
   url: https://kiwigrid.github.io
 - name: tip-cloudsdk
-  url: https://tip.jfrog.io/artifactory/tip-wlan-cloud-helm-virtual-repo
-  username: gleb
-  password: 'eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJMWlRPWDlYbFJHQ0dLZEh2RWRGbXNJdDRianZtdVlqR0xPWUM3Qk54YjNrIn0.eyJzdWIiOiJnbGViIiwic2NwIjoiYXBwbGllZC1wZXJtaXNzaW9uc1wvYWRtaW4gYXBpOioiLCJhdWQiOiJqZnJ0QCoiLCJpc3MiOiJqZmZlQDAwMCIsImlhdCI6MTU5NTI1MDE1OSwianRpIjoiOGYzMTYwNDItMWFhNi00ZGY3LWEyZGMtNTE0MTIyZTJkMGI4In0.uX46t91KSC8HqxMkYyp1944Nrt8nEEv3lvJ7UweBX2_xZ5YU1Be7ORvTAkvK7jQaOTPfz_QTvlnF8ZliH728_5Fy8bTFro3eXaR2ItGowingjLbRg8fRITFL0xqyXOO91LLBbLeh5ALxjdrg1hXS2hskBg3O-ZGziKB7YxhqYexaf6d_R1sYpbgEa7lWuhT5An6eReLO2b69gQCOY1q1evDxvweXwxlWaPszLt78iKTitfZkAmwPXEUpGGeIpWvZe0O36mYleQR01yc0cpSx-25NjLTTRL9AfrvHXXRJEGI6rDFBAd0I058iLM8f9BFCj23vTI867_I7ghevk_V6TQ'
+  url: https://tip.jfrog.io/artifactory/tip-wlan-cloud-helm-repo
 
 environments:
   azure:
@@ -34,6 +32,7 @@ environments:
         awsRegion: us-east-2
         awsAccountID: 289708231103
         hostedZoneId: Z09534373UTXT2L1YL912
+        certificateARN: arn:aws:acm:us-east-2:289708231103:certificate/00d5919e-7d7f-44b8-bab0-31ca868be195
     - monitoring:
         namespace: monitoring
     - domain: lab.wlan.tip.build
@@ -74,13 +73,13 @@ templates:
 releases:
 - name: cluster-autoscaler
   condition: autoscaler.enabled
-  <<: *default
+  <<: *default 
   <<: *cluster-autoscaler
   chart: stable/cluster-autoscaler
   version: 7.3.2
   labels:
-    group: system
     role: setup
+    group: system
     app: autoscaler
 - name: external-dns
   condition: external-dns.enabled
@@ -89,8 +88,8 @@ releases:
   chart: stable/external-dns
   version: 2.20.4
   labels:
-    group: system
     role: setup
+    group: system
     app: external-dns
 - name: nginx-ingress
   condition: ingress.enabled
@@ -98,11 +97,15 @@ releases:
   chart: stable/nginx-ingress
   version: 1.41.2
   labels:
-    group: system
     role: setup
+    group: system
     app: nginx-ingress
   values:
   - controller:
+      service:
+        annotations:
+          service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Environment.Values.eks.certificateARN }} 
+          service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
       publishService:
         enabled: true
       metrics:
@@ -118,9 +121,9 @@ releases:
   namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: stable/prometheus-operator
   labels:
+    role: setup
     group: monitoring
     app: prometheus-operator
-    role: setup
   values:
   - prometheusOperator:
       manageCrds: true
@@ -167,13 +170,24 @@ releases:
               path: /var/lib/grafana/dashboards/default
       dashboards:
         default:
-          mosquitto: # metrics are there, but have no data
+          mosquitto:
             gnetId: 11542
             revision: 1
             datasource: Prometheus
           nginx-ingress:
             gnetId: 9614
             revision: 1
+            datasource: Prometheus
+          cassandra:
+            # gnetId: 5408
+            gnetId: 6258
+            revision: 3
+            datasource: Prometheus
+          kafka:
+            gnetId: 7589
+            revision: 5
+            # gnetId: 10555
+            # revision: 1
             datasource: Prometheus
           postgres:
             gnetId: 6742
@@ -193,10 +207,10 @@ releases:
   namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: charts/standalone-monitoring
   labels:
+    role: setup
     group: monitoring
     app: prometheus-operator
     sub: helper
-    role: setup
   values:
   - monitoring:
       namespace: monitoring
@@ -208,10 +222,10 @@ releases:
   namespace: kube-system
   chart: charts/sso
   labels:
+    role: setup
     group: monitoring
     app: prometheus-operator
     sub: oAuth
-    role: setup
   values:
   - charts/sso/values.local.yaml # temporary solution to workaround secrets in plain text in the repo
   - monitoring:
@@ -221,9 +235,9 @@ releases:
   namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: kiwigrid/fluentd-elasticsearch
   labels:
+    role: setup
     group: monitoring
     app: fluentd
-    role: setup
   values:
   - elasticsearch:
       serviceAccount:
@@ -237,17 +251,17 @@ releases:
   namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: stable/elasticsearch
   labels:
+    role: setup
     group: monitoring
     app: elasticsearch
-    role: setup
 - name: kibana
   condition: kibana.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: stable/kibana
   labels:
+    role: setup
     group: monitoring
     app: kibana
-    role: setup
   values:
   - testFramework:
       enabled: false
@@ -275,6 +289,7 @@ releases:
   values:
   - tip-wlan/resources/environments/dev.yaml
   - wlan-cloud-graphql-gw:
+      enabled: true
       env:
         portalsvc: graphql.tip.{{ .Environment.Values.domain }}
       ingress:
@@ -283,31 +298,56 @@ releases:
           paths:
           - "/"
   - wlan-cloud-static-portal:
+      enabled: true
       ingress:
         hosts:
         - host: portal.tip.{{ .Environment.Values.domain }}
           paths:
           - "/"
+  - opensync-gw-static:
+      enabled: true
+  - wlan-ssc-service:
+      enabled: true
+  - wlan-portal-service:
+      enabled: true
+  - wlan-prov-service:
+      enabled: false
   - nginx-ingress-controller:
       enabled: false
-      prometheus:
-        create: true
-      controller:
-        config:
-          externalStatusAddress: api.tip.{{ .Environment.Values.domain }}
   - opensync-mqtt-broker:
+      enabled: true
       persistence:
         storageClass: {{ .Environment.Values.storageClass }}
   - zookeeper:
       persistence:
         storageClass: {{ .Environment.Values.storageClass }}
   - kafka:
+      replicas: 1
       persistence:
         storageClass: {{ .Environment.Values.storageClass }}
+      prometheus:
+        jmx:
+          enabled: true
+        operator:
+          enabled: true
+          serviceMonitor:
+            namespace: tip
+            selector:
+              release: prometheus-operator
+      zookeeper:
+        enabled: false
+        url: tip-zookeeper
   - cassandra:
       persistence:
         storageClass: {{ .Environment.Values.storageClass }}
+      exporter:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+          additionalLabels:
+            release: prometheus-operator
   - postgresql:
+      enabled: true
       postgresqlDatabase: tip
       metrics:
         enabled: true
@@ -316,5 +356,3 @@ releases:
           namespace: {{ .Environment.Values.monitoring.namespace }}
       persistence:
         storageClass: {{ .Environment.Values.storageClass }}
-  - wlan-ssc-service:
-      enabled: false

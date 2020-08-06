@@ -5,6 +5,7 @@ image:
 autoDiscovery:
   clusterName: {{ .Environment.Values.eks.clusterName }}
 awsRegion: {{ .Environment.Values.eks.awsRegion }}
+priorityClassName: system-cluster-critical
 rbac:
   create: true
   pspEnabled: true

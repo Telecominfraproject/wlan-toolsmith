@@ -3,7 +3,7 @@ monitoring:
   domain: example.com
 
 oidc:
-  issuerUrl: 'https://workplace-integration40-dev.auth0.com/' # telecominfraproject.auth0.com for production
+  issuerUrl: 'https://telecominfraproject.auth0.com/' # workplace-integration40-dev for development
   clientId: clientId
   clientSecret: clientSecret
   cookieSecret: egh24Y$GB2rh2t # arbitrary random string, not really a secret
