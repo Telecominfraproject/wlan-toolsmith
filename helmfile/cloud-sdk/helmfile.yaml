@@ -29,10 +29,10 @@ environments:
     values:
     - eks:
         clusterName: tip-wlan-main
-        awsRegion: us-east-2
-        awsAccountID: 289708231103
+        region: us-east-2
+        accountID: 289708231103
         hostedZoneId: Z09534373UTXT2L1YL912
-        certificateARN: arn:aws:acm:us-east-2:289708231103:certificate/00d5919e-7d7f-44b8-bab0-31ca868be195
+        certificateARN: arn:aws:acm:us-east-2:289708231103:certificate/7300bc18-1c72-4f6a-8bd7-d7cd4041a72a
     - monitoring:
         namespace: monitoring
     - domain: lab.wlan.tip.build
@@ -52,7 +52,7 @@ environments:
 
 helmDefaults:
   force: false
-  timeout: 600
+  timeout: 300
   # dont seem to work
   # wait: false
   # recreatePods: true
@@ -99,13 +99,18 @@ releases:
   labels:
     role: setup
     group: system
-    app: nginx-ingress
+    app: ingress
   values:
   - controller:
       service:
         annotations:
-          service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Environment.Values.eks.certificateARN }} 
+          service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Environment.Values.eks.certificateARN }}
           service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
+          service.beta.kubernetes.io/aws-load-balancer-type: elb
+          service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+        targetPorts:
+          http: http
+          https: http
       publishService:
         enabled: true
       metrics:
@@ -178,6 +183,11 @@ releases:
             gnetId: 9614
             revision: 1
             datasource: Prometheus
+          postgres:
+            gnetId: 6742
+            revision: 1
+            datasource: Prometheus
+          # still need to finalize the dashboards below but they are working partially
           cassandra:
             # gnetId: 5408
             gnetId: 6258
@@ -188,10 +198,6 @@ releases:
             revision: 5
             # gnetId: 10555
             # revision: 1
-            datasource: Prometheus
-          postgres:
-            gnetId: 6742
-            revision: 1
             datasource: Prometheus
       datasources:
        datasources.yaml:
@@ -213,7 +219,7 @@ releases:
     sub: helper
   values:
   - monitoring:
-      namespace: monitoring
+      namespace: {{ .Environment.Values.monitoring.namespace }}
       domain: {{ .Environment.Values.domain }}
     proxy:
       namespace: kube-system
@@ -291,17 +297,17 @@ releases:
   - wlan-cloud-graphql-gw:
       enabled: true
       env:
-        portalsvc: graphql.tip.{{ .Environment.Values.domain }}
+        portalsvc: graphql.{{ .Environment.Values.domain }}
       ingress:
         hosts:
-        - host: graphql.tip.{{ .Environment.Values.domain }}
+        - host: graphql.{{ .Environment.Values.domain }}
           paths:
           - "/"
   - wlan-cloud-static-portal:
       enabled: true
       ingress:
         hosts:
-        - host: portal.tip.{{ .Environment.Values.domain }}
+        - host: portal.{{ .Environment.Values.domain }}
           paths:
           - "/"
   - opensync-gw-static:
