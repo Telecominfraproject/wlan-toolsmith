@@ -38,5 +38,6 @@ terraform.rc
 # Ignore development files
 config
 tip-wlan
-local
+*local*
 id_rsa*
+*.pem

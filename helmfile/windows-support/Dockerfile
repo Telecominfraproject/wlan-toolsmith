@@ -1,9 +1,9 @@
 # Setup build arguments with default versions
-ARG AWS_CLI_VERSION=1.18.52
-ARG TERRAFORM_VERSION=0.12.24
+ARG AWS_CLI_VERSION=1.18.105
+ARG TERRAFORM_VERSION=0.12.29
 ARG PYTHON_MAJOR_VERSION=3.7
-ARG KUBE_VERSION=v1.18.2
-ARG HELM_VERSION=v3.2.1
+ARG KUBE_VERSION=v1.18.6
+ARG HELM_VERSION=v3.2.4
 
 # Download Terraform binary
 FROM debian:buster-20191224-slim as terraform
@@ -39,11 +39,10 @@ RUN pip3 install awscli==${AWS_CLI_VERSION}
 FROM debian:buster-20191224-slim as wget
 ARG KUBE_VERSION
 ARG HELM_VERSION
-RUN apt-get update
-RUN apt-get install --no-install-recommends -y wget
-RUN apt-get install --no-install-recommends -y ca-certificates=20190110
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y wget ca-certificates=20190110
 RUN wget -q https://storage.googleapis.com/kubernetes-release/release/${KUBE_VERSION}/bin/linux/amd64/kubectl -O /usr/local/bin/kubectl
-RUN wget -q https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/local/bin/helm 
+RUN wget -q https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/local/bin/helm
 
 # Build final image
 FROM debian:buster-20191224-slim
@@ -68,10 +67,11 @@ COPY --from=wget /usr/local/bin/helm /usr/local/bin/helm
 COPY --from=wget /usr/local/bin/kubectl /usr/local/bin/kubectl
 # this requires helmfile binary in the same folder with the Dockerfile
 COPY helmfile /usr/local/bin/ 
-RUN chmod +x /usr/local/bin/helmfile && chmod +x /usr/local/bin/helm && chmod +x /usr/local/bin/kubectl
+RUN chmod +x /usr/local/bin/helmfile /usr/local/bin/helm /usr/local/bin/kubectl
 RUN helm plugin install https://github.com/databus23/helm-diff --version v3.0.0-rc.7 && \
     helm plugin install https://github.com/futuresimple/helm-secrets && \
     helm plugin install https://github.com/hypnoglow/helm-s3.git && \
     helm plugin install https://github.com/aslafy-z/helm-git.git
+
 WORKDIR /workspace
 CMD ["bash"]

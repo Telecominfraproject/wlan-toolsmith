@@ -1,0 +1,13 @@
+-podAnnotations:
+podAnnotations:
+  iam.amazonaws.com/role: arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/tip-wlan-main-external-dns
+aws.region: us-east-2
+domainFilters:
+- {{ .Environment.Values.domain }}
+sources:
+- ingress
+txtOwnerId: /hostedzone/{{ .Environment.Values.eks.hostedZoneId }}
+policy: sync
+rbac:
+  serviceAccountAnnotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/tip-wlan-main-external-dns

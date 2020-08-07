@@ -1,0 +1,6 @@
+apiVersion: v2
+name: sso
+description: oAuth2 proxy chart
+type: application
+version: 0.1.0
+appVersion: 0.1.0

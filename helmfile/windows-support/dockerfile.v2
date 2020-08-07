@@ -1,0 +1,42 @@
+# Setup build arguments with default versions
+ARG TERRAFORM_VERSION=0.12.29
+ARG KUBE_VERSION=v1.18.6
+ARG HELM_VERSION=v3.2.4
+ARG HELMFILE_VERSION=v0.125.0
+
+# Download Terraform\Kubectl\Helm binaries
+FROM debian:buster-20191224-slim as binaries
+ARG TERRAFORM_VERSION
+ARG KUBE_VERSION
+ARG HELM_VERSION
+RUN apt-get update
+RUN apt-get install --no-install-recommends -y curl=7.64.0-4+deb10u1
+RUN apt-get install --no-install-recommends -y ca-certificates=20190110
+RUN apt-get install --no-install-recommends -y unzip=6.0-23+deb10u1
+RUN apt-get install --no-install-recommends -y gnupg=2.2.12-1+deb10u1
+RUN apt-get install --no-install-recommends -y wget
+RUN curl -Os https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_SHA256SUMS
+RUN curl -Os https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+RUN curl -Os https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_SHA256SUMS.sig
+RUN wget -q https://storage.googleapis.com/kubernetes-release/release/${KUBE_VERSION}/bin/linux/amd64/kubectl -O /usr/local/bin/kubectl
+RUN wget -q https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/local/bin/helm
+COPY hashicorp.asc hashicorp.asc
+RUN gpg --import hashicorp.asc
+RUN gpg --verify terraform_${TERRAFORM_VERSION}_SHA256SUMS.sig terraform_${TERRAFORM_VERSION}_SHA256SUMS
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN grep terraform_${TERRAFORM_VERSION}_linux_amd64.zip terraform_${TERRAFORM_VERSION}_SHA256SUMS | sha256sum -c -
+RUN unzip -j terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+
+# Layer to get helmfile stuff
+FROM quay.io/roboll/helmfile:${HELMFILE_VERSION} as helmfile
+
+# Build final image
+FROM amazon/aws-cli
+COPY --from=binaries /terraform /usr/local/bin/terraform
+COPY --from=binaries /usr/local/bin/helm /usr/local/bin/helm
+COPY --from=binaries /usr/local/bin/kubectl /usr/local/bin/kubectl
+COPY --from=helmfile /usr/local/bin/helmfile /usr/local/bin/
+COPY --from=helmfile /root/.helm/cache/plugins/ /root/.local/share/helm/plugins/
+RUN chmod +x /usr/local/bin/helmfile && chmod +x /usr/local/bin/helm && chmod +x /usr/local/bin/kubectl
+WORKDIR /ci
+ENTRYPOINT ["/bin/bash"]

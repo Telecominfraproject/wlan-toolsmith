@@ -4,69 +4,115 @@ repositories:
 - name: kiwigrid 
   url: https://kiwigrid.github.io
 - name: tip-cloudsdk
-  url: https://tip.jfrog.io/artifactory/tip-wlan-cloud-helm-virtual-repo
+  url: https://tip.jfrog.io/artifactory/tip-wlan-cloud-helm-repo
 
 environments:
   azure:
     values:
+    - monitoring:
+        namespace: monitoring
     - domain: tip.4c74356b41.com
     - storageClass: default
     - autoscaler:
-        enabled: false
+        enabled: true
     - ingress:
         enabled: true
     - elastic:
         enabled: true
+    - kibana:
+        enabled: true
     - prometheus:
+        enabled: true
+    - external-dns:
         enabled: true
   amazon:
     values:
-    - domain: tip.4c74356b41.com
+    - eks:
+        clusterName: tip-wlan-main
+        region: us-east-2
+        accountID: 289708231103
+        hostedZoneId: Z09534373UTXT2L1YL912
+        certificateARN: arn:aws:acm:us-east-2:289708231103:certificate/510429bd-1a3d-4c43-90ce-8e340795a888
+    - monitoring:
+        namespace: monitoring
+    - domain: lab.wlan.tip.build
     - storageClass: gp2
     - autoscaler:
-        enabled: false
+        enabled: true
     - ingress:
         enabled: true
     - elastic:
         enabled: true
+    - kibana:
+        enabled: true
     - prometheus:
+        enabled: true
+    - external-dns:
         enabled: true
 
 helmDefaults:
-  wait: false
-  force: true
-  timeout: 600
+  force: false
+  timeout: 300
+  # dont seem to work
+  # wait: false
+  # recreatePods: true
+  # verify: true
 
 templates:
   default: &default
     namespace: kube-system
     missingFileHandler: Warn
-    # values:
-    # - envs/common/{{`{{ .Release.Name }}`}}.yaml.gotmpl
-    # - envs/{{`{{ .Environment.Name }}`}}/{{`{{ .Release.Name }}`}}.yaml.gotmp
+  cluster-autoscaler: &cluster-autoscaler
+    values:
+    - envs/common/cluster-autoscaler.yaml.gotmpl
+  external-dns: &external-dns
+    values:
+    - envs/common/external-dns.yaml.gotmpl
 
 # core setup
 releases:
 - name: cluster-autoscaler
   condition: autoscaler.enabled
-  <<: *default
+  <<: *default 
+  <<: *cluster-autoscaler
   chart: stable/cluster-autoscaler
   version: 7.3.2
   labels:
-    group: system
     role: setup
+    group: system
     app: autoscaler
+- name: external-dns
+  condition: external-dns.enabled
+  <<: *default
+  <<: *external-dns
+  chart: stable/external-dns
+  version: 2.20.4
+  labels:
+    role: setup
+    group: system
+    app: external-dns
 - name: nginx-ingress
   condition: ingress.enabled
   <<: *default
   chart: stable/nginx-ingress
-  version: 1.40.2
+  version: 1.41.2
   labels:
-    group: system
     role: setup
-    app: nginx-ingress
+    group: system
+    app: ingress
   values:
   - controller:
+      service:
+        annotations:
+          service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Environment.Values.eks.certificateARN }}
+          service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
+          service.beta.kubernetes.io/aws-load-balancer-type: elb
+          service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+        targetPorts:
+          http: http
+          https: http
+      publishService:
+        enabled: true
       metrics:
         enabled: true
         serviceMonitor:
@@ -74,18 +120,28 @@ releases:
           additionalLabels:
             release: prometheus-operator
 
+# monitoring
 - name: prometheus-operator
-  namespace: monitoring
+  condition: prometheus.enabled
+  namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: stable/prometheus-operator
   labels:
-    app: prometheus-operator
     role: setup
+    group: monitoring
+    app: prometheus-operator
   values:
   - prometheusOperator:
       manageCrds: true
       createCustomResource: false
   - prometheus:
       enabled: true
+      ingress:
+        enabled: true
+        annotations:
+          nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+          nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+        hosts:
+        - prometheus.{{ .Environment.Values.domain }}
   - grafana:
       grafana.ini:
         users:
@@ -119,6 +175,10 @@ releases:
               path: /var/lib/grafana/dashboards/default
       dashboards:
         default:
+          mosquitto:
+            gnetId: 11542
+            revision: 1
+            datasource: Prometheus
           nginx-ingress:
             gnetId: 9614
             revision: 1
@@ -127,14 +187,63 @@ releases:
             gnetId: 6742
             revision: 1
             datasource: Prometheus
-
+          # still need to finalize the dashboards below but they are working partially
+          cassandra:
+            # gnetId: 5408
+            gnetId: 6258
+            revision: 3
+            datasource: Prometheus
+          kafka:
+            gnetId: 7589
+            revision: 5
+            # gnetId: 10555
+            # revision: 1
+            datasource: Prometheus
+      datasources:
+       datasources.yaml:
+        apiVersion: 1
+        datasources:
+        - name: Prometheus
+          type: prometheus
+          url: http://prometheus-operated:9090
+          access: proxy
+          isDefault: false
+- name: prometheus-operator-helper
+  condition: prometheus.enabled
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+  chart: charts/standalone-monitoring
+  labels:
+    role: setup
+    group: monitoring
+    app: prometheus-operator
+    sub: helper
+  values:
+  - monitoring:
+      namespace: {{ .Environment.Values.monitoring.namespace }}
+      domain: {{ .Environment.Values.domain }}
+    proxy:
+      namespace: kube-system
+- name: prometheus-operator-ingress-auth
+  condition: prometheus.enabled
+  namespace: kube-system
+  chart: charts/sso
+  labels:
+    role: setup
+    group: monitoring
+    app: prometheus-operator
+    sub: oAuth
+  values:
+  - charts/sso/values.local.yaml # temporary solution to workaround secrets in plain text in the repo
+  - monitoring:
+      namespace: {{ .Environment.Values.monitoring.namespace }}
 - name: fluentd
   condition: elastic.enabled
-  namespace: monitoring
+  namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: kiwigrid/fluentd-elasticsearch
   labels:
-    app: fluentd
     role: setup
+    group: monitoring
+    app: fluentd
   values:
   - elasticsearch:
       serviceAccount:
@@ -142,22 +251,23 @@ releases:
       awsSigningSidecar:
         enabled: false
       hosts:
-      - elasticsearch-client.monitoring.svc.cluster.local 
-
+      - elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local 
 - name: elasticsearch
   condition: elastic.enabled
-  namespace: monitoring
+  namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: stable/elasticsearch
   labels:
-    app: elasticsearch
     role: setup
+    group: monitoring
+    app: elasticsearch
 - name: kibana
-  condition: elastic.enabled
-  namespace: monitoring
+  condition: kibana.enabled
+  namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: stable/kibana
   labels:
-    app: kibana
     role: setup
+    group: monitoring
+    app: kibana
   values:
   - testFramework:
       enabled: false
@@ -165,7 +275,7 @@ releases:
       tag: "6.8.6"
   - files:
       kibana.yml:
-        elasticsearch.hosts: http://elasticsearch-client.monitoring.svc.cluster.local:9200
+        elasticsearch.hosts: http://elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local:9200
   - ingress:
       enabled: true
       annotations:
@@ -177,13 +287,15 @@ releases:
 # cloud sdk
 - name: tip
   namespace: tip
-  chart: tip-cloudsdk/tip-wlan
+  chart: tip-wlan
+  # chart: tip-cloudsdk/tip-wlan
   labels:
     app: cloudsdk
     role: payload
   values:
   - tip-wlan/resources/environments/dev.yaml
   - wlan-cloud-graphql-gw:
+      enabled: true
       env:
         portalsvc: graphql.{{ .Environment.Values.domain }}
       ingress:
@@ -192,38 +304,63 @@ releases:
           paths:
           - "/"
   - wlan-cloud-static-portal:
+      enabled: true
       ingress:
         hosts:
         - host: portal.{{ .Environment.Values.domain }}
           paths:
           - "/"
+  - opensync-gw-static:
+      enabled: true
+  - wlan-ssc-service:
+      enabled: true
+  - wlan-portal-service:
+      enabled: true
+  - wlan-prov-service:
+      enabled: false
   - nginx-ingress-controller:
       enabled: false
-      prometheus:
-        create: true
-      controller:
-        config:
-          externalStatusAddress: api.{{ .Environment.Values.domain }}
   - opensync-mqtt-broker:
+      enabled: true
       persistence:
-        storageClass: "{{ .Environment.Values.storageClass }}"
+        storageClass: {{ .Environment.Values.storageClass }}
   - zookeeper:
       persistence:
-        storageClass: "{{ .Environment.Values.storageClass }}"
+        storageClass: {{ .Environment.Values.storageClass }}
   - kafka:
+      replicas: 1
       persistence:
-        storageClass: "{{ .Environment.Values.storageClass }}"
+        storageClass: {{ .Environment.Values.storageClass }}
+      prometheus:
+        jmx:
+          enabled: true
+        operator:
+          enabled: true
+          serviceMonitor:
+            namespace: tip
+            selector:
+              release: prometheus-operator
+      zookeeper:
+        enabled: false
+        url: tip-zookeeper
   - cassandra:
       persistence:
-        storageClass: "{{ .Environment.Values.storageClass }}"
+        storageClass: {{ .Environment.Values.storageClass }}
+      exporter:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+          additionalLabels:
+            release: prometheus-operator
   - postgresql:
+      enabled: true
       postgresqlDatabase: tip
       metrics:
         enabled: true
         serviceMonitor:
           enabled: true
-          namespace: monitoring
+          namespace: {{ .Environment.Values.monitoring.namespace }}
+          additionalLabels:
+            release: prometheus-operator
       persistence:
-        storageClass: "{{ .Environment.Values.storageClass }}"
-  - wlan-ssc-service:
-      enabled: false
+        storageClass: {{ .Environment.Values.storageClass }}
