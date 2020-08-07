@@ -20,7 +20,7 @@ spec:
       containers:
       - args:
         - "--endpoint"
-        - "tls://{{ .Values.target.service.name }}.tip.svc.cluster.local:{{ .Values.target.service.port }}"
+        - "tls://{{ .Values.target.service.name }}.{{ .Values.target.namespace }}.svc.cluster.local:{{ .Values.target.service.port }}"
         - "--bind-address"
         - "0.0.0.0:9234"
         - "--cert"
