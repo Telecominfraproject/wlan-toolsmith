@@ -1,2 +1,11 @@
+image:
+  name: sapcc/mosquitto-exporter
+  tag: "0.6.0"
+
+target:
+  service:
+    name: tip-opensync-mqtt-broker
+    port: "1883"
+
 monitoring:
   namespace: monitoring
