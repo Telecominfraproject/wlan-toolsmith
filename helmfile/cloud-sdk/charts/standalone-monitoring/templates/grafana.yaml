@@ -1,0 +1,17 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: prometheus-operator-grafana-oauth
+  namespace: {{ .Values.monitoring.namespace }}
+  labels:
+    k8s-app: oauth2-proxy
+spec:
+  rules:
+  - host: grafana.{{ .Values.monitoring.domain }}
+    http:
+      paths:
+        - path: /oauth2
+          backend:
+            serviceName: oauth2-proxy
+            servicePort: 4180
