@@ -3,6 +3,7 @@ image:
   tag: "0.6.0"
 
 target:
+  namespace: tip
   service:
     name: tip-opensync-mqtt-broker
     port: "1883"
