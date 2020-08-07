@@ -360,5 +360,7 @@ releases:
         serviceMonitor:
           enabled: true
           namespace: {{ .Environment.Values.monitoring.namespace }}
+          additionalLabels:
+            release: prometheus-operator
       persistence:
         storageClass: {{ .Environment.Values.storageClass }}
