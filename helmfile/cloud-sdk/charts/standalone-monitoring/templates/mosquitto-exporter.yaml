@@ -20,7 +20,7 @@ spec:
       containers:
       - args:
         - "--endpoint"
-        - "tls://tip-opensync-mqtt-broker.tip.svc.cluster.local:1883"
+        - "tls://{{ .Values.target.service.name }}.tip.svc.cluster.local:{{ .Values.target.service.port }}"
         - "--bind-address"
         - "0.0.0.0:9234"
         - "--cert"
@@ -30,7 +30,7 @@ spec:
         command:
         - /mosquitto_exporter
         name: mosquitto-exporter
-        image: sapcc/mosquitto-exporter:0.6.0
+        image: {{ .Values.image.name }}:{{ .Values.image.tag }}
         ports:
         - name: http-metrics
           containerPort: 9234
