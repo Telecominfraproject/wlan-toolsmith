@@ -65,3 +65,8 @@ variable "eks_admin_roles" {
   type        = set(string)
   default     = []
 }
+
+variable "domain" {
+  description = "Public DNS domain"
+  type        = string
+}

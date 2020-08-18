@@ -19,3 +19,5 @@ node_group_settings = {
 cluster_version = "1.17"
 
 eks_admin_roles = ["AWSReservedSSO_SystemAdministrator_622371b0ceece6f8"]
+
+domain = "lab.wlan.tip.build"
