@@ -2,7 +2,7 @@
 ARG TERRAFORM_VERSION=0.12.29
 ARG KUBE_VERSION=v1.18.6
 ARG HELM_VERSION=v3.2.4
-ARG HELMFILE_VERSION=v0.125.0
+ARG HELMFILE_VERSION=v0.125.6
 
 # Download Terraform\Kubectl\Helm binaries
 FROM debian:buster-slim as binaries
