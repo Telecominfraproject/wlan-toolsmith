@@ -13,7 +13,6 @@ node_group_settings = {
   max_capacity     = 6
   min_capacity     = 2
   instance_type    = "t3.large"
-  disk_size        = 50
 }
 
 cluster_version = "1.17"
