@@ -23,22 +23,17 @@ module "eks" {
 
   workers_group_defaults = {
     ami_type           = "AL2_x86_64"
-    disk_size          = var.node_group_settings["disk_size"]
     kubelet_extra_args = "--kube-reserved cpu=500m,memory=2Gi,ephemeral-storage=1Gi --system-reserved cpu=250m,memory=1Gi,ephemeral-storage=1Gi --eviction-hard memory.available<500Mi,nodefs.available<10%"
   }
 
   worker_groups = [
     {
-      name             = "main"
-      desired_capacity = var.node_group_settings["desired_capacity"]
-      max_capacity     = var.node_group_settings["max_capacity"]
-      min_capacity     = var.node_group_settings["min_capacity"]
-      instance_type    = var.node_group_settings["instance_type"]
-      k8s_labels = {
-        role = "default"
-      }
-      additional_tags     = local.tags
-      additional_userdata = <<EOF
+      name                 = "main"
+      asg_desired_capacity = var.node_group_settings["desired_capacity"]
+      asg_max_size         = var.node_group_settings["max_capacity"]
+      asg_min_size         = var.node_group_settings["min_capacity"]
+      instance_type        = var.node_group_settings["instance_type"]
+      additional_userdata  = <<EOF
 yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
 systemctl enable amazon-ssm-agent
 systemctl start amazon-ssm-agent
