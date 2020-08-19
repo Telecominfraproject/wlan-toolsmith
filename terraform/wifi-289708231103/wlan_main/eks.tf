@@ -41,6 +41,10 @@ module "eks" {
     }
   ]
 
+  workers_additional_policies = [
+    "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM",
+  ]
+
   enable_irsa = true
   cluster_enabled_log_types = [
     "api",
@@ -101,6 +105,7 @@ module "external_dns_cluster_role" {
   role_policy_arns = [aws_iam_policy.external_dns.arn]
   create_role      = true
 }
+
 resource "aws_iam_policy" "external_dns" {
   name_prefix = "external-dns"
   description = "EKS external-dns policy for cluster ${local.cluster_name}"
