@@ -20,18 +20,16 @@ module "eks" {
   subnets      = module.vpc_main.private_subnets
   vpc_id       = module.vpc_main.vpc_id
   tags         = merge({ "Name" = local.cluster_name }, local.tags)
-
-  node_groups_defaults = {
-    ami_type  = "AL2_x86_64"
-    disk_size = var.node_group_settings["disk_size"]
-  }
   
   workers_group_defaults = {
+    ami_type  = "AL2_x86_64"
+    disk_size = var.node_group_settings["disk_size"]
     kubelet_extra_args = "--kube-reserved cpu=500m,memory=2Gi,ephemeral-storage=1Gi --system-reserved cpu=250m,memory=1Gi,ephemeral-storage=1Gi --eviction-hard memory.available<500Mi,nodefs.available<10%"
   }
 
-  node_groups = {
-    main = {
+  worker_groups = [
+    {
+      name             = "main"
       desired_capacity = var.node_group_settings["desired_capacity"]
       max_capacity     = var.node_group_settings["max_capacity"]
       min_capacity     = var.node_group_settings["min_capacity"]
@@ -41,7 +39,7 @@ module "eks" {
       }
       additional_tags = local.tags
     }
-  }
+  ]
 
   enable_irsa = true
   cluster_enabled_log_types = [
