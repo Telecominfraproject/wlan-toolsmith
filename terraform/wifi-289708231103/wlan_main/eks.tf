@@ -26,7 +26,7 @@ module "eks" {
     disk_size = var.node_group_settings["disk_size"]
   }
   
-  worker_groups_defaults = {
+  workers_group_defaults = {
     kubelet_extra_args = "--kube-reserved cpu=500m,memory=2Gi,ephemeral-storage=1Gi --system-reserved cpu=250m,memory=1Gi,ephemeral-storage=1Gi --eviction-hard memory.available<500Mi,nodefs.available<10%"
   }
 
