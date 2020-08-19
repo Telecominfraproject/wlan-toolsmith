@@ -77,15 +77,6 @@ locals {
   }]
 }
 
-output "kubeconfig" {
-  value = <<EOF
-
- ========
- ${module.eks.kubeconfig}
- ========
- EOF
-}
-
 data "terraform_remote_state" "route_53" {
   backend = "s3"
 
