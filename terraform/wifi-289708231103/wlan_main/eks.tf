@@ -25,6 +25,10 @@ module "eks" {
     ami_type  = "AL2_x86_64"
     disk_size = var.node_group_settings["disk_size"]
   }
+  
+  worker_groups_defaults = {
+    kubelet_extra_args = "--system-reserved cpu=250m,memory=1Gi,ephemeral-storage=1Gi --eviction-hard memory.available<500Mi,nodefs.available<10%"
+  }
 
   node_groups = {
     main = {
