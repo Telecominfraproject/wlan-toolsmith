@@ -9,11 +9,11 @@ project = "wlan"
 org = "tip"
 
 node_group_settings = {
-  desired_capacity = 1
+  desired_capacity = 3
   max_capacity     = 6
-  min_capacity     = 1
+  min_capacity     = 2
   instance_type    = "t3.large"
-  disk_size        = 20
+  disk_size        = 50
 }
 
 cluster_version = "1.17"
