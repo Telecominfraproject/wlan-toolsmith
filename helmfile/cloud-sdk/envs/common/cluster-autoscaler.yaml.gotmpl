@@ -11,3 +11,6 @@ rbac:
   pspEnabled: true
   serviceAccountAnnotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/tip-wlan-main-cluster-autoscaler
+extraArgs:
+  balance-similar-node-groups: true
+  skip-nodes-with-system-pods: false
