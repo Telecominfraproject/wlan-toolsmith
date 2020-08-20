@@ -41,11 +41,10 @@ variable "node_group_settings" {
   description = "Cluster node group settings"
   type        = map(string)
   default = {
-    desired_capacity = 1
-    max_capacity     = 1
-    min_capacity     = 1
-    instance_type    = "t3.small"
-    disk_size        = 20
+    max_capacity  = 1
+    min_capacity  = 1
+    instance_type = "t3.small"
+    disk_size     = 20
   }
 }
 
