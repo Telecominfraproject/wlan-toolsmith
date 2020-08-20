@@ -14,6 +14,11 @@ data "aws_eks_cluster_auth" "cluster" {
   name = module.eks.cluster_id
 }
 
+data "aws_subnet" "private_az" {
+  for_each = toset(module.vpc_main.private_subnets)
+  id       = each.key
+}
+
 module "eks" {
   source       = "git::https://github.com/terraform-aws-modules/terraform-aws-eks?ref=v12.2.0"
   cluster_name = local.cluster_name
@@ -27,17 +32,15 @@ module "eks" {
   }
 
   worker_groups = [
+    for subnet in module.vpc_main.private_subnets :
     {
-      name                 = "main"
+      name                 = format("default-%s", data.aws_subnet.private_az[subnet].availability_zone)
       asg_desired_capacity = var.node_group_settings["min_capacity"]
       asg_max_size         = var.node_group_settings["max_capacity"]
       asg_min_size         = var.node_group_settings["min_capacity"]
       instance_type        = var.node_group_settings["instance_type"]
-      additional_userdata  = <<EOF
-yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
-systemctl enable amazon-ssm-agent
-systemctl start amazon-ssm-agent
-EOF
+      additional_userdata  = local.worker_additional_userdata
+      subnets              = [subnet]
     }
   ]
 
@@ -75,6 +78,11 @@ locals {
     username = "admin",
     groups   = ["system:masters"]
   }]
+  worker_additional_userdata = <<EOF
+yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+systemctl enable amazon-ssm-agent
+systemctl start amazon-ssm-agent
+EOF
 }
 
 data "terraform_remote_state" "route_53" {

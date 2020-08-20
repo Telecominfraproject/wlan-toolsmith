@@ -9,9 +9,9 @@ project = "wlan"
 org = "tip"
 
 node_group_settings = {
-  max_capacity  = 6
-  min_capacity  = 2
-  instance_type = "t3.large"
+  max_capacity  = 4
+  min_capacity  = 1
+  instance_type = "m5.large"
 }
 
 cluster_version = "1.17"
