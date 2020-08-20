@@ -21,23 +21,29 @@ module "eks" {
   vpc_id       = module.vpc_main.vpc_id
   tags         = merge({ "Name" = local.cluster_name }, local.tags)
 
-  node_groups_defaults = {
-    ami_type  = "AL2_x86_64"
-    disk_size = var.node_group_settings["disk_size"]
+  workers_group_defaults = {
+    ami_type           = "AL2_x86_64"
+    kubelet_extra_args = "--kube-reserved cpu=500m,memory=2Gi,ephemeral-storage=1Gi --system-reserved cpu=250m,memory=1Gi,ephemeral-storage=1Gi --eviction-hard memory.available<500Mi,nodefs.available<10%"
   }
 
-  node_groups = {
-    main = {
-      desired_capacity = var.node_group_settings["desired_capacity"]
-      max_capacity     = var.node_group_settings["max_capacity"]
-      min_capacity     = var.node_group_settings["min_capacity"]
-      instance_type    = var.node_group_settings["instance_type"]
-      k8s_labels = {
-        role = "default"
-      }
-      additional_tags = local.tags
+  worker_groups = [
+    {
+      name                 = "main"
+      asg_desired_capacity = var.node_group_settings["desired_capacity"]
+      asg_max_size         = var.node_group_settings["max_capacity"]
+      asg_min_size         = var.node_group_settings["min_capacity"]
+      instance_type        = var.node_group_settings["instance_type"]
+      additional_userdata  = <<EOF
+yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+systemctl enable amazon-ssm-agent
+systemctl start amazon-ssm-agent
+EOF
     }
-  }
+  ]
+
+  workers_additional_policies = [
+    "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM",
+  ]
 
   enable_irsa = true
   cluster_enabled_log_types = [
@@ -71,15 +77,6 @@ locals {
   }]
 }
 
-output "kubeconfig" {
-  value = <<EOF
-
- ========
- ${module.eks.kubeconfig}
- ========
- EOF
-}
-
 data "terraform_remote_state" "route_53" {
   backend = "s3"
 
@@ -99,6 +96,7 @@ module "external_dns_cluster_role" {
   role_policy_arns = [aws_iam_policy.external_dns.arn]
   create_role      = true
 }
+
 resource "aws_iam_policy" "external_dns" {
   name_prefix = "external-dns"
   description = "EKS external-dns policy for cluster ${local.cluster_name}"
