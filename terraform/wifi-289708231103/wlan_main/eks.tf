@@ -29,7 +29,7 @@ module "eks" {
   worker_groups = [
     {
       name                 = "main"
-      asg_desired_capacity = var.node_group_settings["desired_capacity"]
+      asg_desired_capacity = var.node_group_settings["min_capacity"]
       asg_max_size         = var.node_group_settings["max_capacity"]
       asg_min_size         = var.node_group_settings["min_capacity"]
       instance_type        = var.node_group_settings["instance_type"]
