@@ -41,6 +41,18 @@ module "eks" {
       instance_type        = var.node_group_settings["instance_type"]
       additional_userdata  = local.worker_additional_userdata
       subnets              = [subnet]
+      tags = [
+        {
+          key : "k8s.io/cluster-autoscaler/enabled",
+          value : true,
+          propagate_at_launch : true,
+        },
+        {
+          key : "k8s.io/cluster-autoscaler/${local.cluster_name}",
+          value : true
+          propagate_at_launch : true,
+        },
+      ]
     }
   ]
 
