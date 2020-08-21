@@ -64,3 +64,24 @@ variable "eks_admin_roles" {
   type        = set(string)
   default     = []
 }
+
+variable "base_domain" {
+  description = "Public domain name"
+  type        = string
+}
+
+variable "deployment" {
+  description = "Deployment name"
+  type        = string
+}
+
+variable "service_ingress" {
+  description = "Load balancer configuration for ELK services"
+  type = map(object({
+    internal_protocol = string
+    internal_port     = number
+    external_protocol = string
+    external_port     = number
+    healthcheck_path  = string
+  }))
+}
