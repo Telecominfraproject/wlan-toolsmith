@@ -98,7 +98,10 @@ data "aws_iam_policy_document" "alb_logs_policy" {
 }
 
 resource "aws_acm_certificate" "cloudsdk" {
-  domain_name       = format("%s.%s", var.deployment, var.base_domain)
+  domain_name = format("%s.%s", var.deployment, var.base_domain)
+  subject_alternative_names = [
+    format("*.%s.%s", var.deployment, var.base_domain)
+  ]
   validation_method = "DNS"
 
   lifecycle {
