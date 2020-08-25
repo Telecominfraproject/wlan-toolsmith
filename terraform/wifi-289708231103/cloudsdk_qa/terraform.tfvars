@@ -41,7 +41,7 @@ service_ingress = {
     "external_port" : 443,
     "internal_port" : 30251,
     "external_protocol" : "HTTPS",
-    "internal_protocol" : "HTTP",
+    "internal_protocol" : "HTTPS",
     "healthcheck_path" : "/ping",
   },
   "portal" : {
