@@ -30,6 +30,7 @@ module "eks" {
     ami_type           = "AL2_x86_64"
     kubelet_extra_args = "--kube-reserved cpu=500m,memory=2Gi,ephemeral-storage=1Gi --system-reserved cpu=250m,memory=1Gi,ephemeral-storage=1Gi --eviction-hard memory.available<500Mi,nodefs.available<10%"
   }
+  worker_ami_name_filter = var.node_group_settings["ami_name"]
 
   worker_groups = [
     for subnet in module.vpc_main.private_subnets :
