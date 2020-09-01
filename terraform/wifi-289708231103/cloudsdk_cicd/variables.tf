@@ -45,6 +45,7 @@ variable "node_group_settings" {
     min_capacity  = 1
     instance_type = "t3.small"
     disk_size     = 20
+    ami_name      = ""
   }
 }
 
