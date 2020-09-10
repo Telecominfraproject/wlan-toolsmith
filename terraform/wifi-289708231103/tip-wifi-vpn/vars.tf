@@ -1,6 +1,4 @@
-variable "region" {
-  default = "us-east-1"
-}
+variable "aws_region" {}
 
 variable "vpn_endpoint_ip" {
   description = "IP address of the VPN endpoint connecting to AWS"
