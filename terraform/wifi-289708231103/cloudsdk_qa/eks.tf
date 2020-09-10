@@ -168,10 +168,6 @@ data "aws_iam_policy_document" "external_dns" {
   }
 }
 
-output "external_dns_role_arn" {
-  value = module.external_dns_cluster_role.this_iam_role_arn
-}
-
 module "cluster_autoscaler_cluster_role" {
   source           = "git::https://github.com/terraform-aws-modules/terraform-aws-iam.git//modules/iam-assumable-role-with-oidc?ref=v2.12.0"
   role_name        = "${module.eks.cluster_id}-cluster-autoscaler"
@@ -226,8 +222,4 @@ data "aws_iam_policy_document" "cluster_autoscaler" {
       values   = ["true"]
     }
   }
-}
-
-output "cluster_autoscaler_role_arn" {
-  value = module.cluster_autoscaler_cluster_role.this_iam_role_arn
 }
