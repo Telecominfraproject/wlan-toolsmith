@@ -4,7 +4,7 @@ resource "aws_customer_gateway" "tip_wifi_nrg" {
   type       = "ipsec.1"
 
   tags = {
-    Name = "testvpn"
+    Name = "tip-wifi-nrg"
   }
 }
 
@@ -14,6 +14,6 @@ resource "aws_vpn_connection" "tip_wifi_nrg" {
   type                = "ipsec.1"
   static_routes_only  = true
   tags = {
-    Name = "testvpn"
+    Name = "tip-wifi-nrg"
   }
 }
