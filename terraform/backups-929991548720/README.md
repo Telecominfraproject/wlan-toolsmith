@@ -14,11 +14,12 @@ This repo provides a code that deploy AWS infrastructure using Terraform on AWS 
 
 2. Cd to `tf` directory and run `terraform init` followed by `terraform apply` which creates AWS Step Function, IAM roles, ECS cluster etc.
 
-3. Cd to `build_image`, execute `build_docker_image.sh` script which builds docker image and pushes it to AWS ECR.
+3. Cd to `images/build_image_github_repo_backup`, execute `build_docker_image.sh` script which builds docker image and pushes it to AWS ECR.
+Repeat the step for `images/build_image_atlassian_cloud_backup`.
 
 4. Subscribe necessary emails to SNS `arn:aws:sns:<region>:<account id>:repo_backup`.
 
-5. Update `github-token` key in SSM parameter store with valid Github API key at https://console.aws.amazon.com/systems-manager/parameters/.
+5. Update `/sfn/atlassian-token`, `/sfn/atlassian-user`, `/sfn/github-token` keys in SSM parameter store with valid values at https://console.aws.amazon.com/systems-manager/parameters/.
 
 ## Updates to the backup code
 
