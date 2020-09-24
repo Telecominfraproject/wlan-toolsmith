@@ -1,3 +1,8 @@
+locals {
+  sfn_atlassian_subject = "Atlassian Cloud backup failure"
+  sfn_atlassian_message = "AWS StepFunction for Atlassian Cloud backup failed, please see Cloudwatch logs for details at https://console.aws.amazon.com/cloudwatch/home?region=${var.aws_region}#logsV2:log-groups/log-group/backup-atlassian-cloud"
+}
+
 module "backup_atlassian_cloud_ecs_task" {
   source = "../modules/aws_ecs_task"
   name   = "backup-atlassian-cloud"
@@ -55,10 +60,8 @@ module "backup_atlassian_cloud" {
       "Type": "Task",
       "Resource": "arn:aws:states:::sns:publish",
       "Parameters": {
-        "Message": {
-          "ExecutionId.$": "$$.Execution.Id",
-          "Error.$": "$.error"
-        },
+        "Subject": "${local.sfn_atlassian_subject}",
+        "Message": "${local.sfn_atlassian_message}",
         "TopicArn": "${aws_sns_topic.atlassian_cloud_backup.arn}"
       },
       "Next": "FailState"
@@ -72,6 +75,7 @@ EOF
   ecs_task_definition      = module.backup_atlassian_cloud_ecs_task.ecs_task_definition
   ecs_task_execution_role  = module.backup_atlassian_cloud_ecs_task.ecs_execution_role
   ecs_task_role            = module.backup_atlassian_cloud_ecs_task.ecs_task_role
+  sns_notification_arn     = aws_sns_topic.atlassian_cloud_backup.arn
 }
 
 data "aws_iam_policy_document" "backup_atlassian_cloud_task_role_policy" {

@@ -33,3 +33,8 @@ variable "ecs_task_execution_role" {
   description = "ECS Task execution role ARN"
   type        = string
 }
+
+variable "sns_notification_arn" {
+  description = "SNS notification ARN"
+  type        = string
+}

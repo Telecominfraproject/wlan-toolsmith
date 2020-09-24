@@ -10,8 +10,8 @@ for repo in $(cat repo_list.txt); do
     
     git clone https://${GITHUB_TOKEN}:x-oauth-basic@github.com/${GITHUB_ORGANIZATION}/${repo}.git
     cd ${repo}/
-    for branch in $(git branch --all | grep '^\s*remotes' | egrep --invert-match '(:?HEAD|master)$'); do
-        git branch --track "${branch##*/}" "$branch"
+    for branch in $(git branch --all | grep '^\s*remotes' | egrep --invert-match 'HEAD|master$|->'); do
+        git branch --track "${branch##*/}" "$branch" || true # fix for "fatal: A branch named 'trunk' already exists."
     done
     git fetch --all
     

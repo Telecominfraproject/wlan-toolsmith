@@ -79,6 +79,16 @@ data "aws_iam_policy_document" "sfn_repo_backup_policy" {
       "arn:aws:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/StepFunctionsGetEventsForECSTaskRule"
     ]
   }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "SNS:Publish",
+    ]
+    resources = [
+      var.sns_notification_arn,
+    ]
+  }
 }
 
 resource "aws_cloudwatch_event_rule" "main" {

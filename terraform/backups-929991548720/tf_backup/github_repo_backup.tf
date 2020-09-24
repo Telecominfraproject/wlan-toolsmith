@@ -1,3 +1,8 @@
+locals {
+  sfn_github_subject = "Github repo backup failure"
+  sfn_github_message = "AWS StepFunction for Github repo backup failed, please see Cloudwatch logs for details at https://console.aws.amazon.com/cloudwatch/home?region=${var.aws_region}#logsV2:log-groups/log-group/github-repo-backup"
+}
+
 module "github_repo_backup_ecs_task" {
   source = "../modules/aws_ecs_task"
   name   = "github-repo-backup"
@@ -55,10 +60,8 @@ module "github_repo_backup" {
       "Type": "Task",
       "Resource": "arn:aws:states:::sns:publish",
       "Parameters": {
-        "Message": {
-          "ExecutionId.$": "$$.Execution.Id",
-          "Error.$": "$.error"
-        },
+        "Subject": "${local.sfn_github_subject}",
+        "Message": "${local.sfn_github_message}",
         "TopicArn": "${aws_sns_topic.repo_backup.arn}"
       },
       "Next": "FailState"
@@ -72,6 +75,7 @@ EOF
   ecs_task_definition      = module.github_repo_backup_ecs_task.ecs_task_definition
   ecs_task_execution_role  = module.github_repo_backup_ecs_task.ecs_execution_role
   ecs_task_role            = module.github_repo_backup_ecs_task.ecs_task_role
+  sns_notification_arn     = aws_sns_topic.repo_backup.arn
 }
 
 data "aws_iam_policy_document" "github_repo_backup_task_role_policy" {
@@ -102,7 +106,7 @@ data "aws_iam_policy_document" "github_repo_backup_task_role_policy" {
 
 data "aws_iam_policy_document" "github_repo_backup_execution_role_policy" {
   statement {
-    sid    = "SSMParater"
+    sid    = "ReadSSMParameters"
     effect = "Allow"
 
     actions = [

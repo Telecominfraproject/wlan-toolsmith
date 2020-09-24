@@ -54,17 +54,12 @@ data "aws_iam_policy_document" "ecs_execution_role_policy" {
   }
 
   statement {
-    sid    = "AWSLogs"
     effect = "Allow"
-
     actions = [
       "logs:CreateLogStream",
       "logs:PutLogEvents",
     ]
-
-    resources = [
-      aws_cloudwatch_log_group.main.arn
-    ]
+    resources = ["*"]
   }
 }
 
