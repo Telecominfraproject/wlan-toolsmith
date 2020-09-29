@@ -20,10 +20,11 @@ data "aws_ami" "wlan_ctf" {
 
 resource "aws_instance" "wlan_ctf" {
   ami                    = data.aws_ami.wlan_ctf.id
-  instance_type          = "t3.small"
+  instance_type          = "t3.large"
   subnet_id              = module.vpc_main.public_subnets[1]
   vpc_security_group_ids = [aws_security_group.wlan.id]
   key_name               = aws_key_pair.wlan.id
+  ebs_optimized          = true
 
   lifecycle {
     ignore_changes = [ami]
