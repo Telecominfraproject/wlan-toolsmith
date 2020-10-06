@@ -1,4 +1,6 @@
+
 # not needed with the latest postgresql version
+# ---
 # apiVersion: monitoring.coreos.com/v1
 # kind: PodMonitor
 # metadata:
