@@ -3,8 +3,8 @@ repositories:
   url: https://kubernetes-charts.storage.googleapis.com
 - name: kiwigrid 
   url: https://kiwigrid.github.io
-- name: tip-cloudsdk
-  url: https://tip.jfrog.io/artifactory/tip-wlan-cloud-helm-repo
+- name: nginx
+  url: https://kubernetes.github.io/ingress-nginx
 
 environments:
   azure:
@@ -94,14 +94,15 @@ releases:
 - name: nginx-ingress
   condition: ingress.enabled
   <<: *default
-  chart: stable/nginx-ingress
-  version: 1.41.2
+  chart: nginx/ingress-nginx
+  version: 3.4.0
   labels:
     role: setup
     group: system
     app: ingress
   values:
   - controller:
+      ingressClass: nginx-sso
       service:
         annotations:
           service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Environment.Values.eks.certificateARN }}
@@ -119,6 +120,11 @@ releases:
           enabled: true
           additionalLabels:
             release: prometheus-operator
+  - defaultBackend:
+      enabled: true
+      image:
+        repository: 4c74356b41/custom-backend
+        tag: latest
 
 # monitoring
 - name: prometheus-operator
@@ -140,6 +146,7 @@ releases:
         annotations:
           nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
           nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+          kubernetes.io/ingress.class: nginx-sso
         hosts:
         - prometheus.{{ .Environment.Values.domain }}
   - grafana:
@@ -159,6 +166,7 @@ releases:
         annotations:
           nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
           nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+          kubernetes.io/ingress.class: nginx-sso
         hosts:
         - grafana.{{ .Environment.Values.domain }}
       dashboardProviders:
@@ -281,86 +289,6 @@ releases:
       annotations:
         nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
         nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+        kubernetes.io/ingress.class: nginx-sso
       hosts:
       - kibana.{{ .Environment.Values.domain }}
-
-# cloud sdk
-- name: tip
-  namespace: tip
-  chart: tip-wlan
-  # chart: tip-cloudsdk/tip-wlan
-  labels:
-    app: cloudsdk
-    role: payload
-  values:
-  - tip-wlan/resources/environments/dev.yaml
-  - wlan-cloud-graphql-gw:
-      enabled: true
-      env:
-        portalsvc: graphql.{{ .Environment.Values.domain }}
-      ingress:
-        hosts:
-        - host: graphql.{{ .Environment.Values.domain }}
-          paths:
-          - "/"
-  - wlan-cloud-static-portal:
-      enabled: true
-      ingress:
-        hosts:
-        - host: portal.{{ .Environment.Values.domain }}
-          paths:
-          - "/"
-  - opensync-gw-static:
-      enabled: true
-  - wlan-ssc-service:
-      enabled: true
-  - wlan-portal-service:
-      enabled: true
-  - wlan-prov-service:
-      enabled: false
-  - nginx-ingress-controller:
-      enabled: false
-  - opensync-mqtt-broker:
-      enabled: true
-      persistence:
-        storageClass: {{ .Environment.Values.storageClass }}
-  - zookeeper:
-      persistence:
-        storageClass: {{ .Environment.Values.storageClass }}
-  - kafka:
-      replicas: 1
-      persistence:
-        storageClass: {{ .Environment.Values.storageClass }}
-      prometheus:
-        jmx:
-          enabled: true
-        operator:
-          enabled: true
-          serviceMonitor:
-            namespace: tip
-            selector:
-              release: prometheus-operator
-      zookeeper:
-        enabled: false
-        url: tip-zookeeper
-  - cassandra:
-      persistence:
-        storageClass: {{ .Environment.Values.storageClass }}
-      exporter:
-        enabled: true
-        serviceMonitor:
-          enabled: true
-          additionalLabels:
-            release: prometheus-operator
-  - postgresql:
-      enabled: true
-      postgresqlDatabase: tip
-      metrics:
-        enabled: true
-        serviceMonitor:
-          enabled: true
-          namespace: {{ .Environment.Values.monitoring.namespace }}
-          additionalLabels:
-            release: prometheus-operator
-      persistence:
-        storageClass: {{ .Environment.Values.storageClass }}
