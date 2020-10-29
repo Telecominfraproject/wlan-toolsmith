@@ -27,6 +27,6 @@ resource "aws_route" "private" {
 
 resource "aws_ec2_transit_gateway_route" "vpn" {
   destination_cidr_block         = var.vpn_endpoint_cidr
-  transit_gateway_attachment_id  = aws_vpn_connection.tip_wifi_nrg.transit_gateway_attachment_id
+  transit_gateway_attachment_id  = aws_vpn_connection.tunnel_tip_wifi_nrg.transit_gateway_attachment_id
   transit_gateway_route_table_id = module.tgw_main.this_ec2_transit_gateway_association_default_route_table_id
 }
