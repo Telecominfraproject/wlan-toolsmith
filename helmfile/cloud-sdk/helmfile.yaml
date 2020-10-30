@@ -49,6 +49,8 @@ environments:
         enabled: true
     - external-dns:
         enabled: true
+    - alb-ingress:
+        enabled: true
 
 helmDefaults:
   force: false
@@ -292,3 +294,12 @@ releases:
         kubernetes.io/ingress.class: nginx-sso
       hosts:
       - kibana.{{ .Environment.Values.domain }}
+- name: aws-load-balancer-controller
+  <<: *default
+  condition: alb-ingress.enabled
+  chart: eks/aws-load-balancer-controller
+  version: 1.0.5
+  values:
+  - serviceAccountAnnotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Values.accountID }}:role/{{ .Values.clusterName }}-alb-ingress
+    clusterName: {{ .Values.clusterName }}
