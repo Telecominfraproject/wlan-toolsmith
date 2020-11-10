@@ -1,5 +1,5 @@
 data "aws_lb" "main" {
-  name = "k8s-tipwlan-ae959ea819"
+  name = "k8s-wlantestcluster-2c76f622d1"
 }
 
 # 1883 9001 tip-wlan-opensync-mqtt-broker
