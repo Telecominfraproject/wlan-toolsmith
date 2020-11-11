@@ -93,14 +93,14 @@
 //  }
 //}
 
-resource "aws_route53_record" "cloudsdk_serviceport" {
-  name            = format("wlan-portal-svc.%s.%s", var.deployment, var.base_domain)
-  type            = "A"
-  zone_id         = aws_route53_zone.cloudsdk.zone_id
-  allow_overwrite = true
-  alias {
-    name                   = data.aws_lb.main.dns_name
-    zone_id                = data.aws_lb.main.zone_id
-    evaluate_target_health = true
-  }
-}
+//resource "aws_route53_record" "cloudsdk_serviceport" {
+//  name            = format("wlan-portal-svc.%s.%s", var.deployment, var.base_domain)
+//  type            = "A"
+//  zone_id         = aws_route53_zone.cloudsdk.zone_id
+//  allow_overwrite = true
+//  alias {
+//    name                   = data.aws_lb.main.dns_name
+//    zone_id                = data.aws_lb.main.zone_id
+//    evaluate_target_health = true
+//  }
+//}

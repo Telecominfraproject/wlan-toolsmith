@@ -67,14 +67,14 @@
 //  }
 //}
 
-resource "aws_route53_record" "cloudsdk_gwcontroller" {
-  name            = format("opensync-controller.%s.%s", var.deployment, var.base_domain)
-  type            = "A"
-  zone_id         = aws_route53_zone.cloudsdk.zone_id
-  allow_overwrite = true
-  alias {
-    name                   = data.aws_lb.opensync_gw_cloud.dns_name
-    zone_id                = data.aws_lb.opensync_gw_cloud.zone_id
-    evaluate_target_health = true
-  }
-}
+//resource "aws_route53_record" "cloudsdk_gwcontroller" {
+//  name            = format("opensync-controller.%s.%s", var.deployment, var.base_domain)
+//  type            = "A"
+//  zone_id         = aws_route53_zone.cloudsdk.zone_id
+//  allow_overwrite = true
+//  alias {
+//    name                   = data.aws_lb.opensync_gw_cloud.dns_name
+//    zone_id                = data.aws_lb.opensync_gw_cloud.zone_id
+//    evaluate_target_health = true
+//  }
+//}

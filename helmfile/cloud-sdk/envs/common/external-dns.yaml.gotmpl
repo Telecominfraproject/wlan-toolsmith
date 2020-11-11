@@ -6,8 +6,9 @@ domainFilters:
 - {{ .Environment.Values.domain }}
 sources:
 - ingress
+- service
 txtOwnerId: /hostedzone/{{ .Environment.Values.eks.hostedZoneId }}
 policy: sync
 rbac:
   serviceAccountAnnotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/tip-wlan-main-external-dns
+    eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/{{ .Environment.Values.eks.clusterName }}-external-dns

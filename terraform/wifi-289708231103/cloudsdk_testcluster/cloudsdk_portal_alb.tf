@@ -96,20 +96,20 @@
 //  }
 //}
 
-resource "aws_route53_record" "cloudsdk_portal" {
-  name            = format("wlan-ui.%s.%s", var.deployment, var.base_domain)
-  type            = "A"
-  zone_id         = aws_route53_zone.cloudsdk.zone_id
-  allow_overwrite = true
-  alias {
-    name                   = data.aws_lb.main.dns_name
-    zone_id                = data.aws_lb.main.zone_id
-    evaluate_target_health = true
-  }
-  //  lifecycle {
-  //    ignore_changes = [alias]
-  //  }
-}
+//resource "aws_route53_record" "cloudsdk_portal" {
+//  name            = format("wlan-ui.%s.%s", var.deployment, var.base_domain)
+//  type            = "A"
+//  zone_id         = aws_route53_zone.cloudsdk.zone_id
+//  allow_overwrite = true
+//  alias {
+//    name                   = data.aws_lb.main.dns_name
+//    zone_id                = data.aws_lb.main.zone_id
+//    evaluate_target_health = true
+//  }
+//  //  lifecycle {
+//  //    ignore_changes = [alias]
+//  //  }
+//}
 
 output "ui_url" {
   value = format("https://wlan-ui.%s.%s", var.deployment, var.base_domain)

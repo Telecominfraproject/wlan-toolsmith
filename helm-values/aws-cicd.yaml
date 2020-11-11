@@ -55,23 +55,27 @@ common:
       efsFileSystemId: fs-49a5104c
       awsRegion: us-west-2
       efsDnsName: fs-49a5104c.efs.us-west-2.amazonaws.com
-      storageClass: aws-efs  
+      storageClass: aws-efs
 opensync-gw-cloud:
   service:
+    type: LoadBalancer
     annotations:
-      service.beta.kubernetes.io/aws-load-balancer-type: "nlb-ip"
+      external-dns.alpha.kubernetes.io/hostname: wlan-filestore.testcluster.lab.wlan.tip.build,opensync-controller.testcluster.lab.wlan.tip.build,opensync-redirector.testcluster.lab.wlan.tip.build
+      # service.beta.kubernetes.io/aws-load-balancer-type: "nlb-ip"
   enabled: true
   externalhostaddress:
-    ovsdb: opensync-controller.cicd.lab.wlan.tip.build
-    mqtt: opensync-mqtt-broker.cicd.lab.wlan.tip.build
+    ovsdb: opensync-controller.testcluster.lab.wlan.tip.build
+    mqtt: opensync-mqtt-broker.testcluster.lab.wlan.tip.build
   persistence:
     enabled: false
   filestore:
-    url: "https://wlan-filestore.cicd.lab.wlan.tip.build"
+    url: "https://wlan-filestore.testcluster.lab.wlan.tip.build"
 opensync-mqtt-broker:
   service:
+    type: LoadBalancer
     annotations:
-      service.beta.kubernetes.io/aws-load-balancer-type: "nlb-ip"
+      external-dns.alpha.kubernetes.io/hostname: opensync-mqtt-broker.testcluster.lab.wlan.tip.build
+      # service.beta.kubernetes.io/aws-load-balancer-type: "nlb-ip"
   enabled: true
   replicaCount: 1
   persistence:
@@ -84,27 +88,30 @@ wlan-cloud-graphql-gw:
     enabled: true
     alb_https_redirect: true
     hosts:
-    - host: wlan-graphql.cicd.lab.wlan.tip.build    
+    - host: wlan-graphql.testcluster.lab.wlan.tip.build    
       paths: [
-        /
+        /*
         ]
   env:
-    portalsvc: wlan-portal-svc.cicd.lab.wlan.tip.build
+    portalsvc: wlan-portal-svc.testcluster.lab.wlan.tip.build
 wlan-cloud-static-portal:
   enabled: true
   env:
-    graphql: https://wlan-graphql.cicd.lab.wlan.tip.build
+    graphql: https://wlan-graphql.testcluster.lab.wlan.tip.build
   service:
     type: NodePort
   ingress:
     annotations: *srv-https-annotations
     alb_https_redirect: true
     hosts:
-      - host: wlan-ui.cicd.lab.wlan.tip.build
+      - host: wlan-ui.testcluster.lab.wlan.tip.build
         paths: [
-           /
+           /*
           ]
 wlan-portal-service:
+  service:
+    type: NodePort
+    # nodePort_static: false
   enabled: true
   persistence:
     enabled: true
@@ -112,16 +119,21 @@ wlan-portal-service:
     accessMode: ReadWriteOnce
     filestoreSize: 10Gi
   tsp:
-    host: wlan-portal-service.cicd.lab.wlan.tip.build
+    host: wlan-portal-svc.testcluster.lab.wlan.tip.build
   ingress:
     enabled: true
     alb_https_redirect: true
     tls: []
-    annotations: *srv-https-annotations
+    annotations:
+      <<: *srv-https-annotations
+      alb.ingress.kubernetes.io/backend-protocol: HTTPS
+      alb.ingress.kubernetes.io/healthcheck-protocol: HTTPS
+      alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+      alb.ingress.kubernetes.io/healthcheck-path: /ping
     hosts:
-      - host: wlan-portal-service.cicd.lab.wlan.tip.build
+      - host: wlan-portal-svc.testcluster.lab.wlan.tip.build
         paths: [
-           /
+           /*
           ]
 wlan-prov-service:
   enabled: true
@@ -158,7 +170,7 @@ wlan-port-forwarding-gateway-service:
   creds:
     websocketSessionTokenEncKey: MyToKeN0MyToKeN1
   externallyVisible:
-    host: api.wlan.cicd.lab.wlan.tip.build
+    host: api.wlan.testcluster.lab.wlan.tip.build
     port: 30401
 zookeeper:
   enabled: true
