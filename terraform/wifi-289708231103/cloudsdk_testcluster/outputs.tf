@@ -17,3 +17,7 @@ output "vpc_private_subnets_ids" {
 output "vpc_private_route_table_ids" {
   value = module.vpc_main.private_route_table_ids
 }
+
+output "lb_s3_bucket_logging" {
+  value = aws_s3_bucket.alb_logs.arn
+}

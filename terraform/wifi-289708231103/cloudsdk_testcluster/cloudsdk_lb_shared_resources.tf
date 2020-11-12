@@ -1,31 +1,3 @@
-resource "aws_security_group" "cloudsdk_lb" {
-  name        = "cloudsdk-${var.deployment}-lb"
-  description = "SG for EKS LBs servicing ${local.cluster_name}/${var.deployment}} EKS cluster"
-  vpc_id      = module.vpc_main.vpc_id
-  tags        = local.tags
-}
-
-resource "aws_security_group_rule" "cloudsdk_lb_egress" {
-  from_port         = 0
-  to_port           = 65535
-  protocol          = -1
-  security_group_id = aws_security_group.cloudsdk_lb.id
-  type              = "egress"
-  cidr_blocks       = ["0.0.0.0/0"]
-  ipv6_cidr_blocks  = ["::/0"]
-}
-
-resource "aws_security_group_rule" "cloudsdk_lb_ingress_http" {
-  for_each          = toset(["80", "443"])
-  from_port         = each.key
-  to_port           = each.key
-  protocol          = "TCP"
-  security_group_id = aws_security_group.cloudsdk_lb.id
-  type              = "ingress"
-  cidr_blocks       = ["0.0.0.0/0"]
-  ipv6_cidr_blocks  = ["::/0"]
-}
-
 resource "aws_s3_bucket" "alb_logs" {
   bucket_prefix = "alb-logs-"
   acl           = "private"
