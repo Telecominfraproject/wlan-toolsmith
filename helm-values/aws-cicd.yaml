@@ -84,7 +84,9 @@ opensync-mqtt-broker:
 wlan-cloud-graphql-gw:
   enabled: true
   ingress:
-    annotations: *srv-https-annotations
+    annotations:
+    <<: *srv-https-annotations
+    alb.ingress.kubernetes.io/load-balancer-attributes: access_logs.s3.enabled=true,access_logs.s3.bucket=alb-logs-tip-wlan-testcluster-xqgkeyjvjk,access_logs.s3.prefix=wlan-cloud-graphql-gw
     enabled: true
     alb_https_redirect: true
     hosts:
@@ -101,7 +103,9 @@ wlan-cloud-static-portal:
   service:
     type: NodePort
   ingress:
-    annotations: *srv-https-annotations
+    annotations:
+    <<: *srv-https-annotations
+    alb.ingress.kubernetes.io/load-balancer-attributes: access_logs.s3.enabled=true,access_logs.s3.bucket=alb-logs-tip-wlan-testcluster-xqgkeyjvjk,access_logs.s3.prefix=wlan-cloud-static-portal
     alb_https_redirect: true
     hosts:
       - host: wlan-ui.testcluster.lab.wlan.tip.build
@@ -130,6 +134,7 @@ wlan-portal-service:
       alb.ingress.kubernetes.io/healthcheck-protocol: HTTPS
       alb.ingress.kubernetes.io/healthcheck-port: traffic-port
       alb.ingress.kubernetes.io/healthcheck-path: /ping
+      alb.ingress.kubernetes.io/load-balancer-attributes: access_logs.s3.enabled=true,access_logs.s3.bucket=alb-logs-tip-wlan-testcluster-xqgkeyjvjk,access_logs.s3.prefix=wlan-portal-service
     hosts:
       - host: wlan-portal-svc.testcluster.lab.wlan.tip.build
         paths: [

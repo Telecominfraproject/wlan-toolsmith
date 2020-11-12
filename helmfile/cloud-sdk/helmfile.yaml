@@ -326,6 +326,11 @@ releases:
   chart: eks/aws-load-balancer-controller
   version: 1.0.5
   values:
-  - serviceAccountAnnotations:
-      eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Values.eks.accountID }}:role/{{ .Values.eks.clusterName }}-alb-ingress
+  - serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Values.eks.accountID }}:role/{{ .Values.eks.clusterName }}-alb-ingress
     clusterName: {{ .Values.eks.clusterName }}
+    enableShield: false
+    enableWaf: false
+    enableWafv2: false
+    logLevel: debug

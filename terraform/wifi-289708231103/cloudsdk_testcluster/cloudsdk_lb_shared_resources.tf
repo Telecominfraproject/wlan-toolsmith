@@ -1,6 +1,14 @@
+resource "random_string" "random_suffix" {
+  length  = 10
+  special = false
+  upper   = false
+  lower   = true
+  number  = false
+}
+
 resource "aws_s3_bucket" "alb_logs" {
-  bucket_prefix = "alb-logs-"
-  acl           = "private"
+  bucket = "alb-logs-${var.org}-${var.project}-${var.deployment}-${random_string.random_suffix.result}"
+  acl    = "private"
 
   versioning {
     enabled = false
@@ -58,12 +66,12 @@ data "aws_iam_policy_document" "alb_logs_policy" {
 
     resources = ["${aws_s3_bucket.alb_logs.arn}/*"]
 
-    // Elastic Load Balancing Account ID in us-east-2
-    // https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html
+    // Elastic Load Balancing Account ID https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html
     principals {
       type = "AWS"
       identifiers = [
-        "arn:aws:iam::033677994240:root",
+        "arn:aws:iam::127311923021:root", # us-east-1
+        "arn:aws:iam::033677994240:root", # us-east-2
       ]
     }
   }
