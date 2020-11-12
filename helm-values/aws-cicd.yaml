@@ -111,7 +111,7 @@ wlan-cloud-static-portal:
 wlan-portal-service:
   service:
     type: NodePort
-    # nodePort_static: false
+    nodePort_static: false
   enabled: true
   persistence:
     enabled: true
