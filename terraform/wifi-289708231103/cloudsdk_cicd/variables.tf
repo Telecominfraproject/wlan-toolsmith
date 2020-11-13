@@ -86,3 +86,8 @@ variable "service_ingress" {
     healthcheck_path  = string
   }))
 }
+
+variable "ingress_lb" {
+  description = "Ingress LB dns endpoint"
+  type        = string
+}
