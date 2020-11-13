@@ -12,10 +12,10 @@ node_group_settings = {
   max_capacity  = 4
   min_capacity  = 1
   instance_type = "m5.large"
-  ami_name      = "amazon-eks-node-1.17-v20200814"
+  ami_name      = "amazon-eks-node-1.18-v20201007"
 }
 
-cluster_version = "1.17"
+cluster_version = "1.18"
 
 eks_admin_roles = ["AWSReservedSSO_SystemAdministrator_622371b0ceece6f8"]
 
@@ -74,3 +74,5 @@ service_ingress = {
     "healthcheck_path" : "",
   },
 }
+
+ingress_lb = "a46650fef61b84171825228af3cfc4b2-1416366176.us-east-2.elb.amazonaws.com"

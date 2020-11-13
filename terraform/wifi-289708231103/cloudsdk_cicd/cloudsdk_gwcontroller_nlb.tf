@@ -22,7 +22,7 @@ resource "aws_lb_target_group" "cloudsdk_gwcontroller" {
     protocol            = var.service_ingress["gwcontroller"]["internal_protocol"]
     healthy_threshold   = 2
     unhealthy_threshold = 2
-    port                = var.service_ingress["gwcontroller"]["internal_port"]
+    port                = "traffic-port"
   }
 
   tags = local.tags

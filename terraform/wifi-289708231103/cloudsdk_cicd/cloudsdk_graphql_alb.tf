@@ -87,7 +87,7 @@ resource "aws_route53_record" "cloudsdk_graphql" {
   zone_id         = aws_route53_zone.cloudsdk.zone_id
   allow_overwrite = true
   alias {
-    name                   = aws_alb.cloudsdk_graphql.dns_name
+    name                   = var.ingress_lb
     zone_id                = aws_alb.cloudsdk_graphql.zone_id
     evaluate_target_health = true
   }
