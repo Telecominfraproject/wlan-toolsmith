@@ -11,8 +11,8 @@ org = "tip"
 node_group_settings = {
   max_capacity  = 4
   min_capacity  = 1
-  instance_type = "m5.large"
-  ami_name      = "amazon-eks-node-1.17-v20200814"
+  instance_type = "c5.xlarge"
+  ami_name      = "amazon-eks-node-1.18-v20201007"
 }
 
 cluster_version = "1.18"
