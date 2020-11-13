@@ -74,3 +74,5 @@ service_ingress = {
     "healthcheck_path" : "",
   },
 }
+
+ingress_lb = "a46650fef61b84171825228af3cfc4b2-1416366176.us-east-2.elb.amazonaws.com"
