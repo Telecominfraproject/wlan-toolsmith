@@ -206,10 +206,10 @@ cassandra:
   resources:
     requests:
       cpu: 500m
-      memory: 4Gi
+      memory: 3800Mi
     limits:
       cpu: 1000m
-      memory: 4Gi
+      memory: 3800Mi
   creds:
     sslKeystorePassword: mypassword
     sslTruststorePassword: mypassword
