@@ -11,7 +11,7 @@ org = "tip"
 node_group_settings = {
   max_capacity  = 4
   min_capacity  = 1
-  instance_type = "m5.large"
+  instance_type = "c5.xlarge"
   ami_name      = "amazon-eks-node-1.18-v20201007"
 }
 
