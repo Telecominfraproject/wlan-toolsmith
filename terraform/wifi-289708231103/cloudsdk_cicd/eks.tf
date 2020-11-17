@@ -90,7 +90,7 @@ locals {
   user_roles  = [
     {
       userarn  = aws_iam_user.gh-actions-user.arn
-      username = "gh-actions-user"
+      username = aws_iam_user.gh-actions-user.name
       groups   = ["system:masters"]
     }
   ]
