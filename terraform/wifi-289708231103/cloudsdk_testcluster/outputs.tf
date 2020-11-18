@@ -25,3 +25,11 @@ output "vpc_private_route_table_ids" {
 output "lb_s3_bucket_logging" {
   value = aws_s3_bucket.alb_logs.id
 }
+
+output "efs_id" {
+  value = aws_efs_file_system.default.id
+}
+
+output "efs_dns" {
+  value = aws_efs_file_system.default.dns_name
+}
