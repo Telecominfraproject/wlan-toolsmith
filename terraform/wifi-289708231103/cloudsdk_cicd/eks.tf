@@ -143,7 +143,8 @@ data "aws_iam_policy_document" "external_dns" {
     effect = "Allow"
 
     resources = [
-      "arn:aws:route53:::hostedzone/${data.terraform_remote_state.route_53.outputs.zone_id}"
+      "arn:aws:route53:::hostedzone/${data.terraform_remote_state.route_53.outputs.zone_id}",
+      "arn:aws:route53:::hostedzone/Z054431439VV8JBXTLZ8B", // FIXME
     ]
   }
 
