@@ -87,7 +87,7 @@ locals {
     "Env"     = var.env
     "Project" = var.project
   }
-  user_roles  = [
+  user_roles = [
     {
       userarn  = aws_iam_user.gh-actions-user.arn
       username = aws_iam_user.gh-actions-user.name
