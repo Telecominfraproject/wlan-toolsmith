@@ -25,7 +25,8 @@ environments:
         enabled: true
     - external-dns:
         enabled: true
-  amazon:
+
+  amazon-cicd:
     values:
     - eks:
         clusterName: tip-wlan-main
@@ -33,6 +34,33 @@ environments:
         accountID: 289708231103
         hostedZoneId: Z054431439VV8JBXTLZ8B
         certificateARN: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
+    - monitoring:
+        namespace: monitoring
+    - domain: lab.wlan.tip.build
+    - storageClass: gp2
+    - autoscaler:
+        enabled: true
+    - ingress:
+        enabled: false
+    - elastic:
+        enabled: true
+    - kibana:
+        enabled: true
+    - prometheus:
+        enabled: true
+    - external-dns:
+        enabled: true
+    - alb-ingress:
+        enabled: true
+
+  amazon-qa:
+    values:
+    - eks:
+        clusterName: tip-wlan-qa
+        region: us-east-2
+        accountID: 289708231103
+        hostedZoneId: Z02683893QSUHV3RLVNVB
+        certificateARN: arn:aws:acm:us-east-2:289708231103:certificate/a6dfde32-93bb-4a14-949f-dab16588c539
     - monitoring:
         namespace: monitoring
     - domain: lab.wlan.tip.build
