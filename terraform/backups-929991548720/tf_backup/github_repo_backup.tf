@@ -10,7 +10,7 @@ module "github_repo_backup_ecs_task" {
     { name : "AWS_REGION", value : var.aws_region },
     { name : "BACKUP_BUCKET", value : aws_s3_bucket.repo_backup.id },
     { name : "GITHUB_ORGANIZATION", value : var.github_organization },
-    { name : "REPO_BLACKLIST", value : "${join("|", var.repo_blacklist)}" }
+    { name : "REPO_BLACKLIST", value : join("|", var.repo_blacklist) },
   ]
   task_secrets = [
     { name : "GITHUB_TOKEN", valueFrom : aws_ssm_parameter.github_token.arn },
