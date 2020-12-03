@@ -90,24 +90,11 @@ resource "aws_acm_certificate" "cloudsdk" {
 }
 
 resource "aws_route53_record" "cloudsdk_ssl_validation" {
-  zone_id = aws_route53_zone.cloudsdk.id
+  zone_id = data.terraform_remote_state.route_53.outputs.zone_id
   name    = aws_acm_certificate.cloudsdk.domain_validation_options.0.resource_record_name
   type    = aws_acm_certificate.cloudsdk.domain_validation_options.0.resource_record_type
   ttl     = 600
   records = [
     aws_acm_certificate.cloudsdk.domain_validation_options.0.resource_record_value
   ]
-}
-
-resource "aws_route53_zone" "cloudsdk" {
-  name = format("%s.%s", var.deployment, var.base_domain)
-}
-
-resource "aws_route53_record" "aws_route53_zone_cloudsdk_main_glue" {
-  allow_overwrite = true
-  name            = format("%s.%s", var.deployment, var.base_domain)
-  ttl             = 60
-  type            = "NS"
-  zone_id         = data.terraform_remote_state.route_53.outputs.zone_id
-  records         = aws_route53_zone.cloudsdk.name_servers
 }

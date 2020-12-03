@@ -32,7 +32,7 @@ environments:
         clusterName: tip-wlan-main
         region: us-east-2
         accountID: 289708231103
-        hostedZoneId: Z054431439VV8JBXTLZ8B
+        hostedZoneId: cicd
         certificateARN: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
     - monitoring:
         namespace: monitoring
