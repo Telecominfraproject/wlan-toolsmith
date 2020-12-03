@@ -33,3 +33,7 @@ output "efs_id" {
 output "efs_dns" {
   value = aws_efs_file_system.default.dns_name
 }
+
+output "zone_id" {
+  value = data.terraform_remote_state.route_53.outputs.zone_id
+}
