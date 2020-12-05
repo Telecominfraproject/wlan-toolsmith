@@ -59,6 +59,7 @@ common:
 opensync-gw-cloud:
   service:
     type: LoadBalancer
+    nodePortStatic: false ## if true, nodePort ports are statically defined effectively prohibiting multiple deployments on the same cluster; if false, nodePort ports are chosen dynamically by k8s
     annotations:
       external-dns.alpha.kubernetes.io/hostname: wlan-filestore.cicd.lab.wlan.tip.build,opensync-controller.cicd.lab.wlan.tip.build,opensync-redirector.cicd.lab.wlan.tip.build
       service.beta.kubernetes.io/aws-load-balancer-access-log-enabled: "true"
@@ -78,6 +79,7 @@ opensync-gw-cloud:
 opensync-mqtt-broker:
   service:
     type: LoadBalancer
+    nodePortStatic: false ## if true, nodePort ports are statically defined effectively prohibiting multiple deployments on the same cluster; if false, nodePort ports are chosen dynamically by k8s
     annotations:
       external-dns.alpha.kubernetes.io/hostname: "opensync-mqtt-broker.cicd.lab.wlan.tip.build"
       service.beta.kubernetes.io/aws-load-balancer-access-log-enabled: "true"
@@ -90,11 +92,14 @@ opensync-mqtt-broker:
     storageClass: "gp2"
 wlan-cloud-graphql-gw:
   enabled: true
+  service:
+    type: NodePort
+    nodePortStatic: false ## if true, nodePort ports are statically defined effectively prohibiting multiple deployments on the same cluster; if false, nodePort ports are chosen dynamically by k8s
   ingress:
     annotations:
       <<: *srv-https-annotations
     enabled: true
-    alb_https_redirect: true
+    lb_https_redirect: true ## if set to true, enables http->https redirect on cloud load balancer
     hosts:
     - host: wlan-graphql.cicd.lab.wlan.tip.build    
       paths: [
@@ -108,11 +113,12 @@ wlan-cloud-static-portal:
     graphql: https://wlan-graphql.cicd.lab.wlan.tip.build
   service:
     type: NodePort
+    nodePortStatic: false ## if true, nodePort ports are statically defined effectively prohibiting multiple deployments on the same cluster; if false, nodePort ports are chosen dynamically by k8s
   ingress:
     annotations:
       <<: *srv-https-annotations
       alb.ingress.kubernetes.io/load-balancer-attributes: access_logs.s3.enabled=true,access_logs.s3.bucket=alb-logs-tip-wlan-cicd-wotgakesfr,access_logs.s3.prefix=wlan-cicd
-    alb_https_redirect: true
+    lb_https_redirect: true ## if set to true, enables http->https redirect on cloud load balancer
     hosts:
       - host: wlan-ui.cicd.lab.wlan.tip.build
         paths: [
@@ -132,7 +138,7 @@ wlan-portal-service:
     host: wlan-portal-svc.cicd.lab.wlan.tip.build
   ingress:
     enabled: true
-    alb_https_redirect: true
+    lb_https_redirect: true ## if set to true, enables http->https redirect on cloud load balancer
     tls: []
     annotations:
       <<: *srv-https-annotations
@@ -147,6 +153,9 @@ wlan-portal-service:
           ]
 wlan-prov-service:
   enabled: true
+  service:
+    type: NodePort
+    nodePortStatic: false ## if true, nodePort ports are statically defined effectively prohibiting multiple deployments on the same cluster; if false, nodePort ports are chosen dynamically by k8s
   creds:
     enabled: true
     db:
@@ -163,6 +172,9 @@ wlan-prov-service:
       singleDataSourceSslKeyPassword: mypassword
 wlan-ssc-service:
   enabled: true
+  service:
+    type: NodePort
+    nodePortStatic: false ## if true, nodePort ports are statically defined effectively prohibiting multiple deployments on the same cluster; if false, nodePort ports are chosen dynamically by k8s
   creds:
     sslKeyPassword: mypassword
     sslKeystorePassword: mypassword
@@ -175,12 +187,18 @@ wlan-ssc-service:
       password: tip-read
 wlan-spc-service:
   enabled: true
+  service:
+    type: NodePort
+    nodePortStatic: false ## if true, nodePort ports are statically defined effectively prohibiting multiple deployments on the same cluster; if false, nodePort ports are chosen dynamically by k8s
   creds:
     sslKeyPassword: mypassword
     sslKeystorePassword: mypassword
     sslTruststorePassword: mypassword
 wlan-port-forwarding-gateway-service:
   enabled: true
+  service:
+    type: NodePort
+    nodePortStatic: false ## if true, nodePort ports are statically defined effectively prohibiting multiple deployments on the same cluster; if false, nodePort ports are chosen dynamically by k8s
   creds:
     websocketSessionTokenEncKey: MyToKeN0MyToKeN1
   externallyVisible:
@@ -220,6 +238,9 @@ cassandra:
   creds:
     sslKeystorePassword: mypassword
     sslTruststorePassword: mypassword
+  dbUser:
+    user: tip_user
+    password: tip_password
 postgresql:
   enabled: true
   postgresqlPassword: postgres
