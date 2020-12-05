@@ -19,7 +19,7 @@ resource "aws_vpn_connection" "tunnel-perfecto" {
 }
 
 resource "aws_ec2_transit_gateway_route" "tunnel-perfecto" {
-  destination_cidr_block         = "198.160.7.240/30"
-  transit_gateway_attachment_id  = aws_vpn_connection.tunnel_tip_wifi_nrg.transit_gateway_attachment_id
+  destination_cidr_block         = "198.160.7.240/32"
+  transit_gateway_attachment_id  = aws_vpn_connection.tunnel-perfecto.transit_gateway_attachment_id
   transit_gateway_route_table_id = module.tgw_main.this_ec2_transit_gateway_association_default_route_table_id
 }
