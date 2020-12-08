@@ -74,7 +74,6 @@ opensync-gw-cloud:
     url: "https://wlan-filestore.cicd.lab.wlan.tip.build"
   image:
     name: opensync-gateway-cloud
-    tag: 0.0.1-SNAPSHOT-2020-11-16
 opensync-mqtt-broker:
   service:
     type: LoadBalancer
