@@ -34,6 +34,7 @@ cloudwatch_logs_retention_period = 30
 
 backup_retention_period = 60
 
-atlassian_backup_schedule = "cron(30 2 ? * MON,WED,SAT *)"
+atlassian_backup_schedule = "cron(30 2 ? * WED,SAT *)"
 
 repo_backup_schedule = "cron(0 9 * * ? *)"
+
