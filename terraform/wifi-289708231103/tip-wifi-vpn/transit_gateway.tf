@@ -20,7 +20,7 @@ module "tgw_main" {
 
 resource "aws_route" "private" {
   for_each               = toset(data.terraform_remote_state.wlan_main.outputs.vpc_private_route_table_ids)
-  destination_cidr_block = var.vpn_endpoint_cidr
+  destination_cidr_block = "10.28.2.0/23"
   route_table_id         = each.key
   transit_gateway_id     = module.tgw_main.this_ec2_transit_gateway_id
 }
