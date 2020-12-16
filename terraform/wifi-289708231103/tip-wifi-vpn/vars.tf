@@ -14,3 +14,8 @@ variable "nrg_vpn_endpoint_ip" {
   description = "IP address of the VPN endpoint connecting to AWS"
   type        = string
 }
+
+variable "sns_alarm_subscriptions" {
+  description = "SNS VPN alarm subscriptions"
+  type        = set(map(string))
+}
