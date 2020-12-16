@@ -41,3 +41,4 @@ tip-wlan
 *local*
 id_rsa*
 *.pem
+.envrc
