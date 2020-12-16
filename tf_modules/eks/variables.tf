@@ -4,7 +4,7 @@ variable "aws_region" {
 }
 
 variable "vpc_cidr" {
-  type = string
+  type    = string
   default = ""
 }
 
@@ -49,12 +49,12 @@ variable "cluster_name" {
 
 variable "public_subnets" {
   description = "List of public subnet ids"
-  type = set(string)
-  default = [""]
+  type        = set(string)
+  default     = [""]
 }
 
 variable "private_subnets" {
   description = "List of private subnet ids"
-  type = set(string)
-  default = [""]
+  type        = set(string)
+  default     = [""]
 }

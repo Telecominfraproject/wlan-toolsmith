@@ -29,18 +29,18 @@ module "acm" {
   providers = {
     aws = aws.acm
   }
-  source       = "git::https://github.com/terraform-aws-modules/terraform-aws-acm?ref=v2.9.0"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-acm?ref=v2.9.0"
 
-  domain_name  = var.main_zone_name
-  zone_id      = aws_route53_zone.main.zone_id
+  domain_name = var.main_zone_name
+  zone_id     = aws_route53_zone.main.zone_id
 
   subject_alternative_names = [
     "*.${var.main_zone_name}"
   ]
 
   tags = {
-    eks        = true
-    cloudsdk   = true
+    eks      = true
+    cloudsdk = true
   }
 }
 
