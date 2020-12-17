@@ -10,5 +10,17 @@ sns_alarm_subscriptions = [
   {
     protocol = "email",
     endpoint = "max@opsfleet.com"
-  }
+  },
+  {
+    protocol = "email",
+    endpoint = "leonid@opsfleet.com"
+  },
+  {
+    protocol = "email",
+    endpoint = "gleb@opsfleet.com"
+  },
+  {
+    protocol = "email",
+    endpoint = "tipdevops@launchcg.com"
+  },
 ]
