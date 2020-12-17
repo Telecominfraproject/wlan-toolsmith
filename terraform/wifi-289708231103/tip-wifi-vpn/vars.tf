@@ -18,4 +18,5 @@ variable "nrg_vpn_endpoint_ip" {
 variable "sns_alarm_subscriptions" {
   description = "SNS VPN alarm subscriptions"
   type        = set(map(string))
+  default     = []
 }
