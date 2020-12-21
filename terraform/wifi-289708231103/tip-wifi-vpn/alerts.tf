@@ -92,7 +92,7 @@ resource "aws_cloudwatch_metric_alarm" "tgw_packet_drops" {
       metric_name = "PacketDropCountBlackhole"
       period      = "360"
       stat        = "Sum"
-      unit        = "Dropped Packets"
+      unit        = "Count"
     }
   }
 
@@ -106,7 +106,7 @@ resource "aws_cloudwatch_metric_alarm" "tgw_packet_drops" {
       metric_name = "PacketDropCountNoRoute"
       period      = "360"
       stat        = "Sum"
-      unit        = "Dropped Packets"
+      unit        = "Count"
     }
   }
 }
