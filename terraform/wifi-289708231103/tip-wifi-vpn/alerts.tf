@@ -45,7 +45,6 @@ resource "aws_cloudwatch_metric_alarm" "tgw_incoming" {
   period            = "3600"
   statistic         = "Sum"
   threshold         = "100000000000" # 100GB
-  unit              = "Bytes"
   alarm_description = "Transit Gateway Incoming Data"
   alarm_actions     = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
 }
@@ -62,7 +61,6 @@ resource "aws_cloudwatch_metric_alarm" "tgw_outgoing_data" {
   period            = "3600"
   statistic         = "Sum"
   threshold         = "100000000000" # 100GB
-  unit              = "Bytes"
   alarm_description = "Transit Gateway Outgoing Data"
   alarm_actions     = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
 }
@@ -90,9 +88,8 @@ resource "aws_cloudwatch_metric_alarm" "tgw_packet_drops" {
         "TransitGateway" = module.tgw_main.this_ec2_transit_gateway_id
       }
       metric_name = "PacketDropCountBlackhole"
-      period      = "360"
+      period      = "300"
       stat        = "Sum"
-      unit        = "Count"
     }
   }
 
@@ -104,9 +101,8 @@ resource "aws_cloudwatch_metric_alarm" "tgw_packet_drops" {
         "TransitGateway" = module.tgw_main.this_ec2_transit_gateway_id
       }
       metric_name = "PacketDropCountNoRoute"
-      period      = "360"
+      period      = "300"
       stat        = "Sum"
-      unit        = "Count"
     }
   }
 }
