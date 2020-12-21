@@ -112,7 +112,7 @@ resource "aws_cloudwatch_metric_alarm" "tgw_packet_drops" {
 }
 
 resource "aws_sns_topic" "vpn_cloudwatch_alarms" {
-  name = "VPN cloudwatch alarms"
+  name = "vpn_cloudwatch_alarms"
 }
 
 resource "aws_cloudformation_stack" "atlassian_cloud_backup_email_notification" {
