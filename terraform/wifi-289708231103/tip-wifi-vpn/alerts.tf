@@ -12,6 +12,7 @@ resource "aws_cloudwatch_metric_alarm" "vpn_state" {
   statistic         = "Maximum"
   threshold         = "0"
   alarm_description = "VPN Tunnel State"
+  alarm_actions     = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
 }
 
 resource "aws_cloudwatch_metric_alarm" "vpn_outgoing_data" {
@@ -29,6 +30,7 @@ resource "aws_cloudwatch_metric_alarm" "vpn_outgoing_data" {
   threshold         = "100000000000" # 100GB
   unit              = "Bytes"
   alarm_description = "VPN Outgoing Data"
+  alarm_actions     = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
 }
 
 resource "aws_cloudwatch_metric_alarm" "tgw_incoming" {
@@ -45,6 +47,7 @@ resource "aws_cloudwatch_metric_alarm" "tgw_incoming" {
   threshold         = "100000000000" # 100GB
   unit              = "Bytes"
   alarm_description = "Transit Gateway Incoming Data"
+  alarm_actions     = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
 }
 
 resource "aws_cloudwatch_metric_alarm" "tgw_outgoing_data" {
@@ -61,6 +64,7 @@ resource "aws_cloudwatch_metric_alarm" "tgw_outgoing_data" {
   threshold         = "100000000000" # 100GB
   unit              = "Bytes"
   alarm_description = "Transit Gateway Outgoing Data"
+  alarm_actions     = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
 }
 
 resource "aws_cloudwatch_metric_alarm" "tgw_packet_drops" {
@@ -69,6 +73,7 @@ resource "aws_cloudwatch_metric_alarm" "tgw_packet_drops" {
   evaluation_periods  = "1"
   threshold           = "0"
   alarm_description   = "Transit Gateway Packet Drops"
+  alarm_actions       = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
 
   metric_query {
     id          = "total_drops"
