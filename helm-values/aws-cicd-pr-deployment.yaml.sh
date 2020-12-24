@@ -24,8 +24,8 @@ shared:
 global:
   # Change to an unused port prefix range to prevent port conflicts
   # with other instances running within the same k8s cluster
-  nodePortPrefix: 3$PR_NUMBER
-  nodePortPrefixExt: 4$PR_NUMBER
+  nodePortPrefix: 303
+  nodePortPrefixExt: 305
   nsPrefix: tip-pr-$PR_NUMBER
   # image pull policy
   pullPolicy: Always
