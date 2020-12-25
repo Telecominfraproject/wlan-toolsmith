@@ -28,7 +28,7 @@ global:
   nodePortPrefixExt: 305
   nsPrefix: tip-pr-$PR_NUMBER
   # image pull policy
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
   repository: tip-tip-wlan-cloud-docker-repo.jfrog.io
   # override default mount path root directory
   # referenced by persistent volumes and log files
