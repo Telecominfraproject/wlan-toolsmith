@@ -2,7 +2,7 @@ resource "aws_cloudwatch_metric_alarm" "vpn_state" {
   for_each            = { for vpn in [aws_vpn_connection.tunnel_tip_wifi_nrg, aws_vpn_connection.tunnel-perfecto] : vpn.id => vpn }
   alarm_name          = "vpn-state-${each.key}"
   comparison_operator = "LessThanOrEqualToThreshold"
-  evaluation_periods  = "1"
+  evaluation_periods  = "2"
   namespace           = "AWS/VPN"
   dimensions = {
     "VpnId" = each.key
@@ -72,7 +72,7 @@ resource "aws_cloudwatch_metric_alarm" "tgw_outgoing_data" {
 resource "aws_cloudwatch_metric_alarm" "tgw_packet_drops" {
   alarm_name          = "tgw-packet-drops-${module.tgw_main.this_ec2_transit_gateway_id}"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "1"
+  evaluation_periods  = "2"
   threshold           = "0"
   alarm_description   = "Transit Gateway Packet Drops"
   alarm_actions       = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
