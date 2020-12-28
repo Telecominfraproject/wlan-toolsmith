@@ -9,15 +9,7 @@ vpn_endpoint_cidr = "100.97.55.0/24"
 sns_alarm_subscriptions = [
   {
     protocol = "email",
-    endpoint = "max@opsfleet.com"
-  },
-  {
-    protocol = "email",
-    endpoint = "leonid@opsfleet.com"
-  },
-  {
-    protocol = "email",
-    endpoint = "gleb@opsfleet.com"
+    endpoint = "tip-alerts@opsfleet.com"
   },
   {
     protocol = "email",
