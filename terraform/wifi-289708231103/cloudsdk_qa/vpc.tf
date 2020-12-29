@@ -1,5 +1,5 @@
 module "vpc_main" {
-  source               = "github.com/terraform-aws-modules/terraform-aws-vpc?ref=v2.33.0"
+  source               = "github.com/terraform-aws-modules/terraform-aws-vpc?ref=v2.64.0"
   name                 = "${var.org}-${var.project}-${var.env}"
   cidr                 = var.vpc_cidr
   azs                  = [for az in var.az : format("%s%s", var.aws_region, az)]
