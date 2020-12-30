@@ -5,6 +5,8 @@ repositories:
   url: https://kiwigrid.github.io
 - name: nginx
   url: https://kubernetes.github.io/ingress-nginx
+- name: eks
+  url: https://aws.github.io/eks-charts
 
 environments:
   azure:
@@ -52,6 +54,8 @@ environments:
         enabled: true
     - alb-ingress:
         enabled: true
+    - node-termination-handler:
+        enabled: true
 
   amazon-qa:
     values:
@@ -78,6 +82,8 @@ environments:
     - external-dns:
         enabled: true
     - alb-ingress:
+        enabled: true
+    - node-termination-handler:
         enabled: true
 
 helmDefaults:
@@ -336,3 +342,11 @@ releases:
     enableWaf: false
     enableWafv2: false
     logLevel: debug
+- name: aws-node-termination-handler
+  <<: *default
+  condition: node-termination-handler.enabled
+  chart: aws-node-termination-handler
+  version: 0.13.2
+  values:
+    - deleteLocalData: true
+    - podTerminationGracePeriod: -1 # use values defined in Pod
