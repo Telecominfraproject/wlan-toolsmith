@@ -1,7 +1,7 @@
 resource "aws_security_group" "wlan" {
   name_prefix = "wlan-tmp-"
   vpc_id      = module.vpc_main.vpc_id
-  tags        = { "Name" : "${var.env} instance" }
+  tags        = merge({ "Name" : "${var.env} instance" }, local.common_tags)
 }
 
 resource "aws_security_group_rule" "wlan_ingress_ssh" {

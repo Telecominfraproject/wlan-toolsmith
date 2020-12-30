@@ -36,7 +36,7 @@ resource "aws_s3_bucket" "alb_logs" {
     }
   }
 
-  tags = local.tags
+  tags = local.common_tags
 
   lifecycle {
     prevent_destroy = true

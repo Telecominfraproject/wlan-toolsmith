@@ -33,14 +33,15 @@ resource "aws_instance" "wlan_candelatech_test_results" {
     delete_on_termination = true
   }
 
-  tags = {
+  tags = merge({
     "Name" : "${var.org}-${var.project}-${var.env} CandelaTech Test Results"
-  }
+  }, local.common_tags)
 }
 
 resource "aws_eip" "wlan_candelatech_test_results" {
   vpc      = true
   instance = aws_instance.wlan_candelatech_test_results.id
+  tags     = local.common_tags
 }
 
 output "wlan_candelatech_test_results_instance" {

@@ -36,7 +36,7 @@ resource "aws_s3_bucket" "alb_logs" {
     }
   }
 
-  tags = local.tags
+  tags = local.common_tags
 
   lifecycle {
     prevent_destroy = true
@@ -83,6 +83,7 @@ resource "aws_acm_certificate" "cloudsdk" {
     format("*.%s.%s", var.deployment, var.base_domain)
   ]
   validation_method = "DNS"
+  tags              = local.common_tags
 
   lifecycle {
     create_before_destroy = true

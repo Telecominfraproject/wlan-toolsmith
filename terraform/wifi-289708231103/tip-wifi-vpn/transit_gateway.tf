@@ -13,9 +13,7 @@ module "tgw_main" {
     }
   }
 
-  tags = {
-    Name = "tip-wifi-nrg"
-  }
+  tags = merge({ Name = "tip-wifi-nrg" }, local.common_tags)
 }
 
 resource "aws_route" "private" {

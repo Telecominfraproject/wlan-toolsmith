@@ -34,14 +34,15 @@ resource "aws_instance" "wlan_ctf" {
     delete_on_termination = true
   }
 
-  tags = {
+  tags = merge({
     "Name" : "${var.org}-${var.project}-${var.env}-CTF"
-  }
+  }, local.common_tags)
 }
 
 resource "aws_eip" "wlan_ctf" {
   vpc      = true
   instance = aws_instance.wlan_ctf.id
+  tags     = local.common_tags
 }
 
 output "wlan_ctf_instance" {

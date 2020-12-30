@@ -24,7 +24,7 @@ module "eks" {
   cluster_name = local.cluster_name
   subnets      = module.vpc_main.private_subnets
   vpc_id       = module.vpc_main.vpc_id
-  tags         = merge({ "Name" = local.cluster_name }, local.tags)
+  tags         = merge({ "Name" = local.cluster_name }, local.common_tags)
 
   workers_group_defaults = {
     ami_type           = "AL2_x86_64"
@@ -82,9 +82,10 @@ locals {
   public_subnets_merged       = join(" ", module.vpc_main.public_subnets)
   private_subnets_merged      = join(" ", module.vpc_main.private_subnets)
   cluster_name                = "${var.org}-${var.project}-${var.env}"
-  tags = {
-    "Env"     = var.env
-    "Project" = var.project
+  common_tags = {
+    "Env"       = var.env
+    "Project"   = var.project
+    "ManagedBy" = "terraform"
   }
   admin_roles = [for role in var.eks_admin_roles : {
     rolearn  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${role}"
@@ -116,6 +117,7 @@ module "external_dns_cluster_role" {
   provider_url     = local.oidc_provider_url
   role_policy_arns = [aws_iam_policy.external_dns.arn]
   create_role      = true
+  tags             = local.common_tags
 }
 
 resource "aws_iam_policy" "external_dns" {
@@ -174,6 +176,7 @@ module "cluster_autoscaler_cluster_role" {
   provider_url     = local.oidc_provider_url
   role_policy_arns = [aws_iam_policy.cluster_autoscaler.arn]
   create_role      = true
+  tags             = local.common_tags
 }
 
 resource "aws_iam_policy" "cluster_autoscaler" {

@@ -6,6 +6,7 @@ module "alb_ingress_iam_role" {
     aws_iam_policy.alb_ingress_iam_policy.arn,
   ]
   create_role = true
+  tags        = local.common_tags
 }
 
 resource "aws_iam_policy" "alb_ingress_iam_policy" {

@@ -1,6 +1,7 @@
 resource "aws_iam_user" "gh-actions-user" {
   name = "gh-actions-user"
   path = "/"
+  tags = local.common_tags
 }
 
 resource "aws_iam_user_policy" "lb_ro" {
