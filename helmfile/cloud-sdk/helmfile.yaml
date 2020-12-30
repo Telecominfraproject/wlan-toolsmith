@@ -345,8 +345,12 @@ releases:
 - name: aws-node-termination-handler
   <<: *default
   condition: node-termination-handler.enabled
-  chart: aws-node-termination-handler
+  chart: eks/aws-node-termination-handler
   version: 0.13.2
+  labels:
+    role: setup
+    group: system
+    app: node-termination-handler
   values:
     - deleteLocalData: true
     - podTerminationGracePeriod: -1 # use values defined in Pod
