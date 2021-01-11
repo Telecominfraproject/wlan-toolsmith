@@ -26,3 +26,9 @@ data "terraform_remote_state" "wlan_main" {
     encrypt        = true
   }
 }
+
+locals {
+  common_tags = {
+    "ManagedBy" = "terraform"
+  }
+}

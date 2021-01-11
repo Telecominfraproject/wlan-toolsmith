@@ -2,12 +2,7 @@ resource "aws_security_group" "efs" {
   name        = "${var.org}-${var.project}-${var.env}-efs"
   description = "${var.org}-${var.project}-${var.env}-efs"
   vpc_id      = module.vpc_main.vpc_id
-
-  tags = {
-    Name        = "${var.org}-${var.project}-${var.env}"
-    Project     = var.project
-    Environment = var.env
-  }
+  tags        = merge({ Name = "${var.org}-${var.project}-${var.env}" }, local.common_tags)
 }
 
 resource "aws_security_group_rule" "efs_ingress" {
@@ -21,12 +16,7 @@ resource "aws_security_group_rule" "efs_ingress" {
 
 resource "aws_efs_file_system" "default" {
   creation_token = "${var.org}-${var.project}-${var.env}-default"
-
-  tags = {
-    Name        = "${var.org}-${var.project}-${var.env}-default"
-    Project     = var.project
-    Environment = var.env
-  }
+  tags           = merge({ Name = "${var.org}-${var.project}-${var.env}" }, local.common_tags)
 }
 
 resource "aws_efs_mount_target" "default" {

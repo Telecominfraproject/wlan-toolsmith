@@ -3,12 +3,19 @@ provider "aws" {
   region  = var.aws_region
 }
 
+locals {
+  common_tags = {
+    "ManagedBy" = "terraform"
+  }
+}
+
 module "terraform_state_backend" {
   source         = "git::https://github.com/cloudposse/terraform-aws-tfstate-backend.git?ref=0.18.0"
   region         = "us-east-1"
   name           = "terraform"
   s3_bucket_name = "tip-wifi-tfstate"
   attributes     = ["state"]
+  tags           = local.common_tags
 }
 
 output "remote_state_config" {
