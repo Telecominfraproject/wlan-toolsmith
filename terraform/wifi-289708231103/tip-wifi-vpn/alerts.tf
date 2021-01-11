@@ -14,6 +14,7 @@ resource "aws_cloudwatch_metric_alarm" "vpn_state" {
   alarm_description = "VPN Tunnel State"
   alarm_actions     = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
   ok_actions        = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
+  tags              = local.common_tags
 }
 
 resource "aws_cloudwatch_metric_alarm" "vpn_outgoing_data" {
@@ -33,6 +34,7 @@ resource "aws_cloudwatch_metric_alarm" "vpn_outgoing_data" {
   alarm_description = "VPN Outgoing Data"
   alarm_actions     = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
   ok_actions        = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
+  tags              = local.common_tags
 }
 
 resource "aws_cloudwatch_metric_alarm" "tgw_incoming" {
@@ -50,6 +52,7 @@ resource "aws_cloudwatch_metric_alarm" "tgw_incoming" {
   alarm_description = "Transit Gateway Incoming Data"
   alarm_actions     = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
   ok_actions        = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
+  tags              = local.common_tags
 }
 
 resource "aws_cloudwatch_metric_alarm" "tgw_outgoing_data" {
@@ -67,6 +70,7 @@ resource "aws_cloudwatch_metric_alarm" "tgw_outgoing_data" {
   alarm_description = "Transit Gateway Outgoing Data"
   alarm_actions     = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
   ok_actions        = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
+  tags              = local.common_tags
 }
 
 resource "aws_cloudwatch_metric_alarm" "tgw_packet_drops" {
@@ -77,6 +81,7 @@ resource "aws_cloudwatch_metric_alarm" "tgw_packet_drops" {
   alarm_description   = "Transit Gateway Packet Drops"
   alarm_actions       = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
   ok_actions          = [aws_sns_topic.vpn_cloudwatch_alarms.arn]
+  tags                = local.common_tags
 
   metric_query {
     id          = "total_drops"
@@ -114,10 +119,12 @@ resource "aws_cloudwatch_metric_alarm" "tgw_packet_drops" {
 
 resource "aws_sns_topic" "vpn_cloudwatch_alarms" {
   name = "vpn_cloudwatch_alarms"
+  tags = local.common_tags
 }
 
 resource "aws_cloudformation_stack" "atlassian_cloud_backup_email_notification" {
   name          = "atlassian-cloud-backup"
+  tags          = local.common_tags
   template_body = <<EOT
 AWSTemplateFormatVersion: 2010-09-09
 Resources:

@@ -21,8 +21,15 @@ terraform {
   }
 }
 
+locals {
+  common_tags = {
+    "ManagedBy" = "terraform"
+  }
+}
+
 resource "aws_route53_zone" "main" {
   name = var.main_zone_name
+  tags = local.common_tags
 }
 
 module "acm" {
@@ -38,10 +45,10 @@ module "acm" {
     "*.${var.main_zone_name}"
   ]
 
-  tags = {
+  tags = merge({
     eks      = true
     cloudsdk = true
-  }
+  }, local.common_tags)
 }
 
 output "zone_id" {
