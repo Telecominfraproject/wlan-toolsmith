@@ -14,3 +14,10 @@ rbac:
 extraArgs:
   balance-similar-node-groups: true
   skip-nodes-with-system-pods: false
+  expander: priority
+
+expanderPriorities:
+  10:
+    - .*spot.*
+  0:
+      - .*
