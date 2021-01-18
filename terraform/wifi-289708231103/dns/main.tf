@@ -55,6 +55,10 @@ output "zone_id" {
   value = aws_route53_zone.main.zone_id
 }
 
+output "zone_name" {
+  value = aws_route53_zone.main.name
+}
+
 output "certificate_arn" {
   value = module.acm.this_acm_certificate_arn
 }
