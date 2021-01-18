@@ -49,6 +49,11 @@ variable "node_group_settings" {
   }
 }
 
+variable "spot_instance_types" {
+  type    = list(string)
+  default = ["t3.small"]
+}
+
 variable "cluster_log_retention_in_days" {
   description = "Cloudwatch logs retention (days)"
   type        = number

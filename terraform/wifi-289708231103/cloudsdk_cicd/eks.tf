@@ -30,6 +30,7 @@ module "eks" {
     ami_type           = "AL2_x86_64"
     kubelet_extra_args = "--kube-reserved cpu=500m,memory=500Mi,ephemeral-storage=1Gi --system-reserved cpu=250m,memory=500Mi,ephemeral-storage=1Gi --eviction-hard memory.available<500Mi,nodefs.available<10%"
   }
+
   worker_ami_name_filter = var.node_group_settings["ami_name"]
 
   worker_groups = [
@@ -42,6 +43,33 @@ module "eks" {
       instance_type        = var.node_group_settings["instance_type"]
       additional_userdata  = local.worker_additional_userdata
       subnets              = [subnet]
+      tags = [
+        {
+          key : "k8s.io/cluster-autoscaler/enabled",
+          value : true,
+          propagate_at_launch : true,
+        },
+        {
+          key : "k8s.io/cluster-autoscaler/${local.cluster_name}",
+          value : true
+          propagate_at_launch : true,
+        },
+      ]
+    }
+  ]
+
+  worker_groups_launch_template = [
+    for subnet in module.vpc_main.private_subnets :
+    {
+      name                    = format("spot-%s", data.aws_subnet.private_az[subnet].availability_zone)
+      override_instance_types = var.spot_instance_types
+      spot_max_price          = "" # default to on-demand price
+      asg_max_size            = var.node_group_settings["max_capacity"]
+      asg_min_size            = 0
+      asg_desired_capacity    = 0
+      subnets                 = [subnet]
+      additional_userdata     = local.worker_additional_userdata
+      kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot"
       tags = [
         {
           key : "k8s.io/cluster-autoscaler/enabled",
