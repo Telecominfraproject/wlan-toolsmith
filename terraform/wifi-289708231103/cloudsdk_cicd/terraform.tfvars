@@ -15,6 +15,8 @@ node_group_settings = {
   ami_name      = "amazon-eks-node-1.18-v20201007"
 }
 
+spot_instance_types = ["m4.large", "m5.large", "m5a.large", "t2.large", "t3.large", "t3a.large"]
+
 cluster_version = "1.18"
 
 eks_admin_roles = ["AWSReservedSSO_SystemAdministrator_622371b0ceece6f8"]
