@@ -18,7 +18,17 @@ variable "atlantis_github_user_token" {
   type        = string
 }
 
-variable "allowed_repos" {
-  description = "List of repos that Atlantis will watch"
+variable "repo_whitelist" {
+  description = "List of repos that Atlantis is allowed to work with"
+  type        = list(string)
+}
+
+variable "repo_names" {
+  description = "List of repos that will be configured to work with Atlantis"
+  type        = list(string)
+}
+
+variable "atlantis_policy_arns" {
+  description = "List of ARNs of policies that will be attached to Atlantis"
   type        = list(string)
 }
