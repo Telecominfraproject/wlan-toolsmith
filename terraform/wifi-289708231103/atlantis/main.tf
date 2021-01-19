@@ -48,6 +48,14 @@ module "atlantis" {
   tags = {
     "ManagedBy" = "terraform"
   }
+
+  custom_environment_variables = [
+    {
+      name  = "ATLANTIS_DEFAULT_TF_VERSION"
+      value = var.default_terraform_version
+    }
+  ]
+
 }
 
 module "github_repository_webhook" {

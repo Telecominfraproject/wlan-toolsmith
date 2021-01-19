@@ -32,3 +32,8 @@ variable "atlantis_policy_arns" {
   description = "List of ARNs of policies that will be attached to Atlantis"
   type        = list(string)
 }
+
+variable "default_terraform_version" {
+  description = "Default Terraform version that Atlantis will use, see https://www.runatlantis.io/docs/terraform-versions.html#via-atlantis-yaml"
+  type        = string
+}
