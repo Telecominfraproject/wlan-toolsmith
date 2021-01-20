@@ -6,3 +6,5 @@ projects:
   dir: terraform/wifi-289708231103/dns
 - name: tip-wifi-vpn
   dir: terraform/wifi-289708231103/tip-wifi-vpn
+- name: atlantis
+  dir: terraform/wifi-289708231103/atlantis
