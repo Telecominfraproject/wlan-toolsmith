@@ -53,6 +53,10 @@ module "atlantis" {
     {
       name  = "ATLANTIS_DEFAULT_TF_VERSION"
       value = var.default_terraform_version
+    },
+    {
+      name  = "ATLANTIS_REPO_CONFIG_JSON"
+      value = file("atlantis.json")
     }
   ]
 
