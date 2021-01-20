@@ -1,0 +1,8 @@
+{
+    "repos": [
+        {
+            "id": "/.*/",
+            "apply_requirements": ["approved", "mergeable"]
+        }
+    ]
+}
