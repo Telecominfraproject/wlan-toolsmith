@@ -10,7 +10,7 @@ provider "aws" {
 }
 
 terraform {
-  required_version = ">= 0.12.2"
+  required_version = ">= 0.12.2, < 0.14"
 
   backend "s3" {
     region         = "us-east-1"
@@ -53,6 +53,10 @@ module "acm" {
 
 output "zone_id" {
   value = aws_route53_zone.main.zone_id
+}
+
+output "zone_name" {
+  value = aws_route53_zone.main.name
 }
 
 output "certificate_arn" {
