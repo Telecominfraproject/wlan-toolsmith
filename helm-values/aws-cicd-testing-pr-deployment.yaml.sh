@@ -26,7 +26,7 @@ global:
   # with other instances running within the same k8s cluster
   nodePortPrefix: 303
   nodePortPrefixExt: 305
-  nsPrefix: tip-pr-$PR_NUMBER
+  nsPrefix: tip-wlan-pr-$PR_NUMBER
   # image pull policy
   pullPolicy: IfNotPresent
   repository: tip-tip-wlan-cloud-docker-repo.jfrog.io
@@ -216,7 +216,7 @@ kafka:
   allowPlaintextListener: true
   persistence:
     enabled: true
-    storageClass: standard
+    storageClass: gp2
   metrics:
     serviceMonitor:
       enabled: false
@@ -235,7 +235,7 @@ cassandra:
     debug: true
   persistence:
     enabled: true
-    storageClass: standard
+    storageClass: gp2
   replicaCount: 1
   cluster:
     name: TipWlanCluster
@@ -283,7 +283,7 @@ postgresql:
     slaveReplicas: 1
   persistence:
     enabled: true
-    storageClass: standard
+    storageClass: gp2
   volumePermissions:
     enabled: true
   livenessProbe:
