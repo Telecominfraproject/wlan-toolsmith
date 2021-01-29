@@ -91,7 +91,7 @@ wlan-cloud-static-portal:
 wlan-portal-service:
   service:
     type: NodePort
-    nodePort_static: false
+    nodePortStatic: false
   enabled: true
   persistence:
     enabled: true
@@ -155,11 +155,15 @@ wlan-spc-service:
 
 wlan-port-forwarding-gateway-service:
   enabled: true
+  service:
+    nodePortStatic: false
   creds:
     websocketSessionTokenEncKey: MyToKeN0MyToKeN1
   externallyVisible:
     host: api.wlan.cicd.lab.wlan.tip.build
     port: 30401
+  accessPointDebugPortRange:
+    length: 0
 
 kafka:
   enabled: true

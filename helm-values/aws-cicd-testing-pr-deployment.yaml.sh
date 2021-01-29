@@ -22,10 +22,6 @@ shared:
       alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
 
 global:
-  # Change to an unused port prefix range to prevent port conflicts
-  # with other instances running within the same k8s cluster
-  nodePortPrefix: 313
-  nodePortPrefixExt: 315
   pullPolicy: Always
   creds:
     sslKeyPassword: mypassword
@@ -111,7 +107,7 @@ wlan-cloud-static-portal:
 wlan-portal-service:
   service:
     type: NodePort
-    nodePort_static: false
+    nodePortStatic: false
   enabled: true
   persistence:
     enabled: true
@@ -175,12 +171,15 @@ wlan-spc-service:
 
 wlan-port-forwarding-gateway-service:
   enabled: true
+  service:
+    nodePortStatic: false
   creds:
     websocketSessionTokenEncKey: MyToKeN0MyToKeN1
   externallyVisible:
     host: api.wlan-pr-$PR_NUMBER.cicd.lab.wlan.tip.build
     port: 30501
-  debugPorts: []
+  accessPointDebugPortRange:
+    length: 0
 
 kafka:
   enabled: true
