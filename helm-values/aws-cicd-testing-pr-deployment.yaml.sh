@@ -26,28 +26,7 @@ global:
   # with other instances running within the same k8s cluster
   nodePortPrefix: 303
   nodePortPrefixExt: 305
-  nsPrefix: tip-wlan-pr-$PR_NUMBER
-  # image pull policy
-  pullPolicy: IfNotPresent
-  repository: tip-tip-wlan-cloud-docker-repo.jfrog.io
-  # override default mount path root directory
-  # referenced by persistent volumes and log files
-  persistence:
-  # flag to enable debugging - application support required
-  debugEnabled: true
-  kafka:
-    image: confluentinc/cp-kafka:5.0.1
-    port: 9092
-    topics:
-    - name: wlan_service_metrics
-      partitions: 1
-      replicationFactor: 1
-    - name: system_events
-      partitions: 1
-      replicationFactor: 1
-    - name: customer_events
-      partitions: 1
-      replicationFactor: 1
+  pullPolicy: Always
   creds:
     sslKeyPassword: mypassword
     sslKeystorePassword: mypassword
@@ -57,9 +36,10 @@ global:
 annotations: {
     "helm.sh/resource-policy": keep
 }
-dockerRegistrySecret: ewoJImF1dGhzIjogewoJCSJ0aXAtdGlwLXdsYW4tY2xvdWQtZG9ja2VyLXJlcG8uamZyb2cuaW8iOiB7CgkJCSJhdXRoIjogImRHbHdMWEpsWVdRNmRHbHdMWEpsWVdRPSIKCQl9Cgl9LAoJIkh0dHBIZWFkZXJzIjogewoJCSJVc2VyLUFnZW50IjogIkRvY2tlci1DbGllbnQvMTkuMDMuOCAobGludXgpIgoJfQp9
+
 opensync-gw-static:
   enabled: false
+
 common:
   efs-provisioner:
     enabled: false
@@ -68,6 +48,7 @@ common:
       awsRegion: us-west-2
       efsDnsName: fs-49a5104c.efs.us-west-2.amazonaws.com
       storageClass: aws-efs
+
 opensync-gw-cloud:
   service:
     type: LoadBalancer
@@ -84,6 +65,7 @@ opensync-gw-cloud:
     url: "https://wlan-filestore-pr-$PR_NUMBER.cicd.lab.wlan.tip.build"
   image:
     name: opensync-gateway-cloud
+
 opensync-mqtt-broker:
   service:
     type: LoadBalancer
@@ -93,7 +75,8 @@ opensync-mqtt-broker:
   replicaCount: 1
   persistence:
     enabled: true
-    storageClass: "gp2"
+    storageClass: gp2
+
 wlan-cloud-graphql-gw:
   enabled: true
   ingress:
@@ -108,6 +91,7 @@ wlan-cloud-graphql-gw:
         ]
   env:
     portalsvc: wlan-portal-svc-pr-$PR_NUMBER.cicd.lab.wlan.tip.build
+
 wlan-cloud-static-portal:
   enabled: true
   env:
@@ -123,6 +107,7 @@ wlan-cloud-static-portal:
         paths: [
            /*
           ]
+
 wlan-portal-service:
   service:
     type: NodePort
@@ -150,6 +135,7 @@ wlan-portal-service:
         paths: [
            /*
           ]
+
 wlan-prov-service:
   enabled: true
   creds:
@@ -166,6 +152,7 @@ wlan-prov-service:
       singleDataSourceUsername: tip_user
       singleDataSourcePassword: tip_password
       singleDataSourceSslKeyPassword: mypassword
+
 wlan-ssc-service:
   enabled: true
   creds:
@@ -178,12 +165,14 @@ wlan-ssc-service:
     schema_repo:
       username: tip-read
       password: tip-read
+
 wlan-spc-service:
   enabled: true
   creds:
     sslKeyPassword: mypassword
     sslKeystorePassword: mypassword
     sslTruststorePassword: mypassword
+
 wlan-port-forwarding-gateway-service:
   enabled: true
   creds:
@@ -193,126 +182,22 @@ wlan-port-forwarding-gateway-service:
     port: 30501
   debugPorts: []
 
-
 kafka:
   enabled: true
-  replicaCount: 1
-  image:
-    debug: true
-  auth:
-    clientProtocol: mtls
-    interBrokerProtocol: tls
-    jksSecret: tip-common-kafka-certs
-    jksPassword: mypassword
-    tlsEndpointIdentificationAlgorithm: ""
-    jaas:
-      clientUsers:
-      - brokerUser
-      clientPassword:
-      - brokerPassword
-  extraEnvVars:
-  - name: KAFKA_CFG_SSL_KEYSTORE_TYPE
-    value: PKCS12
-  allowPlaintextListener: true
   persistence:
     enabled: true
     storageClass: gp2
-  metrics:
-    serviceMonitor:
-      enabled: false
-      namespace: monitoring
-      selector:
-        release: prometheus-operator
-  zookeeper:
-    enabled: true
-    persistence:
-      enabled: true
 
 cassandra:
   enabled: true
-  tlsEncryptionSecretName: tip-common-cassandra-certs
-  image:
-    debug: true
   persistence:
     enabled: true
     storageClass: gp2
-  replicaCount: 1
-  cluster:
-    name: TipWlanCluster
-    seedCount: 1
-    internodeEncryption: all
-    clientEncryption: true
-  exporter:
-    enabled: false
-    serviceMonitor:
-      enabled: false
-      additionalLabels:
-        release: prometheus-operator
-  dbUser:
-    user: cassandra
-    password: cassandra
-  resources:
-    limits: {}
-    requests:
-      cpu: 1
-      memory: 3Gi
 
 postgresql:
   enabled: true
-  postgresqlDatabase: tip
-  image:
-    debug: true
-  metrics:
-    enabled: false
-    serviceMonitor:
-      enabled: falsea
-      namespace: monitoring
-      additionalLabels:
-        release: prometheus-operator
-  postgresqlUsername: postgres
-  postgresqlPassword: postgres
-  pgHbaConfiguration: |
-    hostssl replication repl_user 0.0.0.0/0 md5 clientcert=0
-    hostssl postgres postgres 0.0.0.0/0 cert clientcert=1
-    hostssl postgres postgres ::/0 cert clientcert=1
-    hostssl all all 0.0.0.0/0 md5 clientcert=1
-  replication:
-    enabled: true
-    user: repl_user
-    password: repl_password
-    slaveReplicas: 1
   persistence:
     enabled: true
     storageClass: gp2
-  volumePermissions:
-    enabled: true
-  livenessProbe:
-    enabled: false
-  readinessProbe:
-    enabled: false
-  tls:
-    enabled: true
-    certificatesSecret: tip-common-postgres-certs
-    certFilename: cert.crt
-    certKeyFilename: cert.key
-    certCAFilename: cacert.pem
-  initdbScriptsConfigMap: tip-common-postgres-scripts
-  extraEnv:
-  - name: PGSSLCERT
-    value: /opt/tip-wlan/certs/postgresclientcert.pem
-  - name: PGSSLKEY
-    value: /opt/tip-wlan/certs/postgresclientkey_dec.pem
-  - name: PGSSLROOTCERT
-    value: /opt/tip-wlan/certs/cacert.pem
-  primary:
-    extraInitContainers:
-    - command: [ "sh", "-c", "chmod 0600 /opt/bitnami/postgresql/certs/postgresclientkey_dec.pem" ]
-      image: busybox:latest
-      name: chmod-client-cert-additional
-      securityContext:
-        runAsUser: 0
-      volumeMounts:
-      - mountPath: /opt/bitnami/postgresql/certs
-        name: postgresql-certificates
 
 EOF
