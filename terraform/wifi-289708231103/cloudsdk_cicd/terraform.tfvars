@@ -19,7 +19,7 @@ spot_instance_types = ["m4.large", "m5.large", "m5a.large", "t2.large", "t3.larg
 
 cluster_version = "1.18"
 
-eks_admin_roles = ["AWSReservedSSO_SystemAdministrator_622371b0ceece6f8"]
+eks_admin_roles = ["AWSReservedSSO_SystemAdministrator_622371b0ceece6f8", "atlantis-ecs_task_execution"]
 
 base_domain = "lab.wlan.tip.build"
 
