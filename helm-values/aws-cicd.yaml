@@ -4,7 +4,7 @@ shared:
       kubernetes.io/ingress.class: alb
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/group.name: wlan-cicd
-      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285"
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
       alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
 
@@ -20,11 +20,6 @@ opensync-gw-static:
 common:
   efs-provisioner:
     enabled: false
-    provisioner:
-      efsFileSystemId: fs-49a5104c
-      awsRegion: us-west-2
-      efsDnsName: fs-49a5104c.efs.us-west-2.amazonaws.com
-      storageClass: aws-efs
 
 opensync-gw-cloud:
   service:
@@ -33,7 +28,7 @@ opensync-gw-cloud:
       external-dns.alpha.kubernetes.io/hostname: wlan-filestore.cicd.lab.wlan.tip.build,opensync-controller.cicd.lab.wlan.tip.build,opensync-redirector.cicd.lab.wlan.tip.build
       service.beta.kubernetes.io/aws-load-balancer-access-log-enabled: "true"
       service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-name: alb-logs-tip-wlan-cicd-wotgakesfr
-      service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-prefix: "opensync-gw-cloud"
+      service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-prefix: opensync-gw-cloud
   enabled: true
   externalhost:
     address:
