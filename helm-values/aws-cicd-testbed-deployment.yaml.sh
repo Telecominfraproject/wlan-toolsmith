@@ -22,8 +22,8 @@ shared:
       alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
 
 global:
-  nodePortPrefix: 3$TESTBED_NUMBER
-  nodePortPrefixExt: 3$TESTBED_NUMBER
+  nodePortPrefix: "3$TESTBED_NUMBER"
+  nodePortPrefixExt: "3$TESTBED_NUMBER"
 
 opensync-gw-static:
   enabled: false
