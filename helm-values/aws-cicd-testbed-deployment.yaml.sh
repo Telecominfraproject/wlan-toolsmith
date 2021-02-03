@@ -32,6 +32,7 @@ opensync-gw-cloud:
   enabled: true
   service:
     type: LoadBalancer
+    nodePortStatic: false
     annotations:
       external-dns.alpha.kubernetes.io/hostname: wlan-filestore-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build,opensync-controller-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build,opensync-redirector-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
   externalhost:
@@ -49,6 +50,7 @@ opensync-mqtt-broker:
   enabled: true
   service:
     type: LoadBalancer
+    nodePortStatic: false
     annotations:
       external-dns.alpha.kubernetes.io/hostname: opensync-mqtt-broker-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
   replicaCount: 1
@@ -58,6 +60,8 @@ opensync-mqtt-broker:
 
 wlan-cloud-graphql-gw:
   enabled: true
+  service:
+    nodePortStatic: false
   ingress:
     annotations:
       <<: *srv-https-annotations
@@ -117,12 +121,18 @@ wlan-portal-service:
 
 wlan-prov-service:
   enabled: true
+  service:
+    nodePortStatic: false
 
 wlan-ssc-service:
   enabled: true
+  service:
+    nodePortStatic: false
 
 wlan-spc-service:
   enabled: true
+  service:
+    nodePortStatic: false
 
 wlan-port-forwarding-gateway-service:
   enabled: true
