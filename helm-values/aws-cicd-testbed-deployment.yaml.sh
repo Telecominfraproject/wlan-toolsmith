@@ -21,10 +21,6 @@ shared:
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
       alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
 
-global:
-  nodePortPrefix: "3$TESTBED_NUMBER"
-  nodePortPrefixExt: "3$TESTBED_NUMBER"
-
 opensync-gw-static:
   enabled: false
 
@@ -95,7 +91,7 @@ wlan-portal-service:
   enabled: true
   service:
     type: NodePort
-    nodePort_static: false
+    nodePortStatic: false
   persistence:
     enabled: true
     storageClass: gp2
@@ -130,6 +126,8 @@ wlan-spc-service:
 
 wlan-port-forwarding-gateway-service:
   enabled: true
+  service:
+    nodePortStatic: false
   creds:
     websocketSessionTokenEncKey: MyToKeN0MyToKeN1
   externallyVisible:
