@@ -21,6 +21,10 @@ shared:
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
       alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
 
+global:
+  nodePortPrefix: 323
+  nodePortPrefixExt: 324
+
 opensync-gw-static:
   enabled: false
 
@@ -131,7 +135,8 @@ wlan-port-forwarding-gateway-service:
   externallyVisible:
     host: api.wlan-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
     port: 30501
-  debugPorts: []
+  accessPointDebugPortRange:
+    length: 0
 
 kafka:
   enabled: true
