@@ -16,7 +16,7 @@ shared:
     srv-https-annotations: &srv-https-annotations
       kubernetes.io/ingress.class: alb
       alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/group.name: wlan-cicd-NOLA-$TESTBED_NUMBER
+      alb.ingress.kubernetes.io/group.name: wlan-cicd-nola-$TESTBED_NUMBER
       alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285"
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
       alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
@@ -33,15 +33,15 @@ opensync-gw-cloud:
   service:
     type: LoadBalancer
     annotations:
-      external-dns.alpha.kubernetes.io/hostname: wlan-filestore-NOLA-$TESTBED_NUMBER.cicd.lab.wlan.tip.build,opensync-controller-NOLA-$TESTBED_NUMBER.cicd.lab.wlan.tip.build,opensync-redirector-NOLA-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
+      external-dns.alpha.kubernetes.io/hostname: wlan-filestore-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build,opensync-controller-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build,opensync-redirector-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
   externalhost:
     address:
-      ovsdb: opensync-controller-NOLA-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
-      mqtt: opensync-mqtt-broker-NOLA-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
+      ovsdb: opensync-controller-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
+      mqtt: opensync-mqtt-broker-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
   persistence:
     enabled: false
   filestore:
-    url: https://wlan-filestore-NOLA-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
+    url: https://wlan-filestore-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
   image:
     name: opensync-gateway-cloud
 
@@ -50,7 +50,7 @@ opensync-mqtt-broker:
   service:
     type: LoadBalancer
     annotations:
-      external-dns.alpha.kubernetes.io/hostname: opensync-mqtt-broker-NOLA-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
+      external-dns.alpha.kubernetes.io/hostname: opensync-mqtt-broker-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
   replicaCount: 1
   persistence:
     enabled: true
@@ -64,17 +64,17 @@ wlan-cloud-graphql-gw:
     enabled: true
     alb_https_redirect: true
     hosts:
-    - host: wlan-graphql-NOLA-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
+    - host: wlan-graphql-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
       paths: [
         /*
         ]
   env:
-    portalsvc: wlan-portal-svc-NOLA-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
+    portalsvc: wlan-portal-svc-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
 
 wlan-cloud-static-portal:
   enabled: true
   env:
-    graphql: https://wlan-graphql-NOLA-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
+    graphql: https://wlan-graphql-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
   service:
     type: NodePort
   ingress:
@@ -82,23 +82,23 @@ wlan-cloud-static-portal:
       <<: *srv-https-annotations
     alb_https_redirect: true
     hosts:
-      - host: wlan-ui-NOLA-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
+      - host: wlan-ui-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
         paths: [
            /*
           ]
 
 wlan-portal-service:
+  enabled: true
   service:
     type: NodePort
     nodePort_static: false
-  enabled: true
   persistence:
     enabled: true
     storageClass: gp2
     accessMode: ReadWriteOnce
     filestoreSize: 10Gi
   tsp:
-    host: wlan-portal-svc-NOLA-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
+    host: wlan-portal-svc-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
   ingress:
     enabled: true
     alb_https_redirect: true
@@ -110,7 +110,7 @@ wlan-portal-service:
       alb.ingress.kubernetes.io/healthcheck-port: traffic-port
       alb.ingress.kubernetes.io/healthcheck-path: /ping
     hosts:
-      - host: wlan-portal-svc-NOLA-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
+      - host: wlan-portal-svc-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
         paths: [
            /*
           ]
@@ -129,7 +129,7 @@ wlan-port-forwarding-gateway-service:
   creds:
     websocketSessionTokenEncKey: MyToKeN0MyToKeN1
   externallyVisible:
-    host: api.wlan-NOLA-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
+    host: api.wlan-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
     port: 30501
   debugPorts: []
 
