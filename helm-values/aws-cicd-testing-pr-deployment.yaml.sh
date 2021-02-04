@@ -24,8 +24,8 @@ shared:
 global:
   # Change to an unused port prefix range to prevent port conflicts
   # with other instances running within the same k8s cluster
-  nodePortPrefix: 303
-  nodePortPrefixExt: 305
+  nodePortPrefix: 313
+  nodePortPrefixExt: 315
   pullPolicy: Always
   creds:
     sslKeyPassword: mypassword
