@@ -17,16 +17,12 @@ shared:
       kubernetes.io/ingress.class: alb
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/group.name: wlan-cicd-pr-$PR_NUMBER
-      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285"
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
       alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
 
 global:
-  pullPolicy: IfNotPresent
-  creds:
-    sslKeyPassword: mypassword
-    sslKeystorePassword: mypassword
-    sslTruststorePassword: mypassword
+  debugEnabled: true
 
 opensync-gw-static:
   enabled: false
@@ -36,11 +32,11 @@ common:
     enabled: false
 
 opensync-gw-cloud:
+  enabled: true
   service:
     type: LoadBalancer
     annotations:
       external-dns.alpha.kubernetes.io/hostname: wlan-filestore-pr-$PR_NUMBER.cicd.lab.wlan.tip.build,opensync-controller-pr-$PR_NUMBER.cicd.lab.wlan.tip.build,opensync-redirector-pr-$PR_NUMBER.cicd.lab.wlan.tip.build
-  enabled: true
   externalhost:
     address:
       ovsdb: opensync-controller-pr-$PR_NUMBER.cicd.lab.wlan.tip.build
@@ -48,27 +44,24 @@ opensync-gw-cloud:
   persistence:
     enabled: false
   filestore:
-    url: "https://wlan-filestore-pr-$PR_NUMBER.cicd.lab.wlan.tip.build"
-  image:
-    name: opensync-gateway-cloud
+    url: https://wlan-filestore-pr-$PR_NUMBER.cicd.lab.wlan.tip.build
 
 opensync-mqtt-broker:
+  enabled: true
   service:
     type: LoadBalancer
     annotations:
-      external-dns.alpha.kubernetes.io/hostname: "opensync-mqtt-broker-pr-$PR_NUMBER.cicd.lab.wlan.tip.build"
-  enabled: true
-  replicaCount: 1
+      external-dns.alpha.kubernetes.io/hostname: opensync-mqtt-broker-pr-$PR_NUMBER.cicd.lab.wlan.tip.build
   persistence:
     enabled: true
-    storageClass: "gp2"
+    storageClass: gp2
 
 wlan-cloud-graphql-gw:
   enabled: true
   ingress:
+    enabled: true
     annotations:
       <<: *srv-https-annotations
-    enabled: true
     alb_https_redirect: true
     hosts:
     - host: wlan-graphql-pr-$PR_NUMBER.cicd.lab.wlan.tip.build
@@ -95,10 +88,10 @@ wlan-cloud-static-portal:
           ]
 
 wlan-portal-service:
+  enabled: true
   service:
     type: NodePort
     nodePortStatic: false
-  enabled: true
   persistence:
     enabled: true
     storageClass: gp2
@@ -124,40 +117,12 @@ wlan-portal-service:
 
 wlan-prov-service:
   enabled: true
-  creds:
-    enabled: true
-    db:
-      postgresUser:
-        password: postgres
-      tipUser:
-        password: tip_password
-    schema_repo:
-      username: tip-read
-      password: tip-read
-    postgres:
-      singleDataSourceUsername: tip_user
-      singleDataSourcePassword: tip_password
-      singleDataSourceSslKeyPassword: mypassword
 
 wlan-ssc-service:
   enabled: true
-  creds:
-    sslKeyPassword: mypassword
-    sslKeystorePassword: mypassword
-    sslTruststorePassword: mypassword
-    cassandra:
-      tip_user: tip_user
-      tip_password: tip_password 
-    schema_repo:
-      username: tip-read
-      password: tip-read
 
 wlan-spc-service:
   enabled: true
-  creds:
-    sslKeyPassword: mypassword
-    sslKeystorePassword: mypassword
-    sslTruststorePassword: mypassword
 
 wlan-port-forwarding-gateway-service:
   enabled: true
@@ -174,18 +139,15 @@ wlan-port-forwarding-gateway-service:
 kafka:
   enabled: true
   persistence:
-    enabled: true
-    storageClass: "gp2"
+    storageClass: gp2
 
 cassandra:
   enabled: true
   persistence:
-    enabled: true
-    storageClass: "gp2"
+    storageClass: gp2
 
 postgresql:
   enabled: true
   persistence:
-    enabled: true
-    storageClass: "gp2"
+    storageClass: gp2
 EOF
