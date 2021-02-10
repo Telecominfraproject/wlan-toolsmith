@@ -23,6 +23,7 @@ shared:
 
 global:
   debugEnabled: true
+  pullPolicy: IfNotPresent
 
 opensync-gw-static:
   enabled: false
