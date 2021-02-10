@@ -22,6 +22,9 @@ shared:
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
       alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
 
+global:
+  pullPolicy: IfNotPresent
+
 opensync-gw-static:
   enabled: false
 
