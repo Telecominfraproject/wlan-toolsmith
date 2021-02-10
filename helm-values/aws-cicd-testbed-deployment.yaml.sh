@@ -9,6 +9,7 @@ then
 fi
 
 TESTBED_NUMBER=$1
+TODAY=$(date +"%Y-%m-%d")
 
 cat <<EOF
 shared:
@@ -20,6 +21,8 @@ shared:
       alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
       alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
+  image: &todays-tag
+    tag: 0.0.1-SNAPSHOT-$TODAY
 
 opensync-gw-static:
   enabled: false
@@ -30,6 +33,7 @@ common:
 
 opensync-gw-cloud:
   enabled: true
+  <<: *todays-tag
   service:
     type: LoadBalancer
     nodePortStatic: false
@@ -57,6 +61,8 @@ opensync-mqtt-broker:
 
 wlan-cloud-graphql-gw:
   enabled: true
+  image:
+    tag: latest-$TODAY
   service:
     nodePortStatic: false
   ingress:
@@ -74,6 +80,8 @@ wlan-cloud-graphql-gw:
 
 wlan-cloud-static-portal:
   enabled: true
+  image:
+    tag: latest-$TODAY
   env:
     graphql: https://wlan-graphql-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
   service:
@@ -90,6 +98,7 @@ wlan-cloud-static-portal:
 
 wlan-portal-service:
   enabled: true
+  <<: *todays-tag
   service:
     type: NodePort
     nodePortStatic: false
@@ -118,21 +127,25 @@ wlan-portal-service:
 
 wlan-prov-service:
   enabled: true
+  <<: *todays-tag
   service:
     nodePortStatic: false
 
 wlan-ssc-service:
   enabled: true
+  <<: *todays-tag
   service:
     nodePortStatic: false
 
 wlan-spc-service:
   enabled: true
+  <<: *todays-tag
   service:
     nodePortStatic: false
 
 wlan-port-forwarding-gateway-service:
   enabled: true
+  <<: *todays-tag
   service:
     nodePortStatic: false
   creds:
