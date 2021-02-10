@@ -8,12 +8,6 @@ shared:
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
       alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
 
-global:
-  creds:
-    sslKeyPassword: mypassword
-    sslKeystorePassword: mypassword
-    sslTruststorePassword: mypassword
-
 opensync-gw-static:
   enabled: false
 
@@ -22,6 +16,7 @@ common:
     enabled: false
 
 opensync-gw-cloud:
+  enabled: true
   service:
     type: LoadBalancer
     annotations:
@@ -29,7 +24,6 @@ opensync-gw-cloud:
       service.beta.kubernetes.io/aws-load-balancer-access-log-enabled: "true"
       service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-name: alb-logs-tip-wlan-cicd-wotgakesfr
       service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-prefix: opensync-gw-cloud
-  enabled: true
   externalhost:
     address:
       ovsdb: opensync-controller.cicd.lab.wlan.tip.build
@@ -38,10 +32,9 @@ opensync-gw-cloud:
     enabled: false
   filestore:
     url: https://wlan-filestore.cicd.lab.wlan.tip.build
-  image:
-    name: opensync-gateway-cloud
 
 opensync-mqtt-broker:
+  enabled: true
   service:
     type: LoadBalancer
     annotations:
@@ -50,8 +43,6 @@ opensync-mqtt-broker:
       service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-name: alb-logs-tip-wlan-cicd-wotgakesfr
       service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-prefix: opensync-mqtt-broker
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
-  enabled: true
-  replicaCount: 1
   persistence:
     enabled: true
     storageClass: gp2
@@ -89,10 +80,10 @@ wlan-cloud-static-portal:
           ]
 
 wlan-portal-service:
+  enabled: true
   service:
     type: NodePort
     nodePortStatic: false
-  enabled: true
   persistence:
     enabled: true
     storageClass: gp2
@@ -118,40 +109,12 @@ wlan-portal-service:
 
 wlan-prov-service:
   enabled: true
-  creds:
-    enabled: true
-    db:
-      postgresUser:
-        password: postgres
-      tipUser:
-        password: tip_password
-    schema_repo:
-      username: tip-read
-      password: tip-read
-    postgres:
-      singleDataSourceUsername: tip_user
-      singleDataSourcePassword: tip_password
-      singleDataSourceSslKeyPassword: mypassword
 
 wlan-ssc-service:
   enabled: true
-  creds:
-    sslKeyPassword: mypassword
-    sslKeystorePassword: mypassword
-    sslTruststorePassword: mypassword
-    cassandra:
-      tip_user: tip_user
-      tip_password: tip_password 
-    schema_repo:
-      username: tip-read
-      password: tip-read
 
 wlan-spc-service:
   enabled: true
-  creds:
-    sslKeyPassword: mypassword
-    sslKeystorePassword: mypassword
-    sslTruststorePassword: mypassword
 
 wlan-port-forwarding-gateway-service:
   enabled: true
@@ -168,17 +131,14 @@ wlan-port-forwarding-gateway-service:
 kafka:
   enabled: true
   persistence:
-    enabled: true
     storageClass: gp2
 
 cassandra:
   enabled: true
   persistence:
-    enabled: true
     storageClass: gp2
 
 postgresql:
   enabled: true
   persistence:
-    enabled: true
     storageClass: gp2
