@@ -17,7 +17,7 @@ shared:
       kubernetes.io/ingress.class: alb
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/group.name: wlan-cicd-nola-$TESTBED_NUMBER
-      alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285"
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
       alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
 
@@ -43,8 +43,6 @@ opensync-gw-cloud:
     enabled: false
   filestore:
     url: https://wlan-filestore-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
-  image:
-    name: opensync-gateway-cloud
 
 opensync-mqtt-broker:
   enabled: true
@@ -53,7 +51,6 @@ opensync-mqtt-broker:
     nodePortStatic: false
     annotations:
       external-dns.alpha.kubernetes.io/hostname: opensync-mqtt-broker-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
-  replicaCount: 1
   persistence:
     enabled: true
     storageClass: gp2
@@ -149,19 +146,16 @@ wlan-port-forwarding-gateway-service:
 kafka:
   enabled: true
   persistence:
-    enabled: true
     storageClass: gp2
 
 cassandra:
   enabled: true
   persistence:
-    enabled: true
     storageClass: gp2
 
 postgresql:
   enabled: true
   persistence:
-    enabled: true
     storageClass: gp2
 
 EOF
