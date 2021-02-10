@@ -56,6 +56,8 @@ opensync-mqtt-broker:
 
 wlan-cloud-graphql-gw:
   enabled: true
+  service:
+    nodePortStatic: false
   ingress:
     enabled: true
     annotations:
