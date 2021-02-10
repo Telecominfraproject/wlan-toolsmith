@@ -21,8 +21,6 @@ shared:
       alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
       alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
-  image: &todays-tag
-    tag: 0.0.1-SNAPSHOT-$TODAY
 
 opensync-gw-static:
   enabled: false
@@ -33,7 +31,8 @@ common:
 
 opensync-gw-cloud:
   enabled: true
-  <<: *todays-tag
+  image:
+    tag: 0.0.1-SNAPSHOT-$TODAY
   service:
     type: LoadBalancer
     nodePortStatic: false
@@ -98,7 +97,8 @@ wlan-cloud-static-portal:
 
 wlan-portal-service:
   enabled: true
-  <<: *todays-tag
+  image:
+    tag: 0.0.1-SNAPSHOT-$TODAY
   service:
     type: NodePort
     nodePortStatic: false
@@ -127,25 +127,29 @@ wlan-portal-service:
 
 wlan-prov-service:
   enabled: true
-  <<: *todays-tag
+  image:
+    tag: 0.0.1-SNAPSHOT-$TODAY
   service:
     nodePortStatic: false
 
 wlan-ssc-service:
   enabled: true
-  <<: *todays-tag
+  image:
+    tag: 0.0.1-SNAPSHOT-$TODAY
   service:
     nodePortStatic: false
 
 wlan-spc-service:
   enabled: true
-  <<: *todays-tag
+  image:
+    tag: 0.0.1-SNAPSHOT-$TODAY
   service:
     nodePortStatic: false
 
 wlan-port-forwarding-gateway-service:
   enabled: true
-  <<: *todays-tag
+  image:
+    tag: 0.0.1-SNAPSHOT-$TODAY
   service:
     nodePortStatic: false
   creds:
