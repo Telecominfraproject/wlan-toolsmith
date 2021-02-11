@@ -11,14 +11,14 @@ TESTBED_NUMBER=$1
 
 if [ -z "$2" ];
 then
-  echo "using todays date"
+  # using todays date
   TODAY=-$(date +"%Y-%m-%d")
 elif [ "$2" = "latest" ]
 then
-  echo "using latest tag"
+  # using latest tag
   TODAY=""
 else
-  echo "using provided tag"
+  # using provided tag
   TODAY=-$2
 fi
 
@@ -88,7 +88,7 @@ wlan-cloud-graphql-gw:
     - host: wlan-graphql-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
       paths: [
         /*
-        ]
+      ]
   env:
     portalsvc: wlan-portal-svc-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
 
@@ -107,8 +107,8 @@ wlan-cloud-static-portal:
     hosts:
       - host: wlan-ui-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
         paths: [
-           /*
-          ]
+          /*
+        ]
 
 wlan-portal-service:
   enabled: true
@@ -137,8 +137,8 @@ wlan-portal-service:
     hosts:
       - host: wlan-portal-svc-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
         paths: [
-           /*
-          ]
+          /*
+        ]
 
 wlan-prov-service:
   enabled: true
