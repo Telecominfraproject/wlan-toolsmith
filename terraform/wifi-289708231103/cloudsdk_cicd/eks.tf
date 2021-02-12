@@ -121,6 +121,11 @@ locals {
       userarn  = aws_iam_user.gh-actions-user.arn
       username = aws_iam_user.gh-actions-user.name
       groups   = ["system:masters"]
+    },
+    {
+      userarn  = aws_iam_user.quali-poc.arn
+      username = aws_iam_user.quali-poc.name
+      groups   = ["system:masters"]
     }
   ]
   admin_roles = [for role in var.eks_admin_roles : {
