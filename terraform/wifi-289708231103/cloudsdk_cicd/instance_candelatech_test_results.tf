@@ -1,5 +1,5 @@
 data "aws_ami" "wlan_candelatech_test_results" {
-  owners      = [var.root_org_account]
+  owners      = ["self"]
   most_recent = true
 
   filter {
