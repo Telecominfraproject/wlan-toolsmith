@@ -100,7 +100,7 @@ resource "aws_route53_record" "cloudsdk_ssl_validation" {
   }
 
   zone_id         = data.terraform_remote_state.route_53.outputs.zone_id
-  name            = each.value.type
+  name            = each.value.name
   type            = each.value.type
   ttl             = 600
   allow_overwrite = true
