@@ -12,7 +12,7 @@ TESTBED_NUMBER=$1
 if [ -z "$2" ];
 then
   # using todays date
-  TODAY=-$(date +"%Y-%m-%d")
+  TODAY=-$(date -d "yesterday" +"%Y-%m-%d")
 elif [ "$2" = "latest" ]
 then
   # using latest tag
