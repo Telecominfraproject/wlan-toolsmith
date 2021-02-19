@@ -12,14 +12,14 @@ TESTBED_NUMBER=$1
 if [ -z "$2" ];
 then
   # using todays date
-  TODAY=-$(date -d "yesterday" +"%Y-%m-%d")
+  TODAY=0.0.1-SNAPSHOT-$(date -d "yesterday" +"%Y-%m-%d")
 elif [ "$2" = "latest" ]
 then
   # using latest tag
-  TODAY=""
+  TODAY=0.0.1-SNAPSHOT
 else
   # using provided tag
-  TODAY=-$2
+  TODAY=0.0.1-SNAPSHOT-$2
 fi
 
 
@@ -47,7 +47,7 @@ common:
 opensync-gw-cloud:
   enabled: true
   image:
-    tag: 0.0.1-SNAPSHOT$TODAY
+    tag: $TODAY
   service:
     type: LoadBalancer
     nodePortStatic: false
@@ -76,7 +76,7 @@ opensync-mqtt-broker:
 wlan-cloud-graphql-gw:
   enabled: true
   image:
-    tag: latest$TODAY
+    tag: $TODAY
   service:
     nodePortStatic: false
   ingress:
@@ -95,7 +95,7 @@ wlan-cloud-graphql-gw:
 wlan-cloud-static-portal:
   enabled: true
   image:
-    tag: latest$TODAY
+    tag: $TODAY
   env:
     graphql: https://wlan-graphql-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
   service:
@@ -113,7 +113,7 @@ wlan-cloud-static-portal:
 wlan-portal-service:
   enabled: true
   image:
-    tag: 0.0.1-SNAPSHOT$TODAY
+    tag: $TODAY
   service:
     type: NodePort
     nodePortStatic: false
@@ -143,28 +143,28 @@ wlan-portal-service:
 wlan-prov-service:
   enabled: true
   image:
-    tag: 0.0.1-SNAPSHOT$TODAY
+    tag: $TODAY
   service:
     nodePortStatic: false
 
 wlan-ssc-service:
   enabled: true
   image:
-    tag: 0.0.1-SNAPSHOT$TODAY
+    tag: $TODAY
   service:
     nodePortStatic: false
 
 wlan-spc-service:
   enabled: true
   image:
-    tag: 0.0.1-SNAPSHOT$TODAY
+    tag: $TODAY
   service:
     nodePortStatic: false
 
 wlan-port-forwarding-gateway-service:
   enabled: true
   image:
-    tag: 0.0.1-SNAPSHOT$TODAY
+    tag: $TODAY
   service:
     nodePortStatic: false
   creds:
