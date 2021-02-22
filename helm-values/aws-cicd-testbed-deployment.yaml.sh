@@ -29,7 +29,7 @@ shared:
     srv-https-annotations: &srv-https-annotations
       kubernetes.io/ingress.class: alb
       alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/group.name: wlan-cicd-nola-$TESTBED_NUMBER
+      alb.ingress.kubernetes.io/group.name: wlan-cicd
       alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
       alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
