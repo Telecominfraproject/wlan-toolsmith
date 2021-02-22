@@ -24,6 +24,7 @@ opensync-gw-cloud:
       service.beta.kubernetes.io/aws-load-balancer-access-log-enabled: "true"
       service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-name: alb-logs-tip-wlan-cicd-wotgakesfr
       service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-prefix: opensync-gw-cloud
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb-ip"
   externalhost:
     address:
       ovsdb: opensync-controller.cicd.lab.wlan.tip.build
@@ -43,6 +44,7 @@ opensync-mqtt-broker:
       service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-name: alb-logs-tip-wlan-cicd-wotgakesfr
       service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-prefix: opensync-mqtt-broker
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "300"
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb-ip"
   persistence:
     enabled: true
     storageClass: gp2
