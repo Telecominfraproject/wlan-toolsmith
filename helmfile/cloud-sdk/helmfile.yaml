@@ -243,6 +243,10 @@ releases:
             # gnetId: 10555
             # revision: 1
             datasource: Prometheus
+          jvm-metrics-per-pod:
+            file: grafana-dashboards/jvm-metrics-per-pod.json
+            datasource: Prometheus
+
       datasources:
        datasources.yaml:
         apiVersion: 1
