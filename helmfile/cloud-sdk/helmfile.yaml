@@ -244,8 +244,9 @@ releases:
             # revision: 1
             datasource: Prometheus
           jvm-metrics-per-pod:
-            file: grafana-dashboards/jvm-metrics-per-pod.json
             datasource: Prometheus
+            json: |
+            {{- readFile "grafana-dashboards/jvm-metrics-per-pod.json" | nindent 14 }}
 
       datasources:
        datasources.yaml:
