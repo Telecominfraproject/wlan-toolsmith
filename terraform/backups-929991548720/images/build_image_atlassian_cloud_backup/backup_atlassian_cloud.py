@@ -66,7 +66,7 @@ class AtlassianBackup:
             self.base_url, "/wiki/rest/obm/1.0/getprogress"
         )
 
-        for _ in range(100):
+        for _ in range(360):
             backup_progress_res = self.session.get(backup_progress_url).json()
             print(f"Debug: {backup_progress_res}")
 
@@ -87,7 +87,7 @@ class AtlassianBackup:
             self.base_url, f"/rest/backup/1/export/getProgress?taskId={task_id}"
         )
 
-        for _ in range(100):
+        for _ in range(360):
             backup_progress_res = self.session.get(backup_progress_url).json()
             if backup_progress_res["status"] == "Success":
                 return backup_progress_res["result"]
