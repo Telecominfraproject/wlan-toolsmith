@@ -9,15 +9,15 @@ project = "wlan"
 org = "tip"
 
 node_group_settings = {
-  max_capacity  = 4
+  max_capacity  = 8
   min_capacity  = 0
   instance_type = "c5.xlarge"
-  ami_name      = "amazon-eks-node-1.18-v20201007"
+  ami_name      = "amazon-eks-node-1.19-v20210208"
 }
 
 spot_instance_types = ["m4.large", "m5.large", "m5a.large", "t2.large", "t3.large", "t3a.large"]
 
-cluster_version = "1.18"
+cluster_version = "1.19"
 
 eks_admin_roles = ["AWSReservedSSO_SystemAdministrator_622371b0ceece6f8", "atlantis-ecs_task_execution"]
 
