@@ -260,6 +260,10 @@ releases:
             datasource: Prometheus
             json: |
             {{- readFile "grafana-dashboards/cloud-controller-perf.json" | nindent 14 }}
+          pod-events:
+            datasource: Prometheus
+            json: |
+            {{- readFile "grafana-dashboards/pod-events.json" | nindent 14 }}
 
       datasources:
        datasources.yaml:
