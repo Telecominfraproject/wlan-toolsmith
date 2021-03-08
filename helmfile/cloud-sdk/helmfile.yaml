@@ -247,6 +247,10 @@ releases:
             datasource: Prometheus
             json: |
             {{- readFile "grafana-dashboards/jvm-metrics-per-pod.json" | nindent 14 }}
+          cloud-controller-perf:
+            datasource: Prometheus
+            json: |
+            {{- readFile "grafana-dashboards/cloud-controller-perf.json" | nindent 14 }}
 
       datasources:
        datasources.yaml:
