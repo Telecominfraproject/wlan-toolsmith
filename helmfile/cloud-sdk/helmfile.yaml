@@ -177,6 +177,15 @@ releases:
       createCustomResource: false
   - prometheus:
       enabled: true
+      prometheusSpec:
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: gp2
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 50Gi
       ingress:
         enabled: true
         annotations:
