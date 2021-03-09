@@ -32,6 +32,9 @@ shared:
 
 global:
   pullPolicy: IfNotPresent
+  monitoring:
+    enableJmxPrometheusMetrics: true
+    enablePrometheusPodMonitors: true
 
 opensync-gw-static:
   enabled: false
