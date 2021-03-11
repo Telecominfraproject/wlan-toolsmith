@@ -346,6 +346,33 @@ releases:
         kubernetes.io/ingress.class: nginx-sso
       hosts:
       - kibana.{{ .Environment.Values.domain }}
+  - lifecycle:
+      postStart:
+        exec:
+          command:
+          - bash
+          - -c
+          - |
+            #!/bin/bash
+            # Config the index_pattern
+            TEMPLATE_NAME="logstash"
+            INDEX_PATTERN="logstash-*"
+            KIBANA_URL=http://localhost:5601
+
+            # Wait until service is ready
+            while [[ "$(curl -s -o /dev/null -w '%{http_code}\n' $KIBANA_URL/app/kibana)" != "200" ]]; do sleep 1; done
+
+            # Apply default Index Pattern into Kibana
+            curl -X POST -v $KIBANA_URL/api/saved_objects/index-pattern/$TEMPLATE_NAME \
+            -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
+            -d '{"attributes": {"title": "'$INDEX_PATTERN'"}}'
+  - dashboardImport:
+      enabled: true
+      timeout: 60
+      basePath: ""
+      dashboards:
+        k8s-container-logs: |
+        {{- readFile "kibana-dashboards/k8s-container-logs.json" | nindent 10 }}
 - name: aws-load-balancer-controller
   <<: *default
   condition: alb-ingress.enabled
