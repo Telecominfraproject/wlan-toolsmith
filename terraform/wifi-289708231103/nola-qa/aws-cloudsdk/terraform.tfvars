@@ -1,0 +1,5 @@
+name = "nola-qa"
+cidr = "10.0.0.0/16"
+route53_zone_name = "lab.wlan.tip.build"
+subdomain = "nola-qa"
+eks_cluster_version = "1.19"
