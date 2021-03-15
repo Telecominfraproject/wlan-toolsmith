@@ -322,6 +322,10 @@ releases:
     role: setup
     group: monitoring
     app: elasticsearch
+  values:
+  - data:
+      persistence:
+        size: 250Gi
 - name: kibana
   condition: kibana.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
