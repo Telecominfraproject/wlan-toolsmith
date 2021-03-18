@@ -296,7 +296,42 @@ releases:
   values:
   - data:
       persistence:
-        size: 250Gi
+        size: 650Gi
+
+- name: elasticsearch-curator
+  condition: elastic.enabled
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+  chart: stable/elasticsearch-curator
+  labels:
+    role: setup
+    group: monitoring
+    app: elasticsearch
+  values:
+  - configMaps:
+      config_yml: |-
+        client:
+          hosts:
+            -  http://elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local:9200
+      action_file_yml: |-
+        actions:
+          1:
+            action: delete_indices
+            description: "Delete old indices"
+            options:
+              ignore_empty_list: True
+              continue_if_exception: True
+              timeout_override: 300
+            filters:
+            - filtertype: pattern
+              kind: prefix
+              value: 'logstash-'
+            - filtertype: age
+              source: name
+              direction: older
+              timestring: '%Y.%m.%d'
+              unit: days
+              unit_count: 30
+
 - name: kibana
   condition: kibana.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
