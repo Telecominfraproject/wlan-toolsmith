@@ -22,6 +22,8 @@ provider "helm" {
   }
 }
 
+data "aws_caller_identity" "current" {}
+
 module "eks" {
   source       = "git::https://github.com/terraform-aws-modules/terraform-aws-eks?ref=v13.2.1"
   cluster_name = var.name
@@ -46,4 +48,9 @@ module "eks" {
   enable_irsa      = true
   cluster_version  = var.eks_cluster_version
   write_kubeconfig = false
+  map_roles = [{
+    rolearn  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/AWSReservedSSO_SystemAdministrator_622371b0ceece6f8"
+    username = "admin",
+    groups   = ["system:masters"]
+  }]
 }
