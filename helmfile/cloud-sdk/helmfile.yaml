@@ -7,6 +7,8 @@ repositories:
   url: https://kubernetes.github.io/ingress-nginx
 - name: eks
   url: https://aws.github.io/eks-charts
+- name: elastic
+  url: https://helm.elastic.co
 
 environments:
   azure:
@@ -47,6 +49,8 @@ environments:
     - elastic:
         enabled: true
     - kibana:
+        enabled: true
+    - logstash:
         enabled: true
     - prometheus:
         enabled: true
@@ -387,11 +391,56 @@ releases:
       dashboards:
         k8s-container-logs: |
         {{- readFile "kibana-dashboards/k8s-container-logs.json" | nindent 10 }}
+
+- name: logstash
+  condition: logstash.enabled
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+  chart: elastic/logstash
+  labels:
+    role: setup
+    group: monitoring
+    app: logstash
+  values:
+  - image: docker.elastic.co/logstash/logstash-oss
+  - imageTag: 7.12.0
+  - replicas: 2
+  - logstashConfig:
+      logstash.yml: |
+        http.host: 0.0.0.0
+        log.level: warn
+  - logstashPipeline:
+      logstash.conf: "" # override default pipeline
+      syslog.conf: |
+        input {
+          syslog {
+            port => 5514
+          }
+        }
+
+        output {
+          elasticsearch {
+            hosts => "http://elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local:9200"
+            index => "logstash-%{+YYYY.MM.dd}"
+          }
+        }
+  - service:
+      type: LoadBalancer
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "nlb-ip"
+        service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+        # waiting for new aws-load-balancer-controller supporting this annotation to be able to set static IP addresses
+        # service.beta.kubernetes.io/aws-load-balancer-private-ipv4-addresses: "10.10.10.40,10.10.11.40,10.10.12.40"
+      ports:
+        - name: syslog
+          port: 514
+          targetPort: 5514
+          protocol: TCP
+
 - name: aws-load-balancer-controller
   <<: *default
   condition: alb-ingress.enabled
   chart: eks/aws-load-balancer-controller
-  version: 1.0.5
+  version: 1.1.5
   values:
   - serviceAccount:
       annotations:
@@ -400,7 +449,8 @@ releases:
     enableShield: false
     enableWaf: false
     enableWafv2: false
-    logLevel: debug
+    logLevel: info
+
 - name: aws-node-termination-handler
   <<: *default
   condition: node-termination-handler.enabled
