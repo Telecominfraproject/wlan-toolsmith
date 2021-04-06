@@ -1,14 +1,18 @@
 repositories:
 - name: stable
   url: https://charts.helm.sh/stable
-- name: kiwigrid 
-  url: https://kiwigrid.github.io
+- name: kokuwa
+  url: https://kokuwaio.github.io/helm-charts
 - name: nginx
   url: https://kubernetes.github.io/ingress-nginx
 - name: eks
   url: https://aws.github.io/eks-charts
 - name: elastic
   url: https://helm.elastic.co
+- name: kubernetes-dashboard
+  url: https://kubernetes.github.io/dashboard/
+- name: bitnami
+  url: https://charts.bitnami.com/bitnami
 
 environments:
   azure:
@@ -40,6 +44,7 @@ environments:
         certificateARN: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
     - monitoring:
         namespace: monitoring
+        nolaNamespaces: ['nola-01', 'nola-02', 'nola-04', 'nola-05', 'nola-15', 'nola-ext-01', 'nola-ext-02', 'nola-ext-03', 'nola-ext-04', 'nola-ext-05', 'nola-qualitest']
     - domain: lab.wlan.tip.build
     - storageClass: gp2
     - autoscaler:
@@ -53,6 +58,10 @@ environments:
     - logstash:
         enabled: true
     - prometheus:
+        enabled: true
+    - k8s-dashboard:
+        enabled: true
+    - metrics-server:
         enabled: true
     - external-dns:
         enabled: true
@@ -249,6 +258,7 @@ releases:
           url: http://prometheus-operated:9090
           access: proxy
           isDefault: false
+
 - name: prometheus-operator-helper
   condition: prometheus.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
@@ -264,6 +274,7 @@ releases:
       domain: {{ .Environment.Values.domain }}
     proxy:
       namespace: kube-system
+
 - name: prometheus-operator-ingress-auth
   condition: prometheus.enabled
   namespace: kube-system
@@ -277,10 +288,11 @@ releases:
   - charts/sso/values.local.yaml # temporary solution to workaround secrets in plain text in the repo
   - monitoring:
       namespace: {{ .Environment.Values.monitoring.namespace }}
+
 - name: fluentd
   condition: elastic.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
-  chart: kiwigrid/fluentd-elasticsearch
+  chart: kokuwa/fluentd-elasticsearch
   labels:
     role: setup
     group: monitoring
@@ -435,6 +447,69 @@ releases:
           port: 514
           targetPort: 5514
           protocol: TCP
+
+- name: k8s-dashboard-roles
+  condition: k8s-dashboard.enabled
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+  chart: charts/k8s-dashboard-roles
+  labels:
+    role: setup
+    group: monitoring
+    app: k8s-dashboard
+
+- name: k8s-dashboard
+  condition: k8s-dashboard.enabled
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+  chart: kubernetes-dashboard/kubernetes-dashboard
+  labels:
+    role: setup
+    group: monitoring
+    app: k8s-dashboard
+  values:
+  - settings:
+      defaultNamespace: {{ index .Environment.Values.monitoring.nolaNamespaces 0 }}
+      namespaceFallbackList: {{ .Environment.Values.monitoring.nolaNamespaces | toJson }}
+      itemsPerPage: 25
+      clusterName: TIP WLAN CI/CD
+  - extraArgs:
+    - --enable-skip-login
+    - --system-banner=Welcome to the TIP WLAN CI/CD Kubernetes cluster. If you are missing your namespace in the above select box, please <a href="https://telecominfraproject.atlassian.net/browse/WIFI">create a ticket</a>.
+  - rbac:
+      create: false
+      clusterRoleMetrics: true
+      clusterReadOnlyRole: false
+  - service:
+      type: NodePort
+      externalPort: 80
+  - protocolHttp: true
+  - ingress:
+      enabled: true
+      paths:
+        - /
+        - /*
+      annotations:
+        #alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
+        #alb.ingress.kubernetes.io/group.name: wlan-cicd
+        #alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+        #alb.ingress.kubernetes.io/scheme: internet-facing
+        #kubernetes.io/ingress.class: alb
+        nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+        kubernetes.io/ingress.class: nginx-sso
+      hosts:
+        - k8s-dashboard.{{ .Environment.Values.domain }}
+
+- name: metrics-server
+  condition: metrics-server.enabled
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+  chart: bitnami/metrics-server
+  labels:
+    role: setup
+    group: monitoring
+    app: metrics-server
+  values:
+  - apiService:
+      create: true
 
 - name: aws-load-balancer-controller
   <<: *default
