@@ -1,6 +1,6 @@
 aws_region = "us-east-1"
 
-backup_timeout = 3600
+backup_timeout = 7200
 
 fargate_task_public_ip_enabled = true
 
