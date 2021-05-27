@@ -42,3 +42,7 @@ tip-wlan
 id_rsa*
 *.pem
 .envrc
+*swp
+
+# Ignore Helm secrets decrypted files
+*.dec
