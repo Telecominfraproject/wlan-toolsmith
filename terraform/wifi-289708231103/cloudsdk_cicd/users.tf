@@ -1,3 +1,15 @@
+data "aws_iam_policy_document" "gh-actions-policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "eks:DescribeCluster",
+      "eks:ListClusters",
+    ]
+    resources = ["*"]
+  }
+}
+
+# gh-actions-user
 resource "aws_iam_user" "gh-actions-user" {
   name = "gh-actions-user"
   path = "/"
@@ -10,17 +22,7 @@ resource "aws_iam_user_policy" "lb_ro" {
   policy = data.aws_iam_policy_document.gh-actions-policy.json
 }
 
-data "aws_iam_policy_document" "gh-actions-policy" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "eks:DescribeCluster",
-      "eks:ListClusters",
-    ]
-    resources = ["*"]
-  }
-}
-
+# quali-poc
 resource "aws_iam_user" "quali-poc" {
   name = "quali-poc"
   path = "/"
@@ -33,13 +35,15 @@ resource "aws_iam_user_policy" "lb_ro_quali" {
   policy = data.aws_iam_policy_document.gh-actions-policy.json
 }
 
-data "aws_iam_policy_document" "quali-poc-policy" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "eks:DescribeCluster",
-      "eks:ListClusters",
-    ]
-    resources = ["*"]
-  }
+# gh-actions-wlan-test-bss
+resource "aws_iam_user" "gh-actions-wlan-test-bss" {
+  name = "gh-actions-wlan-test-bss"
+  path = "/"
+  tags = local.common_tags
+}
+
+resource "aws_iam_user_policy" "lb_ro_gh_wlan_test_bss" {
+  name   = "eks-list-access"
+  user   = aws_iam_user.gh-actions-wlan-test-bss.name
+  policy = data.aws_iam_policy_document.gh-actions-policy.json
 }
