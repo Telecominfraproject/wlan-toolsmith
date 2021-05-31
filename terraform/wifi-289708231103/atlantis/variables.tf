@@ -13,11 +13,6 @@ variable "atlantis_github_organization" {
   type        = string
 }
 
-variable "atlantis_github_user_token" {
-  description = "PAT for Github user that will be used by Atlantis"
-  type        = string
-}
-
 variable "repo_whitelist" {
   description = "List of repos that Atlantis is allowed to work with"
   type        = list(string)

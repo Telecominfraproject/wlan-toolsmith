@@ -39,6 +39,7 @@ environments:
   amazon-cicd:
     secrets:
       - secrets/influxdb.yaml
+      - secrets/sso.yaml
     values:
     - eks:
         clusterName: tip-wlan-main
@@ -291,9 +292,14 @@ releases:
     app: prometheus-operator
     sub: oAuth
   values:
-  - charts/sso/values.local.yaml # temporary solution to workaround secrets in plain text in the repo
   - monitoring:
+      domain: example.com
       namespace: {{ .Environment.Values.monitoring.namespace }}
+  - oidc:
+      issuerUrl: {{ .Environment.Values.sso.oidc.clientId }}
+      clientId: {{ .Environment.Values.sso.oidc.clientId }}
+      clientSecret: {{ .Environment.Values.sso.oidc.clientSecret }}
+      cookieSecret: {{ .Environment.Values.sso.oidc.cookieSecret }}
 
 - name: fluentd
   condition: elastic.enabled
