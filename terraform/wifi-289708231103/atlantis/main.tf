@@ -6,6 +6,13 @@ terraform {
     dynamodb_table = "terraform-state-lock"
     encrypt        = true
   }
+
+  required_providers {
+    sops = {
+      source  = "carlpett/sops"
+      version = "~> 0.5"
+    }
+  }
 }
 
 provider "aws" {
@@ -24,6 +31,10 @@ data "terraform_remote_state" "route_53" {
   }
 }
 
+data "sops_file" "secrets" {
+  source_file = "secrets.enc.json"
+}
+
 module "atlantis" {
   source  = "terraform-aws-modules/atlantis/aws"
   version = "~> 2.0"
@@ -38,8 +49,8 @@ module "atlantis" {
   route53_zone_name = trimsuffix(data.terraform_remote_state.route_53.outputs.zone_name, ".")
 
   atlantis_github_user       = var.atlantis_github_user
-  atlantis_github_user_token = var.atlantis_github_user_token
-  atlantis_repo_whitelist    = var.repo_whitelist
+  atlantis_repo_allowlist    = var.repo_whitelist
+  atlantis_github_user_token = data.sops_file.secrets.data["atlantis_github_user_token"]
 
   policies_arn = var.atlantis_policy_arns
 
@@ -66,7 +77,7 @@ module "github_repository_webhook" {
   source = "terraform-aws-modules/atlantis/aws//modules/github-repository-webhook"
 
   github_organization = var.atlantis_github_organization
-  github_token        = var.atlantis_github_user_token
+  github_token        = data.sops_file.secrets.data["atlantis_github_user_token"]
 
   atlantis_allowed_repo_names = var.repo_names
 
