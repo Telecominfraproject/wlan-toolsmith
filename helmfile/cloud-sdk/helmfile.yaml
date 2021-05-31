@@ -314,9 +314,30 @@ releases:
     group: monitoring
     app: elasticsearch
   values:
+  - client:
+      resources:
+        limits:
+          memory: 1000Mi
+        requests:
+          memory: 750Mi
+
+  - master:
+      resources:
+        limits:
+          memory: 1000Mi
+        requests:
+          memory: 750Mi
+
   - data:
       persistence:
         size: 650Gi
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 4196Mi
+      requests:
+        cpu: 500m
+        memory: 2048Mi
 
 - name: elasticsearch-curator
   condition: elastic.enabled
@@ -537,4 +558,5 @@ releases:
     app: node-termination-handler
   values:
     - deleteLocalData: true
+    - ignoreDaemonSets: true
     - podTerminationGracePeriod: -1 # use values defined in Pod
