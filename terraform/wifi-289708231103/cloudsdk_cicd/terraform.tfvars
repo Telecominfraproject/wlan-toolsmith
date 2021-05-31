@@ -15,7 +15,7 @@ node_group_settings = {
   ami_name      = "amazon-eks-node-1.19-v20210208"
 }
 
-spot_instance_types = ["m4.large", "m5.large", "m5a.large", "t2.large", "t3.large", "t3a.large"]
+spot_instance_types = ["m4.large", "m5.large", "m5a.large"]
 
 cluster_version = "1.19"
 
