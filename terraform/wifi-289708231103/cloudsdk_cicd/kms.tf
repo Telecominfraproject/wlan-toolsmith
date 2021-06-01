@@ -35,6 +35,7 @@ data "aws_iam_policy_document" "kms" {
       identifiers = [
         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AdministratorAccess_5b24211378e8344f",
         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_SystemAdministrator_622371b0ceece6f8",
+        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/atlantis-ecs_task_execution",
       ]
     }
   }
@@ -55,6 +56,7 @@ data "aws_iam_policy_document" "kms" {
       identifiers = [
         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AdministratorAccess_5b24211378e8344f",
         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_SystemAdministrator_622371b0ceece6f8",
+        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/atlantis-ecs_task_execution",
       ]
     }
   }
