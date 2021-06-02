@@ -40,6 +40,7 @@ environments:
     secrets:
       - secrets/influxdb.yaml
       - secrets/sso.yaml
+      - secrets/alertmanager.yaml
     values:
     - eks:
         clusterName: tip-wlan-main
@@ -49,7 +50,7 @@ environments:
         certificateARN: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
     - monitoring:
         namespace: monitoring
-        nolaNamespaces: ['nola-01', 'nola-02', 'nola-04', 'nola-05', 'nola-15', 'nola-ext-01', 'nola-ext-02', 'nola-ext-03', 'nola-ext-04', 'nola-ext-05', 'nola-qualitest']
+        nolaNamespaces: ['nola-01', 'nola-ext-01', 'nola-ext-02', 'nola-ext-03', 'nola-ext-04', 'tip-digicert']
     - domain: lab.wlan.tip.build
     - storageClass: gp2
     - autoscaler:
@@ -185,6 +186,33 @@ releases:
           kubernetes.io/ingress.class: nginx-sso
         hosts:
         - prometheus.{{ .Environment.Values.domain }}
+  - additionalPrometheusRulesMap:
+      testbed:
+        groups:
+        - name: Testbed alerts
+          rules:
+          - alert: Waiting pod
+            expr: sum(kube_pod_container_status_waiting_reason{namespace=~".*nola.*", reason!="ContainerCreating"}) by (namespace, pod) > 0
+            for: 5m
+            labels:
+              severity: warning
+              area: testbed
+              namespace: "{{`{{ $labels.namespace }}`}}"
+              pod: "{{`{{ $labels.pod }}`}}"
+            annotations:
+              title: Pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* is in waiting state
+              description: The pod {{`{{ $labels.namespace }}/{{ $labels.pod }}`}} is in waiting state for at least 5 minutes. Please check for image pull issues.
+          - alert: Node not ready
+            expr: sum(kube_node_status_condition{condition="Ready", status!="true"}) by (node) > 0
+            for: 60m
+            labels:
+              severity: error
+              area: testbed
+              node: "{{`{{ $labels.node }}`}}"
+            annotations:
+              title: Node {{`{{ $labels.node }}`}} not becoming ready
+              description: The cluster node {{`{{ $labels.node }}`}} is not getting ready since 60 minutes. Please contact the cluster administrators.
+
   - grafana:
       grafana.ini:
         users:
@@ -266,6 +294,33 @@ releases:
           access: proxy
           isDefault: false
 
+  - alertmanager:
+      config:
+        global:
+          resolve_timeout: 1m
+          slack_api_url: {{ .Environment.Values.alertmanager.slack_api_url }}
+
+        route:
+          receiver: "null"
+          routes:
+          - match:
+              area: testbed
+            receiver: "slack-notifications"
+
+        receivers:
+        - name: "null"
+        - name: "slack-notifications"
+          slack_configs:
+          - channel: "#open-wifi-testbed-alerts"
+            send_resolved: true
+            icon_url: https://avatars3.githubusercontent.com/u/3380462
+            title: |-
+            {{- readFile "alertmanager-templates/title.tpl" | nindent 14 }}
+            text: >-
+            {{- readFile "alertmanager-templates/text.tpl" | nindent 14 }}
+            title_link: ""
+
+
 - name: prometheus-operator-helper
   condition: prometheus.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
@@ -296,7 +351,7 @@ releases:
       domain: example.com
       namespace: {{ .Environment.Values.monitoring.namespace }}
   - oidc:
-      issuerUrl: {{ .Environment.Values.sso.oidc.clientId }}
+      issuerUrl: {{ .Environment.Values.sso.oidc.issuerUrl }}
       clientId: {{ .Environment.Values.sso.oidc.clientId }}
       clientSecret: {{ .Environment.Values.sso.oidc.clientSecret }}
       cookieSecret: {{ .Environment.Values.sso.oidc.cookieSecret }}
