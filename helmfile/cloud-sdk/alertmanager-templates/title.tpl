@@ -1,0 +1,1 @@
+[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}
