@@ -131,6 +131,11 @@ locals {
       userarn  = aws_iam_user.gh-actions-wlan-test-bss.arn
       username = aws_iam_user.gh-actions-wlan-test-bss.name
       groups   = ["system:masters"]
+    },
+    {
+      userarn  = aws_iam_user.gh-actions-toolsmith.arn
+      username = aws_iam_user.gh-actions-toolsmith.name
+      groups   = ["system:masters"]
     }
   ]
   admin_roles = [for role in var.eks_admin_roles : {

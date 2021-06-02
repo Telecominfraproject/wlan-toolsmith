@@ -47,3 +47,16 @@ resource "aws_iam_user_policy" "lb_ro_gh_wlan_test_bss" {
   user   = aws_iam_user.gh-actions-wlan-test-bss.name
   policy = data.aws_iam_policy_document.gh-actions-policy.json
 }
+
+# gh-actions-toolsmith
+resource "aws_iam_user" "gh-actions-toolsmith" {
+  name = "gh-actions-toolsmith"
+  path = "/"
+  tags = local.common_tags
+}
+
+resource "aws_iam_user_policy" "lb_ro_gh_toolsmith" {
+  name   = "eks-list-access"
+  user   = aws_iam_user.gh-actions-toolsmith.name
+  policy = data.aws_iam_policy_document.gh-actions-policy.json
+}

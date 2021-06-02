@@ -58,6 +58,7 @@ data "aws_iam_policy_document" "kms" {
         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_SystemAdministrator_622371b0ceece6f8",
         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/atlantis-ecs_task_execution",
         aws_iam_user.gh-actions-user.arn,
+        aws_iam_user.gh-actions-toolsmith.arn,
       ]
     }
   }
