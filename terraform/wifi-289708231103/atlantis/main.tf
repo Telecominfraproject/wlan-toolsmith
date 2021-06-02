@@ -37,7 +37,7 @@ data "sops_file" "secrets" {
 
 module "atlantis" {
   source  = "terraform-aws-modules/atlantis/aws"
-  version = "~> 2.0"
+  version = "2.38.0"
 
   name = "atlantis"
 
@@ -48,8 +48,10 @@ module "atlantis" {
 
   route53_zone_name = trimsuffix(data.terraform_remote_state.route_53.outputs.zone_name, ".")
 
+
+  atlantis_version           = "v0.14.0"
   atlantis_github_user       = var.atlantis_github_user
-  atlantis_repo_allowlist    = var.repo_whitelist
+  atlantis_repo_whitelist    = var.repo_whitelist
   atlantis_github_user_token = data.sops_file.secrets.data["atlantis_github_user_token"]
 
   policies_arn = var.atlantis_policy_arns
