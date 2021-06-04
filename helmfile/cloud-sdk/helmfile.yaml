@@ -397,6 +397,22 @@ releases:
         enabled: false
       hosts:
       - elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local 
+  - extraConfigMaps:
+      java-stacktrace-multiline.conf: |-
+        <filter kubernetes.var.log.containers.tip-digicert-opensync-gw-cloud-*>
+          @id filter_java_stacktrace_multiline
+          @type parser
+          key_name message
+          reserve_time true
+          reserve_data true
+          remove_key_name_field true
+          <parse>
+            @type multiline
+            format_firstline /\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}/
+            format1 /^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}(\.\d{3})? \[(?<thread>.*)\] (?<level>[^\s]+)(?<message>.*)/
+          </parse>
+        </filter>
+
 - name: elasticsearch
   condition: elastic.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
