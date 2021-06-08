@@ -170,6 +170,11 @@ releases:
   - prometheus:
       enabled: true
       prometheusSpec:
+        resources:
+          requests:
+            memory: 1400Mi
+          limits:
+            memory: 1400Mi
         storageSpec:
           volumeClaimTemplate:
             spec:
@@ -386,25 +391,25 @@ releases:
         limits:
           memory: 1000Mi
         requests:
-          memory: 750Mi
+          memory: 800Mi
 
   - master:
       resources:
         limits:
           memory: 1000Mi
         requests:
-          memory: 750Mi
+          memory: 800Mi
 
   - data:
       persistence:
         size: 650Gi
-    resources:
-      limits:
-        cpu: 1000m
-        memory: 4196Mi
-      requests:
-        cpu: 500m
-        memory: 2048Mi
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 3000Mi
+        requests:
+          cpu: 50m
+          memory: 2200Mi
 
 - name: elasticsearch-curator
   condition: elastic.enabled
@@ -603,6 +608,10 @@ releases:
   <<: *default
   condition: alb-ingress.enabled
   chart: eks/aws-load-balancer-controller
+  labels:
+    role: setup
+    group: system
+    app: aws-load-balancer-controller
   version: 1.1.5
   values:
   - serviceAccount:
