@@ -1,5 +1,7 @@
 version: 3
 projects:
+- name: ucentral-ap-s3
+  dir: terraform/wifi-289708231103/ucentral-ap-s3
 - name: cloudsdk_cicd
   dir: terraform/wifi-289708231103/cloudsdk_cicd
 - name: dns
