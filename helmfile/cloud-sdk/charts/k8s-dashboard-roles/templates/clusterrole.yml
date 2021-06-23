@@ -70,6 +70,8 @@ rules:
   - get
   - list
   - watch
+  - update
+
 - apiGroups:
   - autoscaling
   resources:
@@ -103,6 +105,7 @@ rules:
   - get
   - list
   - watch
+  - update
 
 - apiGroups:
   - policy

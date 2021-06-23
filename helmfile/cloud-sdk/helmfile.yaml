@@ -217,6 +217,26 @@ releases:
             annotations:
               title: Node {{`{{ $labels.node }}`}} not becoming ready
               description: The cluster node {{`{{ $labels.node }}`}} is not getting ready since 60 minutes. Please contact the cluster administrators.
+          - alert: Pod OOM killed
+            expr: increase(node_vmstat_oom_kill[1m]) > 0
+            for: 0m
+            labels:
+              severity: error
+              area: testbed
+              node: "{{`{{ $labels.node }}`}}"
+            annotations:
+              title: A pod has been OOM killed
+              description: A pod on node {{`{{ $labels.node }}`}} has been killed due to reaching its memory limit. Investigate the memory usage or increase the limit to prevent this.
+          - alert: Node low on memory
+            expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 5
+            for: 1m
+            labels:
+              severity: warning
+              area: testbed
+              node: "{{`{{ $labels.node }}`}}"
+            annotations:
+              title: Node {{`{{ $labels.node }}`}} has very little memory capacity left
+              description: The cluster node {{`{{ $labels.node }}`}} has less than 5% memory available.
 
   - grafana:
       grafana.ini:
