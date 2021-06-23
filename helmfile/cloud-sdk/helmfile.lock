@@ -1,0 +1,46 @@
+version: v0.135.0
+dependencies:
+- name: aws-load-balancer-controller
+  repository: https://aws.github.io/eks-charts
+  version: 1.1.5
+- name: aws-node-termination-handler
+  repository: https://aws.github.io/eks-charts
+  version: 0.13.2
+- name: cluster-autoscaler
+  repository: https://charts.helm.sh/stable
+  version: 7.3.2
+- name: elasticsearch
+  repository: https://charts.helm.sh/stable
+  version: 1.32.5
+- name: elasticsearch-curator
+  repository: https://charts.helm.sh/stable
+  version: 2.2.3
+- name: external-dns
+  repository: https://charts.helm.sh/stable
+  version: 2.20.4
+- name: fluentd-elasticsearch
+  repository: https://kokuwaio.github.io/helm-charts
+  version: 11.13.0
+- name: influxdb2
+  repository: https://helm.influxdata.com
+  version: 2.0.1
+- name: ingress-nginx
+  repository: https://kubernetes.github.io/ingress-nginx
+  version: 3.4.0
+- name: kibana
+  repository: https://charts.helm.sh/stable
+  version: 3.2.8
+- name: kubernetes-dashboard
+  repository: https://kubernetes.github.io/dashboard/
+  version: 4.3.1
+- name: logstash
+  repository: https://helm.elastic.co
+  version: 7.13.1
+- name: metrics-server
+  repository: https://charts.bitnami.com/bitnami
+  version: 5.8.11
+- name: prometheus-operator
+  repository: https://charts.helm.sh/stable
+  version: 9.3.2
+digest: sha256:50e2b3a5ad4bdff0190c36ed6f84ff02f344a8ba54a247fdd0d483e0ccf5796c
+generated: "2021-06-23T14:13:36.904695181+02:00"
