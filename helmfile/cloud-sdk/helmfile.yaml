@@ -174,7 +174,7 @@ releases:
           requests:
             memory: 1400Mi
           limits:
-            memory: 1400Mi
+            memory: 3000Mi
         storageSpec:
           volumeClaimTemplate:
             spec:
@@ -218,25 +218,36 @@ releases:
               title: Node {{`{{ $labels.node }}`}} not becoming ready
               description: The cluster node {{`{{ $labels.node }}`}} is not getting ready since 60 minutes. Please contact the cluster administrators.
           - alert: Pod OOM killed
-            expr: increase(node_vmstat_oom_kill[1m]) > 0
+            expr: (kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1) and ignoring (reason) min_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}[10m]) == 1
             for: 0m
             labels:
               severity: error
               area: testbed
-              node: "{{`{{ $labels.node }}`}}"
+              namespace: "{{`{{ $labels.namespace }}`}}"
+              pod: "{{`{{ $labels.pod }}`}}"
             annotations:
-              title: A pod has been OOM killed
-              description: A pod on node {{`{{ $labels.node }}`}} has been killed due to reaching its memory limit. Investigate the memory usage or increase the limit to prevent this.
+              title: Pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* has been OOM killed
+              description: The pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* has been killed due to reaching its memory limit. Investigate the memory usage or increase the limit to prevent this.
           - alert: Node low on memory
             expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 5
             for: 1m
             labels:
               severity: warning
               area: testbed
-              node: "{{`{{ $labels.node }}`}}"
             annotations:
-              title: Node {{`{{ $labels.node }}`}} has very little memory capacity left
-              description: The cluster node {{`{{ $labels.node }}`}} has less than 5% memory available.
+              title: Node {{`{{ $labels.instance }}`}} has very little memory capacity left
+              description: The cluster node {{`{{ $labels.instance }}`}} has less than 5% memory available.
+          - alert: Pod stuck in crash loop
+            expr: increase(kube_pod_container_status_restarts_total[1m]) > 3
+            for: 2m
+            labels:
+              severity: error
+              area: testbed
+              namespace: "{{`{{ $labels.namespace }}`}}"
+              pod: "{{`{{ $labels.pod }}`}}"
+            annotations:
+              title: Pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* is crash looping
+              description: "The pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* is crash looping. Please check its logs to see what is going on."
 
   - grafana:
       grafana.ini:
