@@ -59,7 +59,7 @@
         ],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"index\":\"1eade710-818c-11eb-bbfe-059c34b41bfc\",\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"kubernetes.namespace_name:nola-01\"},\"filter\":[]}"
+          "searchSourceJSON": "{\"index\":\"1eade710-818c-11eb-bbfe-059c34b41bfc\",\"highlightAll\":true,\"version\":true,\"filter\":[]}"
         }
       }
     },
