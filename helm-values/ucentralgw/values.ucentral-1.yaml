@@ -21,3 +21,23 @@ services:
         servicePort: 16003
         targetPort: 16003
         protocol: TCP
+
+configProperties:
+  # -> Public part
+  # File uploader
+  ucentral.fileuploader.host.0.name: sdk-ucentral-1.cicd.lab.wlan.tip.build
+  # rtty
+  rtty.enabled: "true"
+  rtty.server: rtty-ucentral-1.cicd.lab.wlan.tip.build
+  # Kafka
+  ucentral.kafka.enable: "false"
+  ucentral.kafka.group.id: 1
+  ucentral.kafka.brokerlist: localhost:9092
+  ucentral.kafka.auto.commit: false
+  ucentral.kafka.queue.buffering.max.ms: 50
+  # Storage
+  storage.type: sqlite # (sqlite|postgresql|mysql|odbc)
+  ## SQLite
+  storage.type.sqlite.db: devices.db
+  storage.type.sqlite.idletime: 120
+  storage.type.sqlite.maxsessions: 128
