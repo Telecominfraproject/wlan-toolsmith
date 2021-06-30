@@ -1,0 +1,23 @@
+services:
+  ucentralgw:
+    type: LoadBalancer
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb-ip"
+      external-dns.alpha.kubernetes.io/hostname: sdk-ucentral-1.cicd.lab.wlan.tip.build
+      service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "15015"
+      service.beta.kubernetes.io/aws-load-balancer-backend-protocol: ssl
+      service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285"
+      service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "16001,16003"
+    ports:
+      websocket:
+        servicePort: 15002
+        targetPort: 15002
+        protocol: TCP
+      restapi:
+        servicePort: 16001
+        targetPort: 16001
+        protocol: TCP
+      fileuploader:
+        servicePort: 16003
+        targetPort: 16003
+        protocol: TCP
