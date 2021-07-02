@@ -564,8 +564,7 @@ releases:
       annotations:
         service.beta.kubernetes.io/aws-load-balancer-type: "nlb-ip"
         service.beta.kubernetes.io/aws-load-balancer-internal: "true"
-        # waiting for new aws-load-balancer-controller supporting this annotation to be able to set static IP addresses
-        # service.beta.kubernetes.io/aws-load-balancer-private-ipv4-addresses: "10.10.10.40,10.10.11.40,10.10.12.40"
+        service.beta.kubernetes.io/aws-load-balancer-private-ipv4-addresses: "10.10.10.40,10.10.11.40,10.10.12.40"
       ports:
         - name: syslog
           port: 514
@@ -643,7 +642,7 @@ releases:
     role: setup
     group: system
     app: aws-load-balancer-controller
-  version: 1.1.5
+  version: 1.2.3
   values:
   - serviceAccount:
       annotations:

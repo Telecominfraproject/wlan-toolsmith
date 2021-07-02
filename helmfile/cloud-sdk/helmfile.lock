@@ -2,7 +2,7 @@ version: v0.135.0
 dependencies:
 - name: aws-load-balancer-controller
   repository: https://aws.github.io/eks-charts
-  version: 1.1.5
+  version: 1.2.3
 - name: aws-node-termination-handler
   repository: https://aws.github.io/eks-charts
   version: 0.13.2
@@ -38,9 +38,9 @@ dependencies:
   version: 7.13.1
 - name: metrics-server
   repository: https://charts.bitnami.com/bitnami
-  version: 5.8.11
+  version: 5.8.13
 - name: prometheus-operator
   repository: https://charts.helm.sh/stable
   version: 9.3.2
-digest: sha256:50e2b3a5ad4bdff0190c36ed6f84ff02f344a8ba54a247fdd0d483e0ccf5796c
-generated: "2021-06-23T14:13:36.904695181+02:00"
+digest: sha256:ca0d96767b93ad3c857453b3a55c11aaa4fcdaf264c91ff9fcab7f26a68a5135
+generated: "2021-07-02T16:52:06.848009268+02:00"
