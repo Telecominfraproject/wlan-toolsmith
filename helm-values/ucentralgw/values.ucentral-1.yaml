@@ -22,6 +22,10 @@ services:
         targetPort: 16003
         protocol: TCP
 
+persistence:
+  enabled: true
+  storageClassName: "gp2"
+
 configProperties:
   # -> Public part
   # File uploader
@@ -30,9 +34,9 @@ configProperties:
   rtty.enabled: "true"
   rtty.server: rtty-ucentral-1.cicd.lab.wlan.tip.build
   # Kafka
-  ucentral.kafka.enable: "false"
+  ucentral.kafka.enable: "true"
   ucentral.kafka.group.id: 1
-  ucentral.kafka.brokerlist: localhost:9092
+  ucentral.kafka.brokerlist: kafka:9092
   ucentral.kafka.auto.commit: false
   ucentral.kafka.queue.buffering.max.ms: 50
   # Storage
