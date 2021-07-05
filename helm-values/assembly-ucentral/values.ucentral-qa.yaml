@@ -1,0 +1,66 @@
+ucentralgw:
+  services:
+    ucentralgw:
+      type: LoadBalancer
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "nlb-ip"
+        external-dns.alpha.kubernetes.io/hostname: sdk-ucentral-qa.cicd.lab.wlan.tip.build
+        service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "15015"
+        service.beta.kubernetes.io/aws-load-balancer-backend-protocol: ssl
+        service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285"
+        service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "16001,16003"
+
+  configProperties:
+    # -> Public part
+    # File uploader
+    ucentral.fileuploader.host.0.name: sdk-ucentral-qa.cicd.lab.wlan.tip.build
+    # rtty
+    rtty.enabled: "true"
+    rtty.server: rtty-ucentral-qa.cicd.lab.wlan.tip.build
+    # Storage
+    storage.type: sqlite # (sqlite|postgresql|mysql|odbc)
+    ## SQLite
+    storage.type.sqlite.db: devices.db
+    storage.type.sqlite.idletime: 120
+    storage.type.sqlite.maxsessions: 128
+
+rttys:
+  enabled: true
+
+  services:
+    rttys:
+      type: LoadBalancer
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "nlb-ip"
+        external-dns.alpha.kubernetes.io/hostname: rtty-ucentral-qa.cicd.lab.wlan.tip.build
+        service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "5914"
+        service.beta.kubernetes.io/aws-load-balancer-backend-protocol: ssl
+        service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285"
+        service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "5912,5913"
+
+ucentralgwui:
+  services:
+    ucentralgwui:
+      type: NodePort
+
+  ingresses:
+    default:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: alb
+        alb.ingress.kubernetes.io/scheme: internet-facing
+        alb.ingress.kubernetes.io/group.name: wlan-cicd
+        alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
+        alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+        alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
+        external-dns.alpha.kubernetes.io/hostname: webui-ucentral-qa.cicd.lab.wlan.tip.build
+      hosts:
+      - webui-ucentral-qa.cicd.lab.wlan.tip.build
+      paths:
+      - path: /*
+        serviceName: ucentralgwui
+        servicePort: http
+
+  public_env_variables:
+    DEFAULT_GATEWAY_URL: https://sdk-ucentral-qa.cicd.lab.wlan.tip.build:16001
+    ALLOW_GATEWAY_CHANGE: false
