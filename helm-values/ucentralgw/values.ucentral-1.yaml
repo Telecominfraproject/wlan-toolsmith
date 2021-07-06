@@ -45,3 +45,11 @@ configProperties:
   storage.type.sqlite.db: devices.db
   storage.type.sqlite.idletime: 120
   storage.type.sqlite.maxsessions: 128
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 50Mi
+  requests:
+    cpu: 100m
+    memory: 50Mi
