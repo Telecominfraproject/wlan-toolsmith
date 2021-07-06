@@ -408,6 +408,14 @@ releases:
         enabled: false
       hosts:
       - elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local 
+  - resources:
+      requests:
+        cpu: 100m
+        memory: 120Mi
+      limits:
+        cpu: 500m
+        memory: 120Mi
+
 - name: elasticsearch
   condition: elastic.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
