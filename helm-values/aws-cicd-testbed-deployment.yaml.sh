@@ -53,6 +53,7 @@ opensync-gw-cloud:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: wlan-filestore-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build,opensync-controller-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build,opensync-redirector-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
       service.beta.kubernetes.io/aws-load-balancer-type: "nlb-ip"
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
   externalhost:
     address:
       ovsdb: opensync-controller-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
@@ -70,6 +71,7 @@ opensync-mqtt-broker:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: opensync-mqtt-broker-nola-$TESTBED_NUMBER.cicd.lab.wlan.tip.build
       service.beta.kubernetes.io/aws-load-balancer-type: "nlb-ip"
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
   persistence:
     enabled: true
     storageClass: gp2

@@ -3,6 +3,7 @@ services:
     type: LoadBalancer
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-type: "nlb-ip"
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
       external-dns.alpha.kubernetes.io/hostname: sdk-ucentral-1.cicd.lab.wlan.tip.build
       service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "15015"
       service.beta.kubernetes.io/aws-load-balancer-backend-protocol: ssl
