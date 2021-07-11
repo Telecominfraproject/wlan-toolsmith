@@ -170,6 +170,7 @@ releases:
   - prometheus:
       enabled: true
       prometheusSpec:
+        retention: 31d
         resources:
           requests:
             memory: 1400Mi
