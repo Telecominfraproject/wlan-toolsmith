@@ -42,6 +42,7 @@ module "eks" {
       asg_min_size         = var.node_group_settings["min_capacity"]
       instance_type        = var.node_group_settings["instance_type"]
       additional_userdata  = local.worker_additional_userdata
+      kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal"
       subnets              = [subnet]
       tags = [
         {
