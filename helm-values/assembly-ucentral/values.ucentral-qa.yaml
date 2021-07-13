@@ -23,6 +23,7 @@ ucentralgw:
     # System
     ucentral.system.uri.public: https://gw-ucentral-qa.cicd.lab.wlan.tip.build:16002
     ucentral.system.uri.private: https://gw-ucentral-qa.cicd.lab.wlan.tip.build:17002
+    ucentral.system.uri.ui: https://webui-ucentral-qa.cicd.lab.wlan.tip.build
 
   certs:
     restapi-ca.pem: |
@@ -69,6 +70,7 @@ ucentralsec:
     # System
     ucentral.system.uri.public: https://sec-ucentral-qa.cicd.lab.wlan.tip.build:16001
     ucentral.system.uri.private: https://sec-ucentral-qa.cicd.lab.wlan.tip.build:17001
+    ucentral.system.uri.ui: https://webui-ucentral-qa.cicd.lab.wlan.tip.build
 
   certs:
     restapi-ca.pem: |
