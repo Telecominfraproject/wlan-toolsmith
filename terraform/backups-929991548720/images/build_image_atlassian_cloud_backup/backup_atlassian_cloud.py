@@ -70,7 +70,7 @@ class AtlassianBackup:
             backup_progress_res = self.session.get(backup_progress_url).json()
             print(f"Debug: {backup_progress_res}")
 
-            if backup_progress_res["alternativePercentage"] == "100%":
+            if backup_progress_res["alternativePercentage"] == "100%" and "fileName" in backup_progress_res:
                 return backup_progress_res["fileName"]
 
             else:
