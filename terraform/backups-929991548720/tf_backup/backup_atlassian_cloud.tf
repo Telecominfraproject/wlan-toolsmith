@@ -18,6 +18,7 @@ module "backup_atlassian_cloud_ecs_task" {
   task_role_policy          = data.aws_iam_policy_document.backup_atlassian_cloud_task_role_policy.json
   ecs_execution_role_policy = data.aws_iam_policy_document.backup_atlassian_cloud_execution_role_policy.json
   cw_logs_retention_period  = var.cloudwatch_logs_retention_period
+  ephemeral_storage_size    = var.ephemeral_storage_size
 }
 
 module "backup_atlassian_cloud" {

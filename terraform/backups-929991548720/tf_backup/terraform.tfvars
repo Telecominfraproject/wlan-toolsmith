@@ -32,5 +32,7 @@ backup_retention_period = 60
 
 atlassian_backup_schedule = "cron(30 2 ? * WED,SAT *)"
 
+ephemeral_storage_size = 40
+
 repo_backup_schedule = "cron(0 9 * * ? *)"
 
