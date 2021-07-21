@@ -95,9 +95,9 @@ resource "aws_ecs_task_definition" "sfn" {
   cpu                      = var.cpu
   memory                   = var.memory
   ephemeral_storage {
-    size_in_gib            = var.ephemeral_storage_size
+    size_in_gib = var.ephemeral_storage_size
   }
-  container_definitions    = <<EOF
+  container_definitions = <<EOF
 [
   {
     "name": "${var.name}",
