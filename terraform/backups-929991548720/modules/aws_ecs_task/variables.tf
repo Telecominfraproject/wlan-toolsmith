@@ -38,6 +38,12 @@ variable "memory" {
   default     = 2048
 }
 
+variable "ephemeral_storage_size" {
+  description = "ECS Task ephemeral storage size in GiB"
+  type        = number
+  default     = 21
+}
+
 variable "task_environment" {
   description = "ECS Task environment"
   type        = set(map(string))

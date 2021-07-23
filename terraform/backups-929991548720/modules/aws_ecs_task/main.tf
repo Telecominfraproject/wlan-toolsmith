@@ -94,7 +94,10 @@ resource "aws_ecs_task_definition" "sfn" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.cpu
   memory                   = var.memory
-  container_definitions    = <<EOF
+  ephemeral_storage {
+    size_in_gib = var.ephemeral_storage_size
+  }
+  container_definitions = <<EOF
 [
   {
     "name": "${var.name}",

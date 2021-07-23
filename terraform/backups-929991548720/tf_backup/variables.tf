@@ -75,3 +75,8 @@ variable "backup_retention_period" {
   description = "Backup retention period, days"
   type        = number
 }
+
+variable "ephemeral_storage_size" {
+  description = "ECS Task ephemeral storage size in GiB"
+  type        = number
+}
