@@ -555,6 +555,64 @@ releases:
         log.level: warn
   - logstashPipeline:
       logstash.conf: "" # override default pipeline
+      ucentral-kafka.conf: |
+        input {
+          kafka {
+            bootstrap_servers => "kafka-headless.ucentral-dev01.svc.cluster.local:9092"
+            topics => ["state", "healthcheck"]
+            #codec => json
+            decorate_events => true
+            auto_offset_reset => "latest"
+            client_id => "ucentral-dev01"
+            add_field => { "instance" => "ucentral-dev01" }
+          }
+
+          kafka {
+            bootstrap_servers => "kafka-headless.ucentral-qa01.svc.cluster.local:9092"
+            topics => ["state", "healthcheck"]
+            decorate_events => true
+            auto_offset_reset => "latest"
+            client_id => "ucentral-qa01"
+            add_field => { "instance" => "ucentral-qa01" }
+          }
+        }
+
+        filter {
+          mutate { copy => { "[@metadata][kafka]" => "kafka" } }
+        }
+
+        filter {
+          json {
+            source => "message"
+            remove_field => [ "message" ]
+          }
+        }
+
+        filter {
+          if ([payload][state][unit][load]) {
+            mutate {
+              add_field => { "[payload][state][unit][load1]" => "%{[payload][state][unit][load][0]}" }
+              add_field => { "[payload][state][unit][load5]" => "%{[payload][state][unit][load][1]}" }
+              add_field => { "[payload][state][unit][load15]" => "%{[payload][state][unit][load][2]}" }
+              remove_field => [ "[payload][state][unit][load]" ]
+            }
+
+            mutate {
+              convert => {
+                "[payload][state][unit][load1]" => "integer"
+                "[payload][state][unit][load5]" => "integer"
+                "[payload][state][unit][load15]" => "integer"
+              }
+            }
+          }
+        }
+
+        output {
+          elasticsearch {
+            hosts => "http://elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local:9200"
+            index => "logstash-ucentral-%{+YYYY.MM.dd}"
+          }
+        }
       syslog.conf: |
         input {
           syslog {
