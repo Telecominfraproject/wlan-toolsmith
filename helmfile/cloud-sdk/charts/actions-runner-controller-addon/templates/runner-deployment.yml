@@ -1,0 +1,19 @@
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: wlan-testing-small-deployment
+spec:
+  template:
+    spec:
+      repository: Telecominfraproject/wlan-testing
+      env: []
+      labels:
+      - self-hosted
+      - small
+      resources:
+        limits:
+          cpu: "500m"
+          memory: "500Mi"
+        requests:
+          cpu: "500m"
+          memory: "500Mi"
