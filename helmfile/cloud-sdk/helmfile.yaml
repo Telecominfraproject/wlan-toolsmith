@@ -50,7 +50,7 @@ environments:
         certificateARN: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
     - monitoring:
         namespace: monitoring
-        nolaNamespaces: ['nola-01', 'nola-ext-01', 'nola-ext-02', 'nola-ext-03', 'nola-ext-04', 'tip-digicert', 'ucentral-1', 'ucentral-2']
+        nolaNamespaces: ['nola-01', 'nola-ext-01', 'nola-ext-02', 'nola-ext-03', 'nola-ext-04', 'tip-digicert', 'ucentral-qa01', 'ucentral-dev01']
     - domain: lab.wlan.tip.build
     - storageClass: gp2
     - autoscaler:
