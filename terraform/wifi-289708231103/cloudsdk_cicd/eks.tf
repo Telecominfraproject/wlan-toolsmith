@@ -103,7 +103,7 @@ module "eks" {
   write_kubeconfig              = false
   cluster_log_retention_in_days = var.cluster_log_retention_in_days
   map_roles                     = local.admin_roles
-  map_users                     = local.user_roles
+  map_users                     = concat(local.user_roles, local.eks_access_user_roles)
 }
 
 locals {
@@ -117,6 +117,7 @@ locals {
     "Project"   = var.project
     "ManagedBy" = "terraform"
   }
+  eks_access_user_roles = [for user in var.eks_access_users : { userarn = aws_iam_user.eks_access_users[user].arn, username = aws_iam_user.eks_access_users[user].name, groups = ["system:masters"] }]
   user_roles = [
     {
       userarn  = aws_iam_user.gh-actions-user.arn
