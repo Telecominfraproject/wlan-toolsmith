@@ -80,3 +80,15 @@ variable "deployment" {
   description = "Deployment name"
   type        = string
 }
+
+variable "eks_access_users" {
+  description = "List of IAM users to be created that require EKS access (i.e. GitHub Actions)"
+  type        = set(string)
+  default     = []
+}
+
+variable "eks_access_users_with_kms_access" {
+  description = "List of IAM users for users with EKS access to be granted KMS usage privileges"
+  type        = set(string)
+  default     = []
+}

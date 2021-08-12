@@ -1,4 +1,4 @@
-data "aws_iam_policy_document" "gh-actions-policy" {
+data "aws_iam_policy_document" "gh_actions_policy" {
   statement {
     effect = "Allow"
     actions = [
@@ -9,54 +9,20 @@ data "aws_iam_policy_document" "gh-actions-policy" {
   }
 }
 
-# gh-actions-user
-resource "aws_iam_user" "gh-actions-user" {
-  name = "gh-actions-user"
+resource "aws_iam_user" "eks_access_users" {
+  for_each = toset(var.eks_access_users)
+
+  name = each.key
   path = "/"
   tags = local.common_tags
 }
 
-resource "aws_iam_user_policy" "lb_ro" {
+resource "aws_iam_user_policy" "eks_access_user_policies" {
+  for_each = toset(var.eks_access_users)
+
   name   = "eks-list-access"
-  user   = aws_iam_user.gh-actions-user.name
-  policy = data.aws_iam_policy_document.gh-actions-policy.json
-}
+  user   = each.key
+  policy = data.aws_iam_policy_document.gh_actions_policy.json
 
-# quali-poc
-resource "aws_iam_user" "quali-poc" {
-  name = "quali-poc"
-  path = "/"
-  tags = local.common_tags
-}
-
-resource "aws_iam_user_policy" "lb_ro_quali" {
-  name   = "eks-list-access"
-  user   = aws_iam_user.quali-poc.name
-  policy = data.aws_iam_policy_document.gh-actions-policy.json
-}
-
-# gh-actions-wlan-test-bss
-resource "aws_iam_user" "gh-actions-wlan-test-bss" {
-  name = "gh-actions-wlan-test-bss"
-  path = "/"
-  tags = local.common_tags
-}
-
-resource "aws_iam_user_policy" "lb_ro_gh_wlan_test_bss" {
-  name   = "eks-list-access"
-  user   = aws_iam_user.gh-actions-wlan-test-bss.name
-  policy = data.aws_iam_policy_document.gh-actions-policy.json
-}
-
-# gh-actions-toolsmith
-resource "aws_iam_user" "gh-actions-toolsmith" {
-  name = "gh-actions-toolsmith"
-  path = "/"
-  tags = local.common_tags
-}
-
-resource "aws_iam_user_policy" "lb_ro_gh_toolsmith" {
-  name   = "eks-list-access"
-  user   = aws_iam_user.gh-actions-toolsmith.name
-  policy = data.aws_iam_policy_document.gh-actions-policy.json
+  depends_on = [aws_iam_user.eks_access_users]
 }

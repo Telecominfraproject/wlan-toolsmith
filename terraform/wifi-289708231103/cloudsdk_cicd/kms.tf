@@ -53,13 +53,13 @@ data "aws_iam_policy_document" "kms" {
     effect    = "Allow"
     principals {
       type = "AWS"
-      identifiers = [
+      identifiers = concat([
         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AdministratorAccess_5b24211378e8344f",
         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_SystemAdministrator_622371b0ceece6f8",
         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/atlantis-ecs_task_execution",
-        aws_iam_user.gh-actions-user.arn,
-        aws_iam_user.gh-actions-toolsmith.arn,
-      ]
+        ],
+        [for user in var.eks_access_users_with_kms_access : aws_iam_user.eks_access_users[user].arn]
+      )
     }
   }
 
@@ -86,6 +86,8 @@ data "aws_iam_policy_document" "kms" {
     }
   }
 
+
+  depends_on = [aws_iam_user.eks_access_users]
 }
 
 resource "aws_kms_key" "kms" {
