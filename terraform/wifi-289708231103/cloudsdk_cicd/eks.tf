@@ -103,7 +103,7 @@ module "eks" {
   write_kubeconfig              = false
   cluster_log_retention_in_days = var.cluster_log_retention_in_days
   map_roles                     = local.admin_roles
-  map_users                     = concat(local.user_roles, local.eks_access_user_roles)
+  map_users                     = local.eks_access_user_roles
 }
 
 locals {
@@ -118,28 +118,6 @@ locals {
     "ManagedBy" = "terraform"
   }
   eks_access_user_roles = [for user in var.eks_access_users : { userarn = aws_iam_user.eks_access_users[user].arn, username = aws_iam_user.eks_access_users[user].name, groups = ["system:masters"] }]
-  user_roles = [
-    {
-      userarn  = aws_iam_user.gh-actions-user.arn
-      username = aws_iam_user.gh-actions-user.name
-      groups   = ["system:masters"]
-    },
-    {
-      userarn  = aws_iam_user.quali-poc.arn
-      username = aws_iam_user.quali-poc.name
-      groups   = ["system:masters"]
-    },
-    {
-      userarn  = aws_iam_user.gh-actions-wlan-test-bss.arn
-      username = aws_iam_user.gh-actions-wlan-test-bss.name
-      groups   = ["system:masters"]
-    },
-    {
-      userarn  = aws_iam_user.gh-actions-toolsmith.arn
-      username = aws_iam_user.gh-actions-toolsmith.name
-      groups   = ["system:masters"]
-    }
-  ]
   admin_roles = [for role in var.eks_admin_roles : {
     rolearn  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${role}"
     username = "admin",
