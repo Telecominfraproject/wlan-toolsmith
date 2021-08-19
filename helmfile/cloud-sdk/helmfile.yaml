@@ -46,6 +46,7 @@ environments:
       - secrets/sso.yaml
       - secrets/alertmanager.yaml
       - secrets/actions-runner-controller.yaml
+      - secrets/ucentral-ap-firmware-logstash.yaml
     values:
     - eks:
         clusterName: tip-wlan-main
@@ -624,6 +625,29 @@ releases:
             index => "logstash-ucentral-%{+YYYY.MM.dd}"
           }
         }
+
+      ucentral-ap-firmware.conf: |
+        input {
+          s3 {
+            access_key_id => "{{ .Environment.Values.ucentral_ap_firmware_logstash.access_key_id }}"
+            secret_access_key => "{{ .Environment.Values.ucentral_ap_firmware_logstash.secret_access_key }}"
+            bucket => "ucentral-ap-firmware-logs"
+            delete => true
+            region => "us-east-1"
+            additional_settings => {
+              force_path_style => true
+              follow_redirects => false
+            }
+          }
+        }
+
+        output {
+          elasticsearch {
+            hosts => "http://elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local:9200"
+            index => "logstash-ucentral-ap-firmware-%{+YYYY.MM.dd}"
+          }
+        }
+
       syslog.conf: |
         input {
           syslog {
