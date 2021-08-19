@@ -4,7 +4,7 @@ provider "aws" {
 }
 
 terraform {
-  required_version = ">= 0.12.2, < 0.14"
+  required_version = ">= 0.12.2"
 
   backend "s3" {
     region         = "us-east-1"
@@ -38,6 +38,10 @@ resource "aws_s3_bucket" "bucket" {
   acl    = "public-read"
   tags   = local.common_tags
 
+  logging {
+    target_bucket = aws_s3_bucket.log_bucket.id
+  }
+
   website {
     index_document = "index.html"
     error_document = "index.html"
@@ -50,6 +54,12 @@ resource "aws_s3_bucket" "bucket" {
     expose_headers  = ["ETag"]
     max_age_seconds = 3000
   }
+}
+
+resource "aws_s3_bucket" "log_bucket" {
+  bucket = "ucentral-ap-firmware-logs"
+  acl    = "log-delivery-write"
+  tags   = local.common_tags
 }
 
 resource "aws_s3_bucket_object" "directory_listing" {
@@ -145,6 +155,37 @@ resource "aws_iam_user_policy" "firmware_" {
         "Resource" : [
           aws_s3_bucket.bucket.arn,
           "${aws_s3_bucket.bucket.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_user" "firmware_logstash" {
+  name = "ucentral-ap-firmware-logstash"
+  tags = local.common_tags
+}
+
+resource "aws_iam_access_key" "firmware_logstash" {
+  user = aws_iam_user.firmware_logstash.name
+}
+
+resource "aws_iam_user_policy" "firmware_logstash" {
+  user = aws_iam_user.firmware_logstash.name
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Action" : [
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:DeleteObject"
+        ],
+        "Effect" : "Allow",
+        "Resource" : [
+          aws_s3_bucket.log_bucket.arn,
+          "${aws_s3_bucket.log_bucket.arn}/*"
         ]
       }
     ]
