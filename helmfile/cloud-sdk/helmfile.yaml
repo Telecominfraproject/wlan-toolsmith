@@ -672,9 +672,9 @@ releases:
                 pattern_definitions => {
                  "UPLOAD_DATE" => "%{YEAR}%{MONTHNUM}%{MONTHDAY}"
                  "AP_MODEL" => "[a-z0-9]+_[a-z0-9]+(-|_)?[a-z0-9]+(-|_)?[a-z0-9]+"
-                 "GIT_REV" => "[a-z0-9]" 
+                 "GIT_REV" => "[a-z0-9]{4,8}" 
                 }
-                overwrite => [ "key" ]
+                add_field => { "timestamp_clientip" => "%{@timestamp} %{clientip}" }
               }
             }
           }
