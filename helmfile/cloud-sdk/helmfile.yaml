@@ -46,6 +46,7 @@ environments:
       - secrets/sso.yaml
       - secrets/alertmanager.yaml
       - secrets/actions-runner-controller.yaml
+      - secrets/ucentral-ap-firmware-logstash.yaml
     values:
     - eks:
         clusterName: tip-wlan-main
@@ -559,7 +560,7 @@ releases:
   values:
   - image: docker.elastic.co/logstash/logstash-oss
   - imageTag: 7.12.0
-  - replicas: 2
+  - replicas: 1
   - logstashConfig:
       logstash.yml: |
         http.host: 0.0.0.0
@@ -571,6 +572,7 @@ releases:
           kafka {
             bootstrap_servers => "kafka-headless.ucentral-dev01.svc.cluster.local:9092"
             topics => ["state", "healthcheck"]
+            tags => ["ucentral-kafka"]
             #codec => json
             decorate_events => true
             auto_offset_reset => "latest"
@@ -581,6 +583,7 @@ releases:
           kafka {
             bootstrap_servers => "kafka-headless.ucentral-qa01.svc.cluster.local:9092"
             topics => ["state", "healthcheck"]
+            tags => ["ucentral-kafka"]
             decorate_events => true
             auto_offset_reset => "latest"
             client_id => "ucentral-qa01"
@@ -589,13 +592,17 @@ releases:
         }
 
         filter {
-          mutate { copy => { "[@metadata][kafka]" => "kafka" } }
+          if "ucentral-kafka" in [tags] {
+            mutate { copy => { "[@metadata][kafka]" => "kafka" } }
+          }
         }
 
         filter {
-          json {
-            source => "message"
-            remove_field => [ "message" ]
+          if "ucentral-kafka" in [tags] {
+            json {
+              source => "message"
+              remove_field => [ "message" ]
+            }
           }
         }
 
@@ -619,22 +626,83 @@ releases:
         }
 
         output {
-          elasticsearch {
-            hosts => "http://elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local:9200"
-            index => "logstash-ucentral-%{+YYYY.MM.dd}"
+          if "ucentral-kafka" in [tags] {
+            elasticsearch {
+              hosts => "http://elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local:9200"
+              index => "logstash-ucentral-%{+YYYY.MM.dd}"
+            }
           }
         }
+
+      ucentral-ap-firmware.conf: |
+        input {
+          s3 {
+            access_key_id => "{{ .Environment.Values.ucentral_ap_firmware_logstash.access_key_id }}"
+            secret_access_key => "{{ .Environment.Values.ucentral_ap_firmware_logstash.secret_access_key }}"
+            bucket => "ucentral-ap-firmware-logs"
+            delete => true
+            region => "us-east-1"
+            tags => ["ucentral-ap-firmware"]
+            additional_settings => {
+              force_path_style => true
+              follow_redirects => false
+            }
+          }
+        }
+
+        filter {
+          if "ucentral-ap-firmware" in [tags] {
+            grok {
+              match => { "message" => "%{S3_ACCESS_LOG}" }
+              remove_field => ["message"]
+            }
+
+            date {
+              match => [ "timestamp", "dd/MMM/yyyy:HH:mm:ss Z" ]
+              remove_field => ["timestamp"]
+            }
+
+            geoip {
+              source => "clientip"
+            }
+
+            if [operation] == "REST.GET.OBJECT" and [key] =~ /^*\.bin$/ {
+              grok {
+                match => { "key" => "%{UPLOAD_DATE:upload_date}-%{AP_MODEL:ap_model}-%{GREEDYDATA:branch_name}-%{GIT_REV:git_rev}-%{WORD:suffix}.%{WORD:file_extension}" }
+                pattern_definitions => {
+                 "UPLOAD_DATE" => "%{YEAR}%{MONTHNUM}%{MONTHDAY}"
+                 "AP_MODEL" => "[a-z0-9]+_[a-z0-9]+(-|_)?[a-z0-9]+(-|_)?[a-z0-9]+"
+                 "GIT_REV" => "[a-z0-9]{4,8}" 
+                }
+                add_field => { "timestamp_clientip" => "%{@timestamp} %{clientip}" }
+              }
+            }
+          }
+        }
+
+        output {
+          if "ucentral-ap-firmware" in [tags] {
+            elasticsearch {
+              hosts => "http://elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local:9200"
+              index => "logstash-ucentral-ap-firmware-%{+YYYY.MM.dd}"
+            }
+          }
+        }
+
       syslog.conf: |
         input {
           syslog {
+            tags => ["ucentral-syslog"]
             port => 5514
           }
         }
 
         output {
-          elasticsearch {
-            hosts => "http://elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local:9200"
-            index => "logstash-%{+YYYY.MM.dd}"
+          if "ucentral-syslog" in [tags] {
+            elasticsearch {
+              hosts => "http://elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local:9200"
+              index => "logstash-%{+YYYY.MM.dd}"
+            }
           }
         }
   - service:
