@@ -571,7 +571,7 @@ releases:
         input {
           kafka {
             bootstrap_servers => "kafka-headless.ucentral-dev01.svc.cluster.local:9092"
-            topics => ["state", "healthcheck"]
+            topics => ["state", "healthcheck", "device_event_queue"]
             tags => ["ucentral-kafka"]
             #codec => json
             decorate_events => true
@@ -582,7 +582,7 @@ releases:
 
           kafka {
             bootstrap_servers => "kafka-headless.ucentral-qa01.svc.cluster.local:9092"
-            topics => ["state", "healthcheck"]
+            topics => ["state", "healthcheck", "device_event_queue"]
             tags => ["ucentral-kafka"]
             decorate_events => true
             auto_offset_reset => "latest"
