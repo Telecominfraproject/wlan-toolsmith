@@ -424,10 +424,10 @@ releases:
   - resources:
       requests:
         cpu: 100m
-        memory: 120Mi
+        memory: 150Mi
       limits:
         cpu: 500m
-        memory: 250Mi
+        memory: 300Mi
 
 - name: elasticsearch
   condition: elastic.enabled
