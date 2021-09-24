@@ -428,6 +428,9 @@ releases:
       limits:
         cpu: 500m
         memory: 300Mi
+  - tolerations:
+    - effect: NoSchedule
+      operator: Exists
 
 - name: elasticsearch
   condition: elastic.enabled

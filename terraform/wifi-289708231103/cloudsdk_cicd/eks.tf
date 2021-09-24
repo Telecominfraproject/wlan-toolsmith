@@ -33,7 +33,7 @@ module "eks" {
 
   worker_ami_name_filter = var.node_group_settings["ami_name"]
 
-  worker_groups = [
+  worker_groups = concat([
     for subnet in module.vpc_main.private_subnets :
     {
       name                 = format("default-%s", data.aws_subnet.private_az[subnet].availability_zone)
@@ -57,7 +57,47 @@ module "eks" {
         },
       ]
     }
-  ]
+    ], [
+    for subnet in module.vpc_main.private_subnets :
+    # Performance testing nodes with taints
+    {
+      name                 = format("perf-tests-%s", data.aws_subnet.private_az[subnet].availability_zone)
+      asg_desired_capacity = var.node_group_settings["min_capacity"]
+      asg_max_size         = var.node_group_settings["max_capacity"]
+      asg_min_size         = var.node_group_settings["min_capacity"]
+      instance_type        = var.node_group_settings["instance_type"]
+      additional_userdata  = local.worker_additional_userdata
+      kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal,project=ucentral,env=perf-tests --register-with-taints perftests=true:NoSchedule"
+      subnets              = [subnet]
+      tags = [
+        {
+          key : "k8s.io/cluster-autoscaler/enabled",
+          value : true,
+          propagate_at_launch : true,
+        },
+        {
+          key : "k8s.io/cluster-autoscaler/${local.cluster_name}",
+          value : true
+          propagate_at_launch : true,
+        },
+        {
+          key : "k8s.io/cluster-autoscaler/node-template/label/project",
+          value : "ucentral",
+          propagate_at_launch : true,
+        },
+        {
+          key : "k8s.io/cluster-autoscaler/node-template/label/env",
+          value : "perf-tests",
+          propagate_at_launch : true,
+        },
+        {
+          key : "k8s.io/cluster-autoscaler/node-template/taint/perftests",
+          value : "true:NoSchedule",
+          propagate_at_launch : true,
+        },
+      ]
+    }
+  ])
 
   worker_groups_launch_template = [
     for subnet in module.vpc_main.private_subnets :
