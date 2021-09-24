@@ -1,0 +1,5 @@
+- hosts: freeradius
+  become: true
+  gather_facts: true
+  roles:
+    - freeradius

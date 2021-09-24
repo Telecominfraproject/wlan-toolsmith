@@ -34,6 +34,16 @@ resource "aws_security_group_rule" "wlan_ingress_service" {
   cidr_blocks       = ["50.251.239.81/32", "199.243.89.130/32", "76.226.71.27/32", "35.183.190.118/32"]
 }
 
+resource "aws_security_group_rule" "wlan_ingress_freeradius" {
+  for_each          = toset(["1812"])
+  from_port         = each.key
+  to_port           = each.key
+  protocol          = "ALL"
+  security_group_id = aws_security_group.wlan.id
+  type              = "ingress"
+  cidr_blocks       = ["0.0.0.0/0"]
+}
+
 resource "aws_security_group_rule" "wlan_egress_all" {
   from_port         = 0
   to_port           = 0
