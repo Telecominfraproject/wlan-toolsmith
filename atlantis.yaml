@@ -10,3 +10,6 @@ projects:
   dir: terraform/wifi-289708231103/tip-wifi-vpn
 - name: atlantis
   dir: terraform/wifi-289708231103/atlantis
+- name: quali
+  dir: terraform/wifi-289708231103/quali
+  terraform_version: 1.0.8
