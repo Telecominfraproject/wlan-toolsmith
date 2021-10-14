@@ -6,6 +6,7 @@ spec:
   template:
     spec:
       repository: Telecominfraproject/wlan-testing
+      imagePullPolicy: IfNotPresent
       env: []
       labels:
       - self-hosted

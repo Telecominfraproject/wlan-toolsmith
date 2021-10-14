@@ -2,7 +2,7 @@ version: v0.135.0
 dependencies:
 - name: actions-runner-controller
   repository: https://actions-runner-controller.github.io/actions-runner-controller
-  version: 0.12.7
+  version: 0.13.2
 - name: aws-calico
   repository: https://aws.github.io/eks-charts
   version: 0.3.7
