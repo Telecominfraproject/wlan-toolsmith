@@ -9,4 +9,4 @@ spec:
   maxReplicas: 5
   scaleUpTriggers:
   - githubEvent: {}
-    duration: "30m"
+    duration: "24h"
