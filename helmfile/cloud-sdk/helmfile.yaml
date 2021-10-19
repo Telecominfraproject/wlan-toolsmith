@@ -573,35 +573,35 @@ releases:
       ucentral-kafka.conf: |
         input {
           kafka {
-            bootstrap_servers => "kafka-headless.ucentral-dev01.svc.cluster.local:9092"
+            bootstrap_servers => "kafka-headless.openwifi-dev01.svc.cluster.local:9092"
             topics => ["state", "healthcheck", "device_event_queue"]
-            tags => ["ucentral-kafka"]
+            tags => ["openwifi-kafka"]
             #codec => json
             decorate_events => true
             auto_offset_reset => "latest"
-            client_id => "ucentral-dev01"
-            add_field => { "instance" => "ucentral-dev01" }
+            client_id => "openwifi-dev01"
+            add_field => { "instance" => "openwifi-dev01" }
           }
 
           kafka {
-            bootstrap_servers => "kafka-headless.ucentral-qa01.svc.cluster.local:9092"
+            bootstrap_servers => "kafka-headless.openwifi-qa01.svc.cluster.local:9092"
             topics => ["state", "healthcheck", "device_event_queue"]
-            tags => ["ucentral-kafka"]
+            tags => ["openwifi-kafka"]
             decorate_events => true
             auto_offset_reset => "latest"
-            client_id => "ucentral-qa01"
-            add_field => { "instance" => "ucentral-qa01" }
+            client_id => "openwifi-qa01"
+            add_field => { "instance" => "openwifi-qa01" }
           }
         }
 
         filter {
-          if "ucentral-kafka" in [tags] {
+          if "openwifi-kafka" in [tags] {
             mutate { copy => { "[@metadata][kafka]" => "kafka" } }
           }
         }
 
         filter {
-          if "ucentral-kafka" in [tags] {
+          if "openwifi-kafka" in [tags] {
             json {
               source => "message"
               remove_field => [ "message" ]
@@ -629,7 +629,7 @@ releases:
         }
 
         output {
-          if "ucentral-kafka" in [tags] {
+          if "openwifi-kafka" in [tags] {
             elasticsearch {
               hosts => "http://elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local:9200"
               index => "logstash-ucentral-%{+YYYY.MM.dd}"
