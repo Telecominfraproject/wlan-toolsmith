@@ -56,7 +56,7 @@ environments:
         certificateARN: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
     - monitoring:
         namespace: monitoring
-        nolaNamespaces: ['nola-01', 'nola-ext-01', 'nola-ext-02', 'nola-ext-03', 'nola-ext-04', 'tip-digicert', 'ucentral-qa01', 'ucentral-dev01']
+        publicNamespaces: ['openwifi-qa01', 'openwifi-dev01']
     - domain: lab.wlan.tip.build
     - storageClass: gp2
     - autoscaler:
@@ -733,14 +733,15 @@ releases:
   condition: k8s-dashboard.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: kubernetes-dashboard/kubernetes-dashboard
+  version: 5.0.3
   labels:
     role: setup
     group: monitoring
     app: k8s-dashboard
   values:
   - settings:
-      defaultNamespace: {{ index .Environment.Values.monitoring.nolaNamespaces 0 }}
-      namespaceFallbackList: {{ .Environment.Values.monitoring.nolaNamespaces | toJson }}
+      defaultNamespace: {{ index .Environment.Values.monitoring.publicNamespaces 0 }}
+      namespaceFallbackList: {{ .Environment.Values.monitoring.publicNamespaces | toJson }}
       itemsPerPage: 25
       clusterName: TIP WLAN CI/CD
   - extraArgs:
