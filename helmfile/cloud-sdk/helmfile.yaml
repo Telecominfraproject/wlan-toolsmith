@@ -261,6 +261,16 @@ releases:
             annotations:
               title: Pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* is crash looping
               description: "The pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* is crash looping. Please check its logs to see what is going on."
+          - alert: Pod restarted many times
+            expr: kube_pod_container_status_restarts_total > 5
+            labels:
+              severity: warning
+              area: testbed
+              namespace: "{{`{{ $labels.namespace }}`}}"
+              pod: "{{`{{ $labels.pod }}`}}"
+            annotations:
+              title: Pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* was restarted many times
+              description: "The pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* was restarted more than 5 times. Please check its logs to see what is going on."
 
   - grafana:
       grafana.ini:
