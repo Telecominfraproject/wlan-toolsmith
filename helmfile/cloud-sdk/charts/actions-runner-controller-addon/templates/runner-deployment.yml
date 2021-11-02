@@ -13,15 +13,15 @@ spec:
       - small
       resources:
         limits:
-          cpu: "500m"
-          memory: "500Mi"
+          cpu: "250m"
+          memory: "250Mi"
         requests:
-          cpu: "500m"
-          memory: "500Mi"
+          cpu: "250m"
+          memory: "250Mi"
       dockerdContainerResources:
         limits:
-          cpu: "500m"
-          memory: "500Mi"
+          cpu: "250m"
+          memory: "250Mi"
         requests:
-          cpu: "500m"
-          memory: "500Mi"
+          cpu: "250m"
+          memory: "250Mi"
