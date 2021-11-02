@@ -49,6 +49,11 @@ variable "node_group_settings" {
   }
 }
 
+variable "testing_instance_type" {
+  type    = string
+  default = "t3a.medium"
+}
+
 variable "spot_instance_types" {
   type    = list(string)
   default = ["t3.small"]

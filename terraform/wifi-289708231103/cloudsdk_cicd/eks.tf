@@ -65,7 +65,7 @@ module "eks" {
       asg_desired_capacity = var.node_group_settings["min_capacity"]
       asg_max_size         = var.node_group_settings["max_capacity"]
       asg_min_size         = var.node_group_settings["min_capacity"]
-      instance_type        = "t3a.medium"
+      instance_type        = var.testing_instance_type
       additional_userdata  = local.worker_additional_userdata
       kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal,project=ucentral,env=tests --register-with-taints tests=true:NoSchedule"
       subnets              = [subnet]
