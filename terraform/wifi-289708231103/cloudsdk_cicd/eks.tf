@@ -59,15 +59,15 @@ module "eks" {
     }
     ], [
     for subnet in module.vpc_main.private_subnets :
-    # Performance testing nodes with taints
+    # testing nodes with taints
     {
-      name                 = format("perf-tests-%s", data.aws_subnet.private_az[subnet].availability_zone)
+      name                 = format("tests-%s", data.aws_subnet.private_az[subnet].availability_zone)
       asg_desired_capacity = var.node_group_settings["min_capacity"]
       asg_max_size         = var.node_group_settings["max_capacity"]
       asg_min_size         = var.node_group_settings["min_capacity"]
-      instance_type        = var.node_group_settings["instance_type"]
+      instance_type        = var.testing_instance_type
       additional_userdata  = local.worker_additional_userdata
-      kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal,project=ucentral,env=perf-tests --register-with-taints perftests=true:NoSchedule"
+      kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal,project=ucentral,env=tests --register-with-taints tests=true:NoSchedule"
       subnets              = [subnet]
       tags = [
         {
@@ -87,11 +87,11 @@ module "eks" {
         },
         {
           key : "k8s.io/cluster-autoscaler/node-template/label/env",
-          value : "perf-tests",
+          value : "tests",
           propagate_at_launch : true,
         },
         {
-          key : "k8s.io/cluster-autoscaler/node-template/taint/perftests",
+          key : "k8s.io/cluster-autoscaler/node-template/taint/tests",
           value : "true:NoSchedule",
           propagate_at_launch : true,
         },
