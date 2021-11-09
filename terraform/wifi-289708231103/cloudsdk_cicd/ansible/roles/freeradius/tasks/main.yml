@@ -9,46 +9,48 @@
     state: absent
   notify: Restart FreeRADIUS
 
+- name: Copy inner-tunnel FreeRADIUS config
+  copy:
+    src: inner-tunnel.config
+    dest: /etc/freeradius/3.0/sites-available/inner-tunnel
+  notify: Restart FreeRADIUS
+
 - name: Copy custom FreeRADIUS config
   copy:
     src: site.config
     dest: /etc/freeradius/3.0/sites-available/site
-  register: copy_freeradius_config
   notify: Restart FreeRADIUS
 
 - name: Copy clients.conf
   copy:
     src: clients.conf
     dest: /etc/freeradius/3.0/clients.conf
-  register: copy_clients_conf
   notify: Restart FreeRADIUS
 
 - name: Copy tls config
   copy:
     src: tls
     dest: /etc/freeradius/3.0/sites-available/tls
-  register: copy_clients_conf
   notify: Restart FreeRADIUS
 
 - name: Copy EAP mod configuration
   copy:
     src: eap
     dest: /etc/freeradius/3.0/mods-available/eap
-  register: copy_eap_conf
   notify: Restart FreeRADIUS
-
-- name: Copy original users to backup
-  copy:
-    src: /etc/freeradius/3.0/mods-config/files/authorize
-    dest: /etc/freeradius/3.0/mods-config/files/authorize.bkp
-    remote_src: yes
 
 - name: Copy users
   copy:
     src: users
     dest: /etc/freeradius/3.0/mods-config/files/authorize
-  register: copy_users
   notify: Restart FreeRADIUS
+
+- name: Link user file in freeradius dir to the authorize file
+  file:
+    src: /etc/freeradius/3.0/mods-config/files/authorize
+    dest: /etc/freeradius/3.0/users
+    state: link
+    force: yes
 
 - name: Enable custom FreeRADIUS config
   file:
