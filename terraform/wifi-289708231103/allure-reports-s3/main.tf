@@ -33,7 +33,7 @@ locals {
 }
 
 resource "aws_s3_bucket" "bucket" {
-  bucket = "allure-reports"
+  bucket = "openwifi-allure-reports"
   acl    = "public-read"
   tags   = local.common_tags
 
