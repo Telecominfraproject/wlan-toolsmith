@@ -48,3 +48,34 @@ resource "null_resource" "ansible_inventory_generate" {
 output "wlan_freeradius_instance" {
   value = aws_eip.wlan_freeradius.public_ip
 }
+
+# This instance will also have freeradius installed, but it will be given to the QA team for the internal tests and manual configuration changes that may be backported to the ansible configuration
+resource "aws_instance" "wlan_freeradius_qa" {
+  ami                    = "ami-00399ec92321828f5" # Ubuntu 20.04 amd64
+  instance_type          = "t2.micro"
+  subnet_id              = module.vpc_main.public_subnets[1]
+  vpc_security_group_ids = [aws_security_group.wlan.id]
+  key_name               = aws_key_pair.dunaev_wifi_3714.id
+
+  lifecycle {
+    ignore_changes = [ami]
+  }
+
+  root_block_device {
+    delete_on_termination = true
+  }
+
+  tags = merge({
+    "Name" : "${var.org}-${var.project}-${var.env} FreeRADIUS server for QA team (WIFI-5640)"
+  }, local.common_tags)
+}
+
+resource "aws_eip" "wlan_freeradius_qa" {
+  vpc      = true
+  instance = aws_instance.wlan_freeradius_qa.id
+  tags     = local.common_tags
+}
+
+output "wlan_freeradius_qa_instance" {
+  value = aws_eip.wlan_freeradius_qa.public_ip
+}
