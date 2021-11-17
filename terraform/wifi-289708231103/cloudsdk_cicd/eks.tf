@@ -42,7 +42,7 @@ module "eks" {
       asg_min_size         = var.node_group_settings["min_capacity"]
       instance_type        = var.node_group_settings["instance_type"]
       additional_userdata  = local.worker_additional_userdata
-      kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal"
+      kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal --allowed-unsafe-sysctls net.ipv4.tcp_keepalive_intvl,net.ipv4.tcp_keepalive_probes,net.ipv4.tcp_keepalive_time"
       subnets              = [subnet]
       tags = [
         {
@@ -67,7 +67,7 @@ module "eks" {
       asg_min_size         = var.node_group_settings["min_capacity"]
       instance_type        = var.testing_instance_type
       additional_userdata  = local.worker_additional_userdata
-      kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal,project=ucentral,env=tests --register-with-taints tests=true:NoSchedule"
+      kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal,project=ucentral,env=tests --register-with-taints tests=true:NoSchedule --allowed-unsafe-sysctls net.ipv4.tcp_keepalive_intvl,net.ipv4.tcp_keepalive_probes,net.ipv4.tcp_keepalive_time"
       subnets              = [subnet]
       tags = [
         {
@@ -110,7 +110,7 @@ module "eks" {
       asg_desired_capacity    = 0
       subnets                 = [subnet]
       additional_userdata     = local.worker_additional_userdata
-      kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot"
+      kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot --allowed-unsafe-sysctls net.ipv4.tcp_keepalive_intvl,net.ipv4.tcp_keepalive_probes,net.ipv4.tcp_keepalive_time"
       tags = [
         {
           key : "k8s.io/cluster-autoscaler/enabled",
