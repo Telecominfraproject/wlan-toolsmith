@@ -868,7 +868,7 @@ releases:
 
 - name: actions-runner-controller
   condition: actions-runner-controller.enabled
-  namespace: github-actions-controller
+  namespace: actions-runner-controller
   chart: actions-runner-controller/actions-runner-controller
   version: 0.13.2
   labels:
@@ -901,7 +901,7 @@ releases:
 
 - name: actions-runner-controller-addon
   condition: actions-runner-controller.enabled
-  namespace: github-actions-controller
+  namespace: actions-runner-controller
   chart: charts/actions-runner-controller-addon
   labels:
     app: actions-runner-controller
@@ -915,20 +915,3 @@ releases:
     app: cert-manager
   values:
   - installCRDs: true
-
-# preparation for https://telecominfraproject.atlassian.net/browse/WIFI-3399
-#- name: aws-eks-calico
-#  condition: calico.enabled
-#  namespace: kube-system
-#  chart: eks/aws-calico
-#  version: 0.3.7
-#  labels:
-#    app: calico
-#  values:
-#    - calico:
-#        node:
-#          resources:
-#            requests:
-#              memory: 50Mi
-#            limits:
-#              memory: 100Mi
