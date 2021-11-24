@@ -12,7 +12,7 @@ node_group_settings = {
   max_capacity  = 8
   min_capacity  = 0
   instance_type = "c5.xlarge"
-  ami_name      = "amazon-eks-node-1.20-v20211004"
+  ami_name      = "amazon-eks-node-1.20-v20211109"
 }
 
 spot_instance_types = ["m4.large", "m5.large", "m5a.large"]
