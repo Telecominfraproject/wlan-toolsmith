@@ -4,6 +4,9 @@ metadata:
   name: wlan-testing-small-deployment
 spec:
   template:
+    metadata:
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
     spec:
       repository: Telecominfraproject/wlan-testing
       imagePullPolicy: IfNotPresent
