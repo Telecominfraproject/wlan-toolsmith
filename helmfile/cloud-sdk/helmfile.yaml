@@ -874,7 +874,7 @@ releases:
   condition: actions-runner-controller.enabled
   namespace: actions-runner-controller
   chart: actions-runner-controller/actions-runner-controller
-  version: 0.13.2
+  version: 0.15.1
   labels:
     app: actions-runner-controller
   values:
@@ -883,6 +883,7 @@ releases:
       github_token: {{ .Environment.Values.actions_runner_controller.github_token }}
   - image:
       pullPolicy: IfNotPresent
+      tag: v0.20.4 # remove when Helm release is available
   - githubWebhookServer:
       enabled: true
       secret:
