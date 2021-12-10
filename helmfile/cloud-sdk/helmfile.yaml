@@ -451,6 +451,9 @@ releases:
     group: monitoring
     app: elasticsearch
   values:
+  - image:
+      repository: "docker.elastic.co/elasticsearch/elasticsearch"
+      tag: "6.8.6"
   - client:
       resources:
         limits:
@@ -522,6 +525,7 @@ releases:
   - testFramework:
       enabled: false
   - image:
+      repository: "docker.elastic.co/kibana/kibana"
       tag: "6.8.6"
   - files:
       kibana.yml:
@@ -571,7 +575,7 @@ releases:
     group: monitoring
     app: logstash
   values:
-  - image: docker.elastic.co/logstash/logstash-oss
+  - image: docker.elastic.co/logstash/logstash
   - imageTag: 7.12.0
   - replicas: 1
   - logstashConfig:
