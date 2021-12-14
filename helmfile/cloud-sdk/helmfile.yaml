@@ -464,8 +464,10 @@ releases:
   - master:
       resources:
         limits:
+          cpu: 200m
           memory: 1000Mi
         requests:
+          cpu: 200m
           memory: 800Mi
 
   - data:
@@ -473,10 +475,10 @@ releases:
         size: 650Gi
       resources:
         limits:
-          cpu: 1000m
+          cpu: 1500m
           memory: 3000Mi
         requests:
-          cpu: 50m
+          cpu: 500m
           memory: 2200Mi
 
 - name: elasticsearch-curator
