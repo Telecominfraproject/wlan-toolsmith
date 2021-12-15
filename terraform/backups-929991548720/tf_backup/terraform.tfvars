@@ -1,6 +1,6 @@
 aws_region = "us-east-1"
 
-backup_timeout = 7200
+backup_timeout = 14400
 
 fargate_task_public_ip_enabled = true
 
@@ -32,7 +32,7 @@ backup_retention_period = 60
 
 atlassian_backup_schedule = "cron(30 2 ? * WED,SAT *)"
 
-ephemeral_storage_size = 40
+ephemeral_storage_size = 60
 
 repo_backup_schedule = "cron(0 9 * * ? *)"
 
