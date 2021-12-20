@@ -457,10 +457,10 @@ releases:
   - client:
       resources:
         limits:
-          memory: 4Gi
+          memory: 2Gi
         requests:
-          memory: 4Gi
-      esJavaOpts: "-Xmx2g -Xms2g"
+          memory: 2Gi
+      esJavaOpts: "-Xmx1g -Xms1g"
 
   - master:
       resources:
