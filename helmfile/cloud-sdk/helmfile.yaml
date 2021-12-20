@@ -457,9 +457,10 @@ releases:
   - client:
       resources:
         limits:
-          memory: 1000Mi
+          memory: 4Gi
         requests:
-          memory: 800Mi
+          memory: 4Gi
+      esJavaOpts: "-Xmx2g -Xms2g"
 
   - master:
       resources:
@@ -476,10 +477,11 @@ releases:
       resources:
         limits:
           cpu: 1500m
-          memory: 3000Mi
+          memory: 4Gi
         requests:
-          cpu: 500m
-          memory: 2200Mi
+          cpu: 1500m
+          memory: 4Gi
+      esJavaOpts: "-Xmx2g -Xms2g"
 
 - name: elasticsearch-curator
   condition: elastic.enabled
