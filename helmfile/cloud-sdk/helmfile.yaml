@@ -453,7 +453,7 @@ releases:
   values:
   - image:
       repository: "docker.elastic.co/elasticsearch/elasticsearch"
-      tag: "6.8.6"
+      tag: "6.8.22"
   - client:
       resources:
         limits:
@@ -476,10 +476,11 @@ releases:
       resources:
         limits:
           cpu: 1500m
-          memory: 3000Mi
+          memory: 4Gi
         requests:
-          cpu: 500m
-          memory: 2200Mi
+          cpu: 1500m
+          memory: 4Gi
+      esJavaOpts: "-Xmx2g -Xms2g"
 
 - name: elasticsearch-curator
   condition: elastic.enabled
