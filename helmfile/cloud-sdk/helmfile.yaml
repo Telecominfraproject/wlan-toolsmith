@@ -480,7 +480,7 @@ releases:
         requests:
           cpu: 1500m
           memory: 4Gi
-      esJavaOpts: "-Xmx2g -Xms2g"
+      heapSize: "2048m"
 
 - name: elasticsearch-curator
   condition: elastic.enabled
