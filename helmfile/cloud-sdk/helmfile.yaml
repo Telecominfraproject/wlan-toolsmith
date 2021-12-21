@@ -453,14 +453,13 @@ releases:
   values:
   - image:
       repository: "docker.elastic.co/elasticsearch/elasticsearch"
-      tag: "6.8.6"
+      tag: "6.8.22"
   - client:
       resources:
         limits:
-          memory: 2Gi
+          memory: 1000Mi
         requests:
-          memory: 2Gi
-      esJavaOpts: "-Xmx1g -Xms1g"
+          memory: 800Mi
 
   - master:
       resources:
