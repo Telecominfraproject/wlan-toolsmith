@@ -1,7 +1,9 @@
 -podAnnotations:
 podAnnotations:
   iam.amazonaws.com/role: arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/tip-wlan-main-external-dns
-aws.region: us-east-2
+aws:
+  region: us-east-1
+  evaluateTargetHealth: false
 domainFilters:
 - {{ .Environment.Values.domain }}
 sources:
