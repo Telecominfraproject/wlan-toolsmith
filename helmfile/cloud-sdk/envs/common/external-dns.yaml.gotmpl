@@ -1,4 +1,3 @@
--podAnnotations:
 podAnnotations:
   iam.amazonaws.com/role: arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/tip-wlan-main-external-dns
 aws:
@@ -6,11 +5,14 @@ aws:
   evaluateTargetHealth: false
 domainFilters:
 - {{ .Environment.Values.domain }}
+triggerLoopOnEvent: true
 sources:
 - ingress
 - service
+extraArgs:
+  aws-zones-cache-duration: 1h
 txtOwnerId: /hostedzone/{{ .Environment.Values.eks.hostedZoneId }}
 policy: sync
-rbac:
-  serviceAccountAnnotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/{{ .Environment.Values.eks.clusterName }}-external-dns
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/{{ .Environment.Values.eks.clusterName }}-external-dns"
