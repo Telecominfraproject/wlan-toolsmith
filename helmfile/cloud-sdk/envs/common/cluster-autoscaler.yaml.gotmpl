@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
-  repository: us.gcr.io/k8s-artifacts-prod/autoscaling/cluster-autoscaler
-  tag: v1.17.3
+  repository: k8s.gcr.io/autoscaling/cluster-autoscaler
+  tag: v1.20.2
 autoDiscovery:
   clusterName: {{ .Environment.Values.eks.clusterName }}
 awsRegion: {{ .Environment.Values.eks.region }}
@@ -9,8 +9,9 @@ priorityClassName: system-cluster-critical
 rbac:
   create: true
   pspEnabled: true
-  serviceAccountAnnotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/{{ .Environment.Values.eks.clusterName }}-cluster-autoscaler
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/{{ .Environment.Values.eks.clusterName }}-cluster-autoscaler
 extraArgs:
   balance-similar-node-groups: true
   skip-nodes-with-system-pods: false

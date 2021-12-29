@@ -13,8 +13,8 @@ dependencies:
   repository: https://charts.jetstack.io
   version: v1.4.0
 - name: cluster-autoscaler
-  repository: https://charts.helm.sh/stable
-  version: 7.3.2
+  repository: https://kubernetes.github.io/autoscaler/
+  version: 9.11.0
 - name: elasticsearch
   repository: https://charts.helm.sh/stable
   version: 1.32.5
