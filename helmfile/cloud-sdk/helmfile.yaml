@@ -11,6 +11,8 @@ repositories:
   url: https://helm.elastic.co
 - name: kubernetes-dashboard
   url: https://kubernetes.github.io/dashboard/
+- name: autoscaler
+  url: https://kubernetes.github.io/autoscaler/
 - name: bitnami
   url: https://charts.bitnami.com/bitnami
 - name: influxdata
@@ -115,8 +117,8 @@ releases:
   condition: autoscaler.enabled
   <<: *default 
   <<: *cluster-autoscaler
-  chart: stable/cluster-autoscaler
-  version: 7.3.2
+  chart: autoscaler/cluster-autoscaler
+  version: 9.11.0
   labels:
     role: setup
     group: system
