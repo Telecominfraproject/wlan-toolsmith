@@ -1,2 +1,2 @@
 creation_rules:
-- kms: 'arn:aws:kms:us-east-2:289708231103:alias/helm-secrets'
+- kms: 'arn:aws:kms:us-east-2:289708231103:alias/terraform-secrets'

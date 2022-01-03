@@ -90,13 +90,24 @@ data "aws_iam_policy_document" "kms" {
   depends_on = [aws_iam_user.eks_access_users]
 }
 
-resource "aws_kms_key" "kms" {
+resource "aws_kms_key" "helm_secrets" {
   description = "Helm secrets key"
   policy      = data.aws_iam_policy_document.kms.json
   tags        = local.common_tags
 }
 
-resource "aws_kms_alias" "kms" {
+resource "aws_kms_alias" "helm_secrets" {
   name          = "alias/helm-secrets"
-  target_key_id = aws_kms_key.kms.key_id
+  target_key_id = aws_kms_key.helm_secrets.key_id
+}
+
+resource "aws_kms_key" "terraform_secrets" {
+  description = "Terraform secrets key"
+  policy      = data.aws_iam_policy_document.kms.json
+  tags        = local.common_tags
+}
+
+resource "aws_kms_alias" "terraform_secrets" {
+  name          = "alias/terraform-secrets"
+  target_key_id = aws_kms_key.terraform_secrets.key_id
 }

@@ -1,6 +1,6 @@
-resource "aws_key_pair" "johann-hoffmann-opsfleet" {
-  key_name   = "johann-hoffmann-opsfleet"
-  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhgxY32knQ9OeR+0StROkGT+s73DSoQu33d1mHT4vpC"
+resource "aws_key_pair" "ananda_gateway_wifi_6195" {
+  key_name   = "ananda-gateway-wifi-6195"
+  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILpNaE2RZszhukNHGQQCN52zVofJ+iIg9RsD9yoS2zEX"
 }
 
 data "aws_ami" "ubuntu" {
@@ -29,6 +29,19 @@ data "template_file" "ananda_install" {
 
 data "sops_file" "aws_vpc_gateway_token" {
   source_file = "aws_vpc_gateway_token.enc.json"
+}
+
+data "sops_file" "ananda_gateway_wifi_6195_key" {
+  source_file = "ananda_gateway_wifi_6195_key.enc.json"
+}
+
+resource "aws_secretsmanager_secret" "ananda_gateway_wifi_6195_key" {
+  name = "ananda-gateway-wifi-6195-key"
+}
+
+resource "aws_secretsmanager_secret_version" "ananda_gateway_wifi_6195_key" {
+  secret_id     = aws_secretsmanager_secret.ananda_gateway_wifi_6195_key.id
+  secret_string = data.sops_file.ananda_gateway_wifi_6195_key.data["ananda_gateway_wifi_6195_key"]
 }
 
 resource "aws_security_group" "ananda_aws_vpc_gateway" {
@@ -73,7 +86,7 @@ resource "aws_instance" "ananda_aws_vpc_gateway" {
   instance_type          = "c4.large"
   subnet_id              = module.vpc_main.public_subnets[0]
   vpc_security_group_ids = [aws_security_group.ananda_aws_vpc_gateway.id]
-  key_name               = aws_key_pair.johann-hoffmann-opsfleet.id
+  key_name               = aws_key_pair.ananda_gateway_wifi_6195.id
   user_data              = "${data.template_file.ananda_install.rendered}"
 
   lifecycle {
