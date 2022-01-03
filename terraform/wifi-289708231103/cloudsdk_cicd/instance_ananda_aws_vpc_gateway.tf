@@ -20,7 +20,7 @@ data "aws_ami" "ubuntu" {
 }
 
 data "template_file" "ananda_install" {
-  template = "${file("templates/install_ananda.sh.tpl")}"
+  template = file("templates/install_ananda.sh.tpl")
 
   vars = {
     aws_vpc_gateway_token = data.sops_file.aws_vpc_gateway_token.data["aws_vpc_gateway_token"]
@@ -45,39 +45,39 @@ resource "aws_secretsmanager_secret_version" "ananda_gateway_wifi_6195_key" {
 }
 
 resource "aws_security_group" "ananda_aws_vpc_gateway" {
-  name        = "Ananda AWS VPC gateway"
-  vpc_id      = module.vpc_main.vpc_id
+  name   = "Ananda AWS VPC gateway"
+  vpc_id = module.vpc_main.vpc_id
 
   ingress {
-    description      = "Allow ICMP"
-    from_port        = -1
-    to_port          = -1
-    protocol         = "icmp"
-    cidr_blocks      = ["0.0.0.0/0"]
+    description = "Allow ICMP"
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    description      = "Public SSH access"
-    from_port        = 22
-    to_port          = 22
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
+    description = "Public SSH access"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    description      = "Allow any inbound traffic from VPC network"
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = [var.vpc_cidr]
+    description = "Allow any inbound traffic from VPC network"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [var.vpc_cidr]
   }
 
   egress {
-    description      = "Allow all outbound traffic"
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
@@ -87,7 +87,7 @@ resource "aws_instance" "ananda_aws_vpc_gateway" {
   subnet_id              = module.vpc_main.public_subnets[0]
   vpc_security_group_ids = [aws_security_group.ananda_aws_vpc_gateway.id]
   key_name               = aws_key_pair.ananda_gateway_wifi_6195.id
-  user_data              = "${data.template_file.ananda_install.rendered}"
+  user_data              = data.template_file.ananda_install.rendered
 
   lifecycle {
     ignore_changes = [ami]
