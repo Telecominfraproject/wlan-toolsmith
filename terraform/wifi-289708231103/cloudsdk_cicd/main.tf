@@ -13,6 +13,13 @@ terraform {
     dynamodb_table = "terraform-state-lock"
     encrypt        = true
   }
+
+  required_providers {
+    sops = {
+      source  = "carlpett/sops"
+      version = "~> 0.5"
+    }
+  }
 }
 
 resource "aws_key_pair" "wlan" {
