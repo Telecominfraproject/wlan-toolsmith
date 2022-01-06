@@ -1,10 +1,9 @@
 provider "aws" {
-  version = ">= 2.59.0"
-  region  = var.aws_region
+  region = var.aws_region
 }
 
 terraform {
-  required_version = ">= 0.12.2, < 0.14"
+  required_version = ">= 1.0.0, < 2.0.0"
 
   backend "s3" {
     region         = "us-east-1"

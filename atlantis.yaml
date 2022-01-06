@@ -2,6 +2,7 @@ version: 3
 projects:
 - name: ucentral-ap-s3
   dir: terraform/wifi-289708231103/ucentral-ap-s3
+  terraform_version: 1.1.2
 - name: allure-reports-s3
   dir: terraform/wifi-289708231103/allure-reports-s3
   terraform_version: 1.0.8
