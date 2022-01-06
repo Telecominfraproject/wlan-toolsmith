@@ -7,6 +7,7 @@ projects:
   terraform_version: 1.0.8
 - name: cloudsdk_cicd
   dir: terraform/wifi-289708231103/cloudsdk_cicd
+  terraform_version: 1.1.2
 - name: dns
   dir: terraform/wifi-289708231103/dns
 - name: tip-wifi-vpn
