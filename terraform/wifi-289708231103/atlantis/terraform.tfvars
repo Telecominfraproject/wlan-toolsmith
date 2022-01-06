@@ -4,4 +4,4 @@ atlantis_github_organization = "Telecominfraproject"
 atlantis_policy_arns         = ["arn:aws:iam::aws:policy/AdministratorAccess"]
 repo_whitelist               = ["github.com/Telecominfraproject/Toolsmith"]
 repo_names                   = ["Toolsmith"]
-default_terraform_version    = "v0.13.5"
+default_terraform_version    = "v1.1.2"

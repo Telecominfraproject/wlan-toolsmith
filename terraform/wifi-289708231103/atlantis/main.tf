@@ -1,4 +1,6 @@
 terraform {
+  required_version = ">= 1.0.0, < 2.0.0"
+
   backend "s3" {
     region         = "us-east-1"
     bucket         = "tip-wifi-tfstate"
@@ -76,7 +78,8 @@ module "atlantis" {
 }
 
 module "github_repository_webhook" {
-  source = "terraform-aws-modules/atlantis/aws//modules/github-repository-webhook"
+  source  = "terraform-aws-modules/atlantis/aws//modules/github-repository-webhook"
+  version = "2.38.0"
 
   github_organization = var.atlantis_github_organization
   github_token        = data.sops_file.secrets.data["atlantis_github_user_token"]
