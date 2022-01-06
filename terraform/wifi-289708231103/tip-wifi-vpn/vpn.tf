@@ -7,7 +7,7 @@ resource "aws_customer_gateway" "tunnel_tip_wifi_nrg" {
 
 resource "aws_vpn_connection" "tunnel_tip_wifi_nrg" {
   customer_gateway_id = aws_customer_gateway.tunnel_tip_wifi_nrg.id
-  transit_gateway_id  = module.tgw_main.this_ec2_transit_gateway_id
+  transit_gateway_id  = module.tgw_main.ec2_transit_gateway_id
   type                = "ipsec.1"
   static_routes_only  = true
   tags                = merge({ Name = "tip-wifi-fre" }, local.common_tags)

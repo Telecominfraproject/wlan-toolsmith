@@ -12,7 +12,7 @@ resource "aws_cloudwatch_dashboard" "vpn_tg" {
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "AWS/TransitGateway", "PacketsIn", "TransitGateway", "${module.tgw_main.this_ec2_transit_gateway_id}" ],
+                    [ "AWS/TransitGateway", "PacketsIn", "TransitGateway", "${module.tgw_main.ec2_transit_gateway_id}" ],
                     [ ".", "PacketsOut", ".", "." ]
                 ],
                 "view": "timeSeries",
@@ -40,7 +40,7 @@ resource "aws_cloudwatch_dashboard" "vpn_tg" {
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "AWS/TransitGateway", "BytesIn", "TransitGateway", "${module.tgw_main.this_ec2_transit_gateway_id}" ],
+                    [ "AWS/TransitGateway", "BytesIn", "TransitGateway", "${module.tgw_main.ec2_transit_gateway_id}" ],
                     [ ".", "BytesOut", ".", "." ]
                 ],
                 "view": "timeSeries",
@@ -58,7 +58,7 @@ resource "aws_cloudwatch_dashboard" "vpn_tg" {
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "AWS/TransitGateway", "PacketDropCountBlackhole", "TransitGateway", "${module.tgw_main.this_ec2_transit_gateway_id}" ],
+                    [ "AWS/TransitGateway", "PacketDropCountBlackhole", "TransitGateway", "${module.tgw_main.ec2_transit_gateway_id}" ],
                     [ ".", "PacketDropCountNoRoute", ".", "." ]
                 ],
                 "view": "timeSeries",
@@ -77,7 +77,7 @@ resource "aws_cloudwatch_dashboard" "vpn_tg" {
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "AWS/TransitGateway", "BytesDropCountNoRoute", "TransitGateway", "${module.tgw_main.this_ec2_transit_gateway_id}" ],
+                    [ "AWS/TransitGateway", "BytesDropCountNoRoute", "TransitGateway", "${module.tgw_main.ec2_transit_gateway_id}" ],
                     [ ".", "BytesDropCountBlackhole", ".", "." ]
                 ],
                 "view": "timeSeries",
