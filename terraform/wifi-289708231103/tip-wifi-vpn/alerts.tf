@@ -38,12 +38,12 @@ resource "aws_cloudwatch_metric_alarm" "vpn_outgoing_data" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "tgw_incoming" {
-  alarm_name          = "tgw-incoming-data-${module.tgw_main.this_ec2_transit_gateway_id}"
+  alarm_name          = "tgw-incoming-data-${module.tgw_main.ec2_transit_gateway_id}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   namespace           = "AWS/TransitGateway"
   dimensions = {
-    "TransitGateway" = module.tgw_main.this_ec2_transit_gateway_id
+    "TransitGateway" = module.tgw_main.ec2_transit_gateway_id
   }
   metric_name       = "BytesIn"
   period            = "3600"
@@ -56,12 +56,12 @@ resource "aws_cloudwatch_metric_alarm" "tgw_incoming" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "tgw_outgoing_data" {
-  alarm_name          = "tgw-outgoing-data-${module.tgw_main.this_ec2_transit_gateway_id}"
+  alarm_name          = "tgw-outgoing-data-${module.tgw_main.ec2_transit_gateway_id}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   namespace           = "AWS/TransitGateway"
   dimensions = {
-    "TransitGateway" = module.tgw_main.this_ec2_transit_gateway_id
+    "TransitGateway" = module.tgw_main.ec2_transit_gateway_id
   }
   metric_name       = "BytesOut"
   period            = "3600"
@@ -74,7 +74,7 @@ resource "aws_cloudwatch_metric_alarm" "tgw_outgoing_data" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "tgw_packet_drops" {
-  alarm_name          = "tgw-packet-drops-${module.tgw_main.this_ec2_transit_gateway_id}"
+  alarm_name          = "tgw-packet-drops-${module.tgw_main.ec2_transit_gateway_id}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "3"
   threshold           = "0"
@@ -95,7 +95,7 @@ resource "aws_cloudwatch_metric_alarm" "tgw_packet_drops" {
     metric {
       namespace = "AWS/TransitGateway"
       dimensions = {
-        "TransitGateway" = module.tgw_main.this_ec2_transit_gateway_id
+        "TransitGateway" = module.tgw_main.ec2_transit_gateway_id
       }
       metric_name = "PacketDropCountBlackhole"
       period      = "300"
@@ -108,7 +108,7 @@ resource "aws_cloudwatch_metric_alarm" "tgw_packet_drops" {
     metric {
       namespace = "AWS/TransitGateway"
       dimensions = {
-        "TransitGateway" = module.tgw_main.this_ec2_transit_gateway_id
+        "TransitGateway" = module.tgw_main.ec2_transit_gateway_id
       }
       metric_name = "PacketDropCountNoRoute"
       period      = "300"
