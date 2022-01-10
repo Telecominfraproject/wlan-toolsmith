@@ -1,16 +1,14 @@
 provider "aws" {
-  version = ">= 2.59.0"
-  region  = var.aws_region
+  region = var.aws_region
 }
 
 provider "aws" {
-  alias   = "acm"
-  version = ">= 2.59.0"
-  region  = var.aws_acm_region
+  alias  = "acm"
+  region = var.aws_acm_region
 }
 
 terraform {
-  required_version = ">= 0.12.2, < 0.14"
+  required_version = ">= 1.0.0, < 2.0.0"
 
   backend "s3" {
     region         = "us-east-1"
@@ -33,10 +31,12 @@ resource "aws_route53_zone" "main" {
 }
 
 module "acm" {
+  source  = "terraform-aws-modules/acm/aws"
+  version = "~> 3.0"
+
   providers = {
     aws = aws.acm
   }
-  source = "git::https://github.com/terraform-aws-modules/terraform-aws-acm?ref=v2.9.0"
 
   domain_name = var.main_zone_name
   zone_id     = aws_route53_zone.main.zone_id
@@ -60,5 +60,5 @@ output "zone_name" {
 }
 
 output "certificate_arn" {
-  value = module.acm.this_acm_certificate_arn
+  value = module.acm.acm_certificate_arn
 }
