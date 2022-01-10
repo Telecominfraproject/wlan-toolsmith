@@ -17,6 +17,7 @@ projects:
   terraform_version: 1.1.2
 - name: atlantis
   dir: terraform/wifi-289708231103/atlantis
+  terraform_version: 1.1.2
 - name: quali
   dir: terraform/wifi-289708231103/quali
   terraform_version: 1.0.8
