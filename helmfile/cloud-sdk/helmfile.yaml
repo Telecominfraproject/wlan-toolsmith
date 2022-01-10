@@ -177,16 +177,13 @@ releases:
   condition: prometheus.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: prometheus-community/kube-prometheus-stack
-  version: 26.1.0
+  version: 30.0.0
   labels:
     role: setup
     group: monitoring
     app: prometheus-operator
   values:
   - nameOverride: prometheus-operator
-  - prometheusOperator:
-      manageCrds: true
-      createCustomResource: false
   - prometheus:
       enabled: true
       prometheusSpec:
