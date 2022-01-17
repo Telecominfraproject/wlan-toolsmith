@@ -113,7 +113,8 @@ resource "aws_iam_user_policy" "uploader" {
           "s3:ListBucketMultipartUploads",
           "s3:GetObject",
           "s3:PutObject",
-          "s3:PutObjectAcl"
+          "s3:PutObjectAcl",
+          "s3:PutObjectTagging"
         ],
         "Effect" : "Allow",
         "Resource" : [
