@@ -53,6 +53,18 @@ resource "aws_s3_bucket" "bucket" {
     expose_headers  = ["ETag"]
     max_age_seconds = 3000
   }
+
+  lifecycle_rule {
+    id      = "dev_retention"
+    enabled = true
+    tags = {
+      release = "false"
+    }
+
+    expiration {
+      days = 60
+    }
+  }
 }
 
 resource "aws_s3_bucket" "log_bucket" {
