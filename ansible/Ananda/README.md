@@ -1,3 +1,4 @@
+## Usage
 This playbook installs and configures the Ananda agent on the lab controllers to set them up as gateways.
 
 You need to install the amazon.aws collection (requires Ansible version 2.9+) and it's dependencies before being able to run the playbook:
