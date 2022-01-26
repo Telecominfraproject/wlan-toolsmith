@@ -3,3 +3,19 @@
 user Cleartext-Password := "password", MS-CHAP-Use-NTLM-Auth := 0
   WISPr-Bandwidth-Max-Up := 10000,
   WISPr-Bandwidth-Max-Down := 10000
+
+user1 Cleartext-Password := "password", MS-CHAP-Use-NTLM-Auth := 0
+  WISPr-Bandwidth-Max-Up := 10000,
+  WISPr-Bandwidth-Max-Down := 10000
+
+user2 Cleartext-Password := "password", MS-CHAP-Use-NTLM-Auth := 0
+  WISPr-Bandwidth-Max-Up := 20000,
+  WISPr-Bandwidth-Max-Down := 20000
+
+user3 Cleartext-Password := "password", MS-CHAP-Use-NTLM-Auth := 0
+  WISPr-Bandwidth-Max-Up := 50000,
+  WISPr-Bandwidth-Max-Down := 10000
+
+user4 Cleartext-Password := "password", MS-CHAP-Use-NTLM-Auth := 0
+  WISPr-Bandwidth-Max-Up := 10000,
+  WISPr-Bandwidth-Max-Down := 50000
