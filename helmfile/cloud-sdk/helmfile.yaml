@@ -276,6 +276,16 @@ releases:
             annotations:
               title: Pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* was restarted many times
               description: "The pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* was restarted more than 5 times. Please check its logs to see what is going on."
+          - alert: PVC running out of space
+            expr: kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes * 100 < 20
+            labels:
+              severity: warning
+              area: testbed
+              namespace: "{{`{{ $labels.namespace }}`}}"
+              persistentvolumeclaim: "{{`{{ $labels.persistentvolumeclaim }}`}}"
+            annotations:
+              title: PVC *{{`{{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }}`}}* has less than 20% free storage
+              description: "The PVC *{{`{{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }}`}}* only has {{`{{ $value }}`}}% capacity left. Please increase its size or clean it up."
 
   - grafana:
       grafana.ini:
