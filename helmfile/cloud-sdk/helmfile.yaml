@@ -424,6 +424,7 @@ releases:
   condition: elastic.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: kokuwa/fluentd-elasticsearch
+  version: 13.1.0
   labels:
     role: setup
     group: monitoring
@@ -432,14 +433,12 @@ releases:
   - elasticsearch:
       serviceAccount:
         create: true
-      awsSigningSidecar:
-        enabled: false
       hosts:
       - elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local 
   - resources:
       requests:
         cpu: 100m
-        memory: 150Mi
+        memory: 200Mi
       limits:
         cpu: 500m
         memory: 300Mi
@@ -578,13 +577,13 @@ releases:
   condition: logstash.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: elastic/logstash
+  version: 7.16.2
   labels:
     role: setup
     group: monitoring
     app: logstash
   values:
   - image: docker.elastic.co/logstash/logstash
-  - imageTag: 7.12.0
   - replicas: 1
   - logstashConfig:
       logstash.yml: |
@@ -755,7 +754,7 @@ releases:
   condition: k8s-dashboard.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: kubernetes-dashboard/kubernetes-dashboard
-  version: 5.0.3
+  version: 5.0.5
   labels:
     role: setup
     group: monitoring
@@ -798,6 +797,7 @@ releases:
   condition: metrics-server.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: bitnami/metrics-server
+  version: 5.10.13
   labels:
     role: setup
     group: monitoring
@@ -810,11 +810,11 @@ releases:
   <<: *default
   condition: alb-ingress.enabled
   chart: eks/aws-load-balancer-controller
+  version: 1.3.3
   labels:
     role: setup
     group: system
     app: aws-load-balancer-controller
-  version: 1.2.3
   values:
   - serviceAccount:
       annotations:
@@ -829,7 +829,7 @@ releases:
   <<: *default
   condition: node-termination-handler.enabled
   chart: eks/aws-node-termination-handler
-  version: 0.13.2
+  version: 0.16.0
   labels:
     role: setup
     group: system
@@ -923,7 +923,7 @@ releases:
   condition: cert-manager.enabled
   namespace: kube-system
   chart: jetstack/cert-manager
-  version: v1.4.0
+  version: v1.6.1
   labels:
     app: cert-manager
   values:
