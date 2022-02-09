@@ -2,7 +2,6 @@ provider "kubernetes" {
   host                   = data.aws_eks_cluster.cluster.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
   token                  = data.aws_eks_cluster_auth.cluster.token
-  load_config_file       = false
 }
 
 data "aws_eks_cluster" "cluster" {
@@ -19,7 +18,7 @@ data "aws_subnet" "private_az" {
 }
 
 module "eks" {
-  source       = "git::https://github.com/terraform-aws-modules/terraform-aws-eks?ref=v12.2.0"
+  source       = "git::https://github.com/terraform-aws-modules/terraform-aws-eks?ref=v15.2.0"
   cluster_name = local.cluster_name
   subnets      = module.vpc_main.private_subnets
   vpc_id       = module.vpc_main.vpc_id
