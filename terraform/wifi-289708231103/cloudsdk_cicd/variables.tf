@@ -51,7 +51,12 @@ variable "node_group_settings" {
 
 variable "testing_instance_type" {
   type    = string
-  default = "m5.large"
+  default = "t3a.medium"
+}
+
+variable "testing_big_instance_type" {
+  type    = string
+  default = "m5a.xlarge"
 }
 
 variable "spot_instance_types" {

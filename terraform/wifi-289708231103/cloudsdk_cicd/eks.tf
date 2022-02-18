@@ -65,7 +65,7 @@ module "eks" {
       asg_min_size         = var.node_group_settings["min_capacity"]
       instance_type        = var.testing_instance_type
       additional_userdata  = local.worker_additional_userdata
-      kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal,project=ucentral,env=tests --register-with-taints tests=true:NoSchedule --allowed-unsafe-sysctls net.ipv4.tcp_keepalive_intvl,net.ipv4.tcp_keepalive_probes,net.ipv4.tcp_keepalive_time"
+      kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal,project=ucentral,env=tests,size=small --register-with-taints tests=true:NoSchedule --allowed-unsafe-sysctls net.ipv4.tcp_keepalive_intvl,net.ipv4.tcp_keepalive_probes,net.ipv4.tcp_keepalive_time"
       subnets              = [subnet]
       tags = [
         {
@@ -86,6 +86,56 @@ module "eks" {
         {
           key : "k8s.io/cluster-autoscaler/node-template/label/env",
           value : "tests",
+          propagate_at_launch : true,
+        },
+        {
+          key : "k8s.io/cluster-autoscaler/node-template/label/size",
+          value : "small",
+          propagate_at_launch : true,
+        },
+        {
+          key : "k8s.io/cluster-autoscaler/node-template/taint/tests",
+          value : "true:NoSchedule",
+          propagate_at_launch : true,
+        },
+      ]
+    }
+  ], [
+    for subnet in module.vpc_main.private_subnets :
+    # big testing nodes with taints
+    {
+      name                 = format("tests-big-%s", data.aws_subnet.private_az[subnet].availability_zone)
+      asg_desired_capacity = var.node_group_settings["min_capacity"]
+      asg_max_size         = var.node_group_settings["max_capacity"]
+      asg_min_size         = var.node_group_settings["min_capacity"]
+      instance_type        = var.testing_big_instance_type
+      additional_userdata  = local.worker_additional_userdata
+      kubelet_extra_args   = "--node-labels=node.kubernetes.io/lifecycle=normal,project=ucentral,env=tests,size=big --register-with-taints tests=true:NoSchedule --allowed-unsafe-sysctls net.ipv4.tcp_keepalive_intvl,net.ipv4.tcp_keepalive_probes,net.ipv4.tcp_keepalive_time"
+      subnets              = [subnet]
+      tags = [
+        {
+          key : "k8s.io/cluster-autoscaler/enabled",
+          value : true,
+          propagate_at_launch : true,
+        },
+        {
+          key : "k8s.io/cluster-autoscaler/${local.cluster_name}",
+          value : true
+          propagate_at_launch : true,
+        },
+        {
+          key : "k8s.io/cluster-autoscaler/node-template/label/project",
+          value : "ucentral",
+          propagate_at_launch : true,
+        },
+        {
+          key : "k8s.io/cluster-autoscaler/node-template/label/env",
+          value : "tests",
+          propagate_at_launch : true,
+        },
+        {
+          key : "k8s.io/cluster-autoscaler/node-template/label/size",
+          value : "big",
           propagate_at_launch : true,
         },
         {
