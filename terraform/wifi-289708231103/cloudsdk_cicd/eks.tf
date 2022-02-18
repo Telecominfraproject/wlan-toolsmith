@@ -100,7 +100,7 @@ module "eks" {
         },
       ]
     }
-  ], [
+    ], [
     for subnet in module.vpc_main.private_subnets :
     # big testing nodes with taints
     {
