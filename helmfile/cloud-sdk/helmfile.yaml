@@ -892,7 +892,7 @@ releases:
   condition: actions-runner-controller.enabled
   namespace: actions-runner-controller
   chart: actions-runner-controller/actions-runner-controller
-  version: 0.16.0
+  version: 0.16.1
   labels:
     app: actions-runner-controller
   values:

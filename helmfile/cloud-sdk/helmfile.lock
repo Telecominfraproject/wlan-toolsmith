@@ -2,7 +2,7 @@ version: v0.135.0
 dependencies:
 - name: actions-runner-controller
   repository: https://actions-runner-controller.github.io/actions-runner-controller
-  version: 0.16.0
+  version: 0.16.1
 - name: aws-load-balancer-controller
   repository: https://aws.github.io/eks-charts
   version: 1.3.3
@@ -48,5 +48,5 @@ dependencies:
 - name: metrics-server
   repository: https://charts.bitnami.com/bitnami
   version: 5.10.13
-digest: sha256:1edfdebcc84b7743628713a8c0996d7810c44fe25bd0befada0637d5a7efe131
-generated: "2022-02-18T16:16:21.85740998+01:00"
+digest: sha256:59b75ce1933b29cd8d63f4fcc6bdc861361b5ed13db6715aa788c0f7944890fc
+generated: "2022-02-21T10:50:08.693484261+01:00"
