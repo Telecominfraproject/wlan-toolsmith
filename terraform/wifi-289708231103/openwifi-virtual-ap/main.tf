@@ -73,54 +73,54 @@ resource "aws_iam_role" "vmimport" {
   name = "vmimport"
 
   assume_role_policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
-       {
-          "Effect": "Allow",
-          "Principal": { "Service": "vmie.amazonaws.com" },
-          "Action": "sts:AssumeRole",
-          "Condition": {
-             "StringEquals":{
-                "sts:Externalid": "vmimport"
-             }
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Principal" : { "Service" : "vmie.amazonaws.com" },
+        "Action" : "sts:AssumeRole",
+        "Condition" : {
+          "StringEquals" : {
+            "sts:Externalid" : "vmimport"
           }
-       },
-       {
-          "Effect": "Allow",
-          "Action": [
-             "s3:GetBucketLocation",
-             "s3:GetObject",
-             "s3:ListBucket" 
-          ],
-          "Resource": [
-             "arn:aws:s3:::openwifi-virtual-ap-images",
-             "arn:aws:s3:::openwifi-virtual-ap-images/*"
-          ]
-       },
-       {
-          "Effect": "Allow",
-          "Action": [
-             "s3:GetBucketLocation",
-             "s3:GetObject",
-             "s3:ListBucket",
-             "s3:PutObject",
-             "s3:GetBucketAcl"
-          ],
-          "Resource": [
-             "arn:aws:s3:::openwifi-virtual-ap-images",
-             "arn:aws:s3:::openwifi-virtual-ap-images/*"
-          ]
-       },
-       {
-          "Effect": "Allow",
-          "Action": [
-             "ec2:ModifySnapshotAttribute",
-             "ec2:CopySnapshot",
-             "ec2:RegisterImage",
-             "ec2:Describe*"
-          ],
-          "Resource": "*"
-       }
+        }
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:GetBucketLocation",
+          "s3:GetObject",
+          "s3:ListBucket"
+        ],
+        "Resource" : [
+          "arn:aws:s3:::openwifi-virtual-ap-images",
+          "arn:aws:s3:::openwifi-virtual-ap-images/*"
+        ]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:GetBucketLocation",
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:PutObject",
+          "s3:GetBucketAcl"
+        ],
+        "Resource" : [
+          "arn:aws:s3:::openwifi-virtual-ap-images",
+          "arn:aws:s3:::openwifi-virtual-ap-images/*"
+        ]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ec2:ModifySnapshotAttribute",
+          "ec2:CopySnapshot",
+          "ec2:RegisterImage",
+          "ec2:Describe*"
+        ],
+        "Resource" : "*"
+      }
     ]
   })
 }
