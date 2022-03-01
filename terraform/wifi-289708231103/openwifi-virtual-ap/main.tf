@@ -54,21 +54,6 @@ resource "aws_instance" "openwifi_virtual_ap" {
   }, local.common_tags)
 }
 
-resource "aws_s3_bucket" "openwifi_virtual_ap_images" {
-  bucket = "openwifi-virtual-ap-images"
-  acl    = "private"
-  tags   = local.common_tags
-
-  lifecycle_rule {
-    id      = "default_retention"
-    enabled = true
-
-    expiration {
-      days = 60
-    }
-  }
-}
-
 resource "aws_iam_role" "vmimport" {
   name = "vmimport"
 
@@ -93,8 +78,8 @@ resource "aws_iam_role" "vmimport" {
           "s3:ListBucket"
         ],
         "Resource" : [
-          "arn:aws:s3:::openwifi-virtual-ap-images",
-          "arn:aws:s3:::openwifi-virtual-ap-images/*"
+          "arn:aws:s3:::ucentral-ap-firmware",
+          "arn:aws:s3:::ucentral-ap-firmware/*"
         ]
       },
       {
@@ -107,8 +92,8 @@ resource "aws_iam_role" "vmimport" {
           "s3:GetBucketAcl"
         ],
         "Resource" : [
-          "arn:aws:s3:::openwifi-virtual-ap-images",
-          "arn:aws:s3:::openwifi-virtual-ap-images/*"
+          "arn:aws:s3:::ucentral-ap-firmware",
+          "arn:aws:s3:::ucentral-ap-firmware/*"
         ]
       },
       {

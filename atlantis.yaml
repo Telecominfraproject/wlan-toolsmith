@@ -8,6 +8,8 @@ projects:
   dir: terraform/wifi-289708231103/cloudsdk_cicd
 - name: dns
   dir: terraform/wifi-289708231103/dns
+- name: openwifi-virtual-ap
+  dir: terraform/wifi-289708231103/openwifi-virtual-ap
 - name: tip-wifi-vpn
   dir: terraform/wifi-289708231103/tip-wifi-vpn
 - name: atlantis
