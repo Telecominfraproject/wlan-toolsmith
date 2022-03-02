@@ -913,7 +913,7 @@ releases:
         - host: "ghac-webhook.cicd.lab.wlan.tip.build"
           paths:
           - path: /*
-            pathType: Prefix
+            pathType: ImplementationSpecific
         annotations:
           kubernetes.io/ingress.class: alb
           alb.ingress.kubernetes.io/scheme: internet-facing
