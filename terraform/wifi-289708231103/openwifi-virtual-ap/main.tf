@@ -26,7 +26,7 @@ resource "aws_key_pair" "openwifi_virtual_ap" {
   tags       = local.common_tags
 }
 
-data "aws_ami" "tip_firmware" {
+data "aws_ami" "ubuntu" {
   most_recent = true
 
   filter {
@@ -34,12 +34,17 @@ data "aws_ami" "tip_firmware" {
     values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
   }
 
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
   owners = ["099720109477"] # Canonical
 }
 
 resource "aws_instance" "openwifi_virtual_ap" {
-  ami                         = data.aws_ami.tip_firmware.id
-  instance_type               = "t2.micro"
+  ami                         = data.aws_ami.ubuntu.id
+  instance_type               = "t2.nano"
   associate_public_ip_address = true
   key_name                    = aws_key_pair.openwifi_virtual_ap.id
 
