@@ -43,7 +43,7 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_security_group" "openwifi_virtual_ap" {
-  name = "OpenWifi virtual AP"
+  name = "openwifi-virtual-ap"
 
   ingress {
     description = "Allow ICMP"
@@ -75,7 +75,7 @@ resource "aws_instance" "openwifi_virtual_ap" {
   instance_type               = "t2.nano"
   associate_public_ip_address = true
   key_name                    = aws_key_pair.openwifi_virtual_ap.id
-  security_groups             = [aws_security_group.openwifi_virtual_ap.id]
+  security_groups             = [aws_security_group.openwifi_virtual_ap.name]
 
   lifecycle {
     ignore_changes = [ami]
