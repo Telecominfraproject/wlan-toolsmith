@@ -91,7 +91,7 @@ resource "aws_instance" "openwifi_virtual_ap" {
 }
 
 resource "aws_iam_role_policy" "vmimport" {
-  name = "vmimport role policy"
+  name = "vmimport"
   role = aws_iam_role.vmimport.id
 
   policy = jsonencode({
