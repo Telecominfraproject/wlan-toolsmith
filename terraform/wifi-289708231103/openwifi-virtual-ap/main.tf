@@ -42,11 +42,40 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
+resource "aws_security_group" "openwifi_virtual_ap" {
+  name = "OpenWifi virtual AP"
+
+  ingress {
+    description = "Allow ICMP"
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Public SSH access"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_instance" "openwifi_virtual_ap" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t2.nano"
   associate_public_ip_address = true
   key_name                    = aws_key_pair.openwifi_virtual_ap.id
+  security_groups             = [aws_security_group.openwifi_virtual_ap.id]
 
   lifecycle {
     ignore_changes = [ami]
@@ -57,26 +86,17 @@ resource "aws_instance" "openwifi_virtual_ap" {
   }
 
   tags = merge({
-    "Name" : "${var.org}-${var.project}-${var.env} Openwifi virtual AP (WIFI-7204)"
+    "Name" : "${var.org}-${var.project}-${var.env} OpenWifi virtual AP (WIFI-7204)"
   }, local.common_tags)
 }
 
-resource "aws_iam_role" "vmimport" {
-  name = "vmimport"
+resource "aws_iam_role_policy" "vmimport" {
+  name = "vmimport role policy"
+  role = aws_iam_role.vmimport.id
 
-  assume_role_policy = jsonencode({
+  policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
-      {
-        "Effect" : "Allow",
-        "Principal" : { "Service" : "vmie.amazonaws.com" },
-        "Action" : "sts:AssumeRole",
-        "Condition" : {
-          "StringEquals" : {
-            "sts:Externalid" : "vmimport"
-          }
-        }
-      },
       {
         "Effect" : "Allow",
         "Action" : [
@@ -112,6 +132,26 @@ resource "aws_iam_role" "vmimport" {
           "ec2:Describe*"
         ],
         "Resource" : "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "vmimport" {
+  name = "vmimport"
+
+  assume_role_policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Principal" : { "Service" : "vmie.amazonaws.com" },
+        "Action" : "sts:AssumeRole",
+        "Condition" : {
+          "StringEquals" : {
+            "sts:Externalid" : "vmimport"
+          }
+        }
       }
     ]
   })
