@@ -26,22 +26,6 @@ resource "aws_key_pair" "openwifi_virtual_ap" {
   tags       = local.common_tags
 }
 
-data "aws_ami" "ubuntu" {
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["099720109477"] # Canonical
-}
-
 resource "aws_security_group" "openwifi_virtual_ap" {
   name = "openwifi-virtual-ap"
 
@@ -68,26 +52,6 @@ resource "aws_security_group" "openwifi_virtual_ap" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
-
-resource "aws_instance" "openwifi_virtual_ap" {
-  ami                         = data.aws_ami.ubuntu.id
-  instance_type               = "t2.nano"
-  associate_public_ip_address = true
-  key_name                    = aws_key_pair.openwifi_virtual_ap.id
-  security_groups             = [aws_security_group.openwifi_virtual_ap.name]
-
-  lifecycle {
-    ignore_changes = [ami]
-  }
-
-  root_block_device {
-    delete_on_termination = true
-  }
-
-  tags = merge({
-    "Name" : "${var.org}-${var.project}-${var.env} OpenWifi virtual AP (WIFI-7204)"
-  }, local.common_tags)
 }
 
 resource "aws_iam_role_policy" "vmimport" {
