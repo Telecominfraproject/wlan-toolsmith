@@ -87,7 +87,7 @@ class AtlassianBackup:
             self.base_url, f"/rest/backup/1/export/getProgress?taskId={task_id}"
         )
 
-        for _ in range(720):
+        for _ in range(1440):
             backup_progress_res = self.session.get(backup_progress_url).json()
             if backup_progress_res["status"] == "Success":
                 return backup_progress_res["result"]
