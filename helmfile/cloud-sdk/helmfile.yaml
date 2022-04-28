@@ -900,3 +900,22 @@ releases:
     app: cert-manager
   values:
   - installCRDs: true
+
+- name: calico
+  condition: calico.enabled
+  chart: projectcalico/tigera-operator
+  version: v3.22.2
+  namespace: kube-system
+  labels:
+    app: calico
+
+- name: github-actions-network-policies
+  condition: calico.enabled
+  namespace: actions-runner-controller
+  chart: charts/github-actions-network-policies
+  labels:
+    role: setup
+    group: networking
+    app: github-actions-network-policies
+    sub1: calico
+    sub2: actions-runner-controller-addon
