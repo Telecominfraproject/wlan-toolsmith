@@ -458,6 +458,17 @@ releases:
           memory: 4Gi
       heapSize: "2048m"
 
+  - service:
+      type: LoadBalancer
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "nlb-ip"
+        service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+      ports:
+        - name: elasticsearch
+          port: 9200
+          targetPort: 9200
+          protocol: TCP
+
 - name: elasticsearch-curator
   condition: elastic.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
