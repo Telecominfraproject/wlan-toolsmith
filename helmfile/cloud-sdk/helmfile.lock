@@ -1,4 +1,4 @@
-version: v0.138.7
+version: v0.139.7
 dependencies:
 - name: actions-runner-controller
   repository: https://actions-runner-controller.github.io/actions-runner-controller
@@ -48,5 +48,8 @@ dependencies:
 - name: metrics-server
   repository: https://charts.bitnami.com/bitnami
   version: 5.10.13
-digest: sha256:2d37b8e1865229940eca0119eb31c66a8c274b78127237f531cce93f3d24d25c
-generated: "2022-03-01T15:44:43.809600502+03:00"
+- name: tigera-operator
+  repository: https://projectcalico.docs.tigera.io/charts
+  version: v3.22.2
+digest: sha256:1db69555459c990ff62a1b0bdd23d695a61cb628f929c20b60842742717ebf99
+generated: "2022-05-12T11:58:42.292188802+02:00"
