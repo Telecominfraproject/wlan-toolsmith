@@ -697,6 +697,15 @@ releases:
           syslog {
             tags => ["ucentral-syslog"]
             port => 5514
+            grok_pattern => "(?:<%{POSINT:priority}>%{SYSLOGLINE}|%{MONTH} %{MONTHDAY} %{TIME} %{DATA:docker.container_name}/%{DATA:github.run_number}\[%{INT:undefined_number}\]: %{GREEDYDATA:message})"
+          }
+        }
+
+        filter {
+          if ([undefined_number]) {
+            mutate {
+              remove_field => [ "undefined_number" ]
+            }
           }
         }
 
