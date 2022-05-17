@@ -322,6 +322,11 @@ releases:
             options:
               path: /var/lib/grafana/dashboards/default
 
+      dashboards:
+        default:
+          performance:
+            url: https://raw.githubusercontent.com/Telecominfraproject/wlan-testing/master/grafana/performance.json
+
       datasources:
        datasources.yaml:
         apiVersion: 1
@@ -331,6 +336,18 @@ releases:
           url: http://prometheus-operated:9090
           access: proxy
           isDefault: false
+        - name: InfluxDB
+          type: influxdb
+          access: proxy
+          url: https://influx.cicd.{{ .Environment.Values.domain }}
+          user: tip
+          secureJsonData:
+            token: {{ .Environment.Values.influxdb.adminUser.token }}
+            password: {{ .Environment.Values.influxdb.adminUser.password }}
+          jsonData:
+            version: Flux
+            organization: tip
+            defaultBucket: tip-cicd
 
   - alertmanager:
       config:
