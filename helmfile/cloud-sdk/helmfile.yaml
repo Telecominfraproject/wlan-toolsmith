@@ -816,7 +816,7 @@ releases:
   <<: *default
   condition: alb-ingress.enabled
   chart: eks/aws-load-balancer-controller
-  version: 1.4.0
+  version: 1.4.2
   labels:
     role: setup
     group: system

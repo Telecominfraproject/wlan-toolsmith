@@ -5,7 +5,7 @@ dependencies:
   version: 0.16.1
 - name: aws-load-balancer-controller
   repository: https://aws.github.io/eks-charts
-  version: 1.4.0
+  version: 1.4.2
 - name: aws-node-termination-handler
   repository: https://aws.github.io/eks-charts
   version: 0.16.0
@@ -51,5 +51,5 @@ dependencies:
 - name: tigera-operator
   repository: https://projectcalico.docs.tigera.io/charts
   version: v3.22.2
-digest: sha256:1db69555459c990ff62a1b0bdd23d695a61cb628f929c20b60842742717ebf99
-generated: "2022-05-12T11:58:42.292188802+02:00"
+digest: sha256:b1881ad1d9967f1cc65ba31946be63f56329dc55920c8e541e16b16a105c9307
+generated: "2022-05-27T12:53:47.055630086+03:00"
