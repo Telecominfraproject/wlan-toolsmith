@@ -17,7 +17,7 @@ node_group_settings = {
 
 spot_instance_types = ["m4.large", "m5.large", "m5a.large"]
 
-cluster_version = "1.20"
+cluster_version = "1.22"
 
 eks_admin_roles = ["AWSReservedSSO_SystemAdministrator_622371b0ceece6f8", "atlantis-ecs_task_execution"]
 
