@@ -12,7 +12,7 @@ node_group_settings = {
   max_capacity  = 8
   min_capacity  = 0
   instance_type = "c5.xlarge"
-  ami_name      = "amazon-eks-node-1.20-v20211109"
+  ami_name      = "amazon-eks-node-1.22-v20220526" // you can get the latest one using aws ssm get-parameters-by-path --path /aws/service/eks/optimized-ami/1.22/amazon-linux-2 --query "Parameters[].Name"
 }
 
 spot_instance_types = ["m4.large", "m5.large", "m5a.large"]
