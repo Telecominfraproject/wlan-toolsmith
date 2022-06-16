@@ -1,0 +1,5 @@
+- hosts: ananda_gateways
+  become: true
+  gather_facts: true
+  roles:
+    - setup_gateways
