@@ -2,7 +2,7 @@ version: v0.139.7
 dependencies:
 - name: actions-runner-controller
   repository: https://actions-runner-controller.github.io/actions-runner-controller
-  version: 0.16.1
+  version: 0.19.1
 - name: aws-load-balancer-controller
   repository: https://aws.github.io/eks-charts
   version: 1.4.2
@@ -23,19 +23,16 @@ dependencies:
   version: 2.2.3
 - name: external-dns
   repository: https://charts.bitnami.com/bitnami
-  version: 6.0.2
+  version: 6.1.0
 - name: fluentd-elasticsearch
   repository: https://kokuwaio.github.io/helm-charts
   version: 13.1.0
 - name: influxdb2
   repository: https://helm.influxdata.com
-  version: 2.0.1
+  version: 2.0.3
 - name: ingress-nginx
   repository: https://kubernetes.github.io/ingress-nginx
   version: 3.4.0
-- name: kibana
-  repository: https://charts.helm.sh/stable
-  version: 3.2.8
 - name: kube-prometheus-stack
   repository: https://prometheus-community.github.io/helm-charts
   version: 30.0.0
@@ -51,5 +48,5 @@ dependencies:
 - name: tigera-operator
   repository: https://projectcalico.docs.tigera.io/charts
   version: v3.22.2
-digest: sha256:b1881ad1d9967f1cc65ba31946be63f56329dc55920c8e541e16b16a105c9307
-generated: "2022-05-27T12:53:47.055630086+03:00"
+digest: sha256:289fecc40f3cfb7c7ef4d458d313295cce9d950559391d51b973775333f4f07f
+generated: "2022-06-23T14:05:20.599854754+03:00"
