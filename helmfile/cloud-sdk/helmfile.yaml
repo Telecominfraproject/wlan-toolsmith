@@ -934,6 +934,15 @@ releases:
     app: cert-manager
   values:
   - installCRDs: true
+  - webhook:
+      resources:
+        requests:
+          cpu: 500m
+          memory: 150Mi
+        limits:
+          cpu: 500m
+          memory: 150Mi
+
 
 - name: calico
   condition: calico.enabled
