@@ -870,6 +870,13 @@ releases:
         size: 10Gi
     - service:
         type: NodePort
+    - resources:
+        limits:
+         cpu: 500m
+         memory: 500Mi
+        requests:
+         cpu: 500m
+         memory: 500Mi
     - ingress:
         enabled: true
         annotations:
