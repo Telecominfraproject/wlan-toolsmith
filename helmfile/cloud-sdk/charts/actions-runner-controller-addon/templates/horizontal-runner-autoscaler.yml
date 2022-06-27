@@ -8,5 +8,6 @@ spec:
   minReplicas: 1
   maxReplicas: 5
   scaleUpTriggers:
-  - githubEvent: {}
+  - githubEvent:
+      workflowJob: {}
     duration: "24h"
