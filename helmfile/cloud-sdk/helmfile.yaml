@@ -145,7 +145,7 @@ releases:
   condition: ingress.enabled
   <<: *default
   chart: nginx/ingress-nginx
-  version: 3.4.0
+  version: 3.41.0
   labels:
     role: setup
     group: system
