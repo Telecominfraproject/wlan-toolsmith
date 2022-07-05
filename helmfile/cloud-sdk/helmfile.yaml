@@ -133,7 +133,7 @@ releases:
   <<: *default
   <<: *external-dns
   chart: bitnami/external-dns
-  version: 6.0.2
+  version: 6.1.0
   labels:
     role: setup
     group: system
@@ -389,7 +389,7 @@ releases:
   - monitoring:
       namespace: {{ .Environment.Values.monitoring.namespace }}
       domain: {{ .Environment.Values.domain }}
-    proxy:
+  - proxy:
       namespace: kube-system
 
 - name: prometheus-operator-ingress-auth
@@ -514,7 +514,7 @@ releases:
 - name: kibana
   condition: kibana.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
-  chart: stable/kibana
+  chart: charts/kibana
   labels:
     role: setup
     group: monitoring
@@ -848,7 +848,7 @@ releases:
 - name: influxdb
   namespace: test-bss
   chart: influxdata/influxdb2
-  version: 2.0.1
+  version: 2.0.3
   condition: influxdb.enabled
   labels:
     role: setup
@@ -870,6 +870,13 @@ releases:
         size: 10Gi
     - service:
         type: NodePort
+    - resources:
+        limits:
+         cpu: 500m
+         memory: 500Mi
+        requests:
+         cpu: 500m
+         memory: 500Mi
     - ingress:
         enabled: true
         annotations:
@@ -888,7 +895,7 @@ releases:
   condition: actions-runner-controller.enabled
   namespace: actions-runner-controller
   chart: actions-runner-controller/actions-runner-controller
-  version: 0.16.1
+  version: 0.19.1
   labels:
     app: actions-runner-controller
   values:

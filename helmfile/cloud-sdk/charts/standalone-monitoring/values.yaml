@@ -1,2 +1,4 @@
 monitoring:
   namespace: monitoring
+proxy:
+  namespace: kube-system
