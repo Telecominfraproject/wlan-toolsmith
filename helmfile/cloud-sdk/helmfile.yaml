@@ -50,6 +50,7 @@ environments:
     secrets:
       - secrets/influxdb.yaml
       - secrets/sso.yaml
+      - secrets/grafana.yaml
       - secrets/alertmanager.yaml
       - secrets/actions-runner-controller.yaml
       - secrets/ucentral-ap-firmware-logstash.yaml
@@ -348,6 +349,28 @@ releases:
             version: Flux
             organization: tip
             defaultBucket: tip-cicd
+        - name: ES
+          type: elasticsearch
+          access: proxy
+          url: http://elasticsearch-client.monitoring.svc:9200
+          database: logstash-*
+          isDefault: false
+          jsonData:
+            esVersion: 6
+            timeField: '@timestamp'
+
+      notifiers:
+        notifiers.yaml:
+          notifiers:
+          - name: Slack
+            type: slack
+            uid: slack
+            org_id: 1
+            is_default: true
+            frequency: 1h
+            settings:
+              url: {{ .Environment.Values.grafana.slack_api_url }}
+            disable_resolve_message: false
 
   - alertmanager:
       config:
