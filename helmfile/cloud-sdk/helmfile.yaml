@@ -248,6 +248,7 @@ releases:
               area: testbed
               namespace: "{{`{{ $labels.namespace }}`}}"
               pod: "{{`{{ $labels.pod }}`}}"
+              reason: "{{`{{ $labels.reason }}`}}"
             annotations:
               title: Pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* has terminated, the last reason is *{{`{{ $labels.reason }}`}}*
               description: The pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* terminated because of the above-mentioned reason, please investigate the cause.
@@ -361,28 +362,6 @@ releases:
             version: Flux
             organization: tip
             defaultBucket: tip-cicd
-        - name: ES
-          type: elasticsearch
-          access: proxy
-          url: http://elasticsearch-client.monitoring.svc:9200
-          database: logstash-*
-          isDefault: false
-          jsonData:
-            esVersion: 6
-            timeField: '@timestamp'
-
-      notifiers:
-        notifiers.yaml:
-          notifiers:
-          - name: Slack
-            type: slack
-            uid: slack
-            org_id: 1
-            is_default: true
-            frequency: 1h
-            settings:
-              url: {{ .Environment.Values.grafana.slack_api_url }}
-            disable_resolve_message: false
 
   - alertmanager:
       config:
