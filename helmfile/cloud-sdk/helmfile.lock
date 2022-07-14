@@ -45,8 +45,11 @@ dependencies:
 - name: metrics-server
   repository: https://charts.bitnami.com/bitnami
   version: 5.10.13
+- name: prometheus-es-exporter
+  repository: https://braedon.github.io/helm
+  version: 0.2.0
 - name: tigera-operator
   repository: https://projectcalico.docs.tigera.io/charts
   version: v3.22.2
-digest: sha256:289fecc40f3cfb7c7ef4d458d313295cce9d950559391d51b973775333f4f07f
-generated: "2022-06-23T14:05:20.599854754+03:00"
+digest: sha256:d5e93771fd4dba01fcb0d0d88d32ab7bc06aa2807bdc326a4eaaddb0d5a27c62
+generated: "2022-07-14T11:08:05.177261511+03:00"
