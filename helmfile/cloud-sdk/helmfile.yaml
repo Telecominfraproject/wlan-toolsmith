@@ -25,6 +25,8 @@ repositories:
   url: https://prometheus-community.github.io/helm-charts
 - name: projectcalico
   url: https://projectcalico.docs.tigera.io/charts
+- name: braedon
+  url: https://braedon.github.io/helm
 
 environments:
   azure:
@@ -289,6 +291,16 @@ releases:
             annotations:
               title: PVC *{{`{{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }}`}}* has less than 20% free storage
               description: "The PVC *{{`{{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }}`}}* only has {{`{{ $value }}`}}% capacity left. Please increase its size or clean it up."
+          - alert: ElasticSearch new assert_violation errors found
+            expr: rate(assert_violation_errors_hits[1m]) > 0
+            labels:
+              severity: warning
+              area: testbed
+              service: elasticsearch
+              namespace: "{{`{{ $labels.namespace }}`}}"
+            annotations:
+              title: New ElasticSearch logs found with Assertion violation (WIFI-9824)
+              description: New ElasticSearch logs found with Assertion violation (WIFI-9824)
 
   - grafana:
       grafana.ini:
@@ -448,7 +460,7 @@ releases:
       serviceAccount:
         create: true
       hosts:
-      - elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local 
+      - elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local
   - resources:
       requests:
         cpu: 100m
@@ -992,3 +1004,62 @@ releases:
     app: github-actions-network-policies
     sub1: calico
     sub2: actions-runner-controller-addon
+
+- name: elasticsearch-exporter
+  condition: elastic.enabled
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+  chart: braedon/prometheus-es-exporter
+  version: 0.2.0
+  labels:
+    group: monitoring
+    app: elasticsearch-exporter
+  values:
+    - image:
+        tag: 0.14.1
+    - elasticsearch:
+        cluster: elasticsearch-client.{{ .Environment.Values.monitoring.namespace }}.svc.cluster.local:9200
+        queries: |-
+          [DEFAULT]
+          QueryIntervalSecs = 15
+          QueryTimeoutSecs = 10
+          QueryIndices = _all
+          QueryOnError = drop
+          QueryOnMissing = drop
+          [query_assert_violation_errors]
+          QueryOnError = preserve
+          QueryOnMissing = zero
+          QueryJson = {
+              "query": {
+                "bool": {
+                  "filter": {
+                    "bool": {
+                      "must": [
+                        {
+                          "match": {
+                            "kubernetes.namespace_name.keyword": "openwifi-qa01"
+                          }
+                        },
+                        {
+                          "match": {
+                            "kubernetes.container_name.keyword": "owgw"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "must": {
+                    "match": {
+                      "message": "Assertion violation: !_pStream"
+                    }
+                  }
+                }
+              },
+              "aggs": {
+                "agg_terms_kubernetes.container_name.keyword": {
+                  "terms": {
+                    "field": "kubernetes.container_name.keyword"
+                  }
+                }
+              }
+            }
+
