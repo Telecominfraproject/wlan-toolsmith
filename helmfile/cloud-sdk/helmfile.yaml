@@ -361,6 +361,15 @@ releases:
             version: Flux
             organization: tip
             defaultBucket: tip-cicd
+        - name: ES
+          type: elasticsearch
+          access: proxy
+          url: http://elasticsearch-client.monitoring.svc:9200
+          database: logstash-*
+          isDefault: false
+          jsonData:
+            esVersion: 6
+            timeField: '@timestamp'
 
   - alertmanager:
       config:
