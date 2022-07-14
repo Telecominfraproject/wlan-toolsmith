@@ -52,7 +52,6 @@ environments:
     secrets:
       - secrets/influxdb.yaml
       - secrets/sso.yaml
-      - secrets/grafana.yaml
       - secrets/alertmanager.yaml
       - secrets/actions-runner-controller.yaml
       - secrets/ucentral-ap-firmware-logstash.yaml
