@@ -102,3 +102,15 @@ variable "eks_access_users_with_kms_access" {
   type        = set(string)
   default     = []
 }
+
+variable "sdk_ports_secure" {
+  description = "List of SDK ports that require TLS termination on AWS side"
+  type        = set(number)
+  default     = []
+}
+
+variable "sdk_ports_insecure" {
+  description = "List of SDK ports that don't require TLS termination on AWS side"
+  type        = set(number)
+  default     = []
+}

@@ -37,3 +37,6 @@ eks_access_users_with_kms_access = [
   "gha-wlan-test-bss",
   "gha-toolsmith",
 ]
+
+sdk_ports_secure   = [5912, 5913, 16001, 16002, 16003, 16004, 16005, 16006, 16009, 16789]
+sdk_ports_insecure = [16101, 15002]
