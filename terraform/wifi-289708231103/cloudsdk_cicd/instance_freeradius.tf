@@ -31,20 +31,6 @@ resource "aws_eip" "wlan_freeradius" {
   tags     = local.common_tags
 }
 
-resource "null_resource" "ansible_inventory_generate" {
-  triggers = {
-    instance_arn = aws_instance.wlan_freeradius.arn
-    eip_id       = aws_eip.wlan_freeradius.id
-  }
-
-  # Generate Ansible inventory file
-  provisioner "local-exec" {
-    command = <<-EOA
-    echo "${templatefile("${path.module}/templates/ansible_inventory.yml.tpl", { eip = aws_eip.wlan_freeradius })}" > ansible/hosts.yml
-    EOA
-  }
-}
-
 output "wlan_freeradius_instance" {
   value = aws_eip.wlan_freeradius.public_ip
 }
@@ -79,3 +65,22 @@ resource "aws_eip" "wlan_freeradius_qa" {
 output "wlan_freeradius_qa_instance" {
   value = aws_eip.wlan_freeradius_qa.public_ip
 }
+
+resource "null_resource" "ansible_inventory_generate" {
+  triggers = {
+    freeradius_instance_arn    = aws_instance.wlan_freeradius.arn
+    freeradius_eip_id          = aws_eip.wlan_freeradius.id
+    freeradius_qa_instance_arn = aws_instance.wlan_freeradius_qa.arn
+    freeradius_qa_eip_id       = aws_eip.wlan_freeradius_qa.id
+    demo_instance_arn          = aws_instance.wlan_demo.arn
+    demo_eip_id                = aws_eip.wlan_demo.id
+  }
+
+  # Generate Ansible inventory file
+  provisioner "local-exec" {
+    command = <<-EOA
+    echo "${templatefile("${path.module}/templates/ansible_inventory.yml.tpl", { freeradius_eip = aws_eip.wlan_freeradius, freeradius_eip_qa = aws_eip.wlan_freeradius_qa, demo_eip = aws_eip.wlan_demo })}" > ansible/hosts.yml
+    EOA
+  }
+}
+
