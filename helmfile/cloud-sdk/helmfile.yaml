@@ -61,7 +61,8 @@ environments:
         region: us-east-2
         accountID: 289708231103
         hostedZoneId: cicd
-        certificateARN: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
+        certificateARNCICD: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
+        certificateARNLab: arn:aws:acm:us-east-2:289708231103:certificate/510429bd-1a3d-4c43-90ce-8e340795a888
     - monitoring:
         namespace: monitoring
         publicNamespaces: ['openwifi-qa01', 'openwifi-dev01']
@@ -70,7 +71,7 @@ environments:
     - autoscaler:
         enabled: true
     - ingress:
-        enabled: false
+        enabled: true
     - elastic:
         enabled: true
     - kibana:
@@ -145,7 +146,7 @@ releases:
   condition: ingress.enabled
   <<: *default
   chart: nginx/ingress-nginx
-  version: 3.41.0
+  version: 4.2.0
   labels:
     role: setup
     group: system
@@ -155,7 +156,7 @@ releases:
       ingressClass: nginx-sso
       service:
         annotations:
-          service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Environment.Values.eks.certificateARN }}
+          service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Environment.Values.eks.certificateARNLab }}
           service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
           service.beta.kubernetes.io/aws-load-balancer-type: elb
           service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
@@ -172,9 +173,6 @@ releases:
             release: prometheus-operator
   - defaultBackend:
       enabled: true
-      image:
-        repository: 4c74356b41/custom-backend
-        tag: latest
 
 # monitoring
 - name: prometheus-operator
@@ -905,7 +903,7 @@ releases:
           kubernetes.io/ingress.class: alb
           alb.ingress.kubernetes.io/scheme: internet-facing
           alb.ingress.kubernetes.io/group.name: test-bss-load-testing
-          alb.ingress.kubernetes.io/certificate-arn: {{ .Environment.Values.eks.certificateARN }}
+          alb.ingress.kubernetes.io/certificate-arn: {{ .Environment.Values.eks.certificateARNCICD }}
           alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
           alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
           alb.ingress.kubernetes.io/healthcheck-path: /health
@@ -943,7 +941,7 @@ releases:
           kubernetes.io/ingress.class: alb
           alb.ingress.kubernetes.io/scheme: internet-facing
           alb.ingress.kubernetes.io/group.name: wlan-cicd
-          alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
+          alb.ingress.kubernetes.io/certificate-arn: {{ .Environment.Values.eks.certificateARNCICD }}
           alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
           alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
 

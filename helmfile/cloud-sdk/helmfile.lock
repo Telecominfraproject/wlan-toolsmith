@@ -32,7 +32,7 @@ dependencies:
   version: 2.0.3
 - name: ingress-nginx
   repository: https://kubernetes.github.io/ingress-nginx
-  version: 3.41.0
+  version: 4.2.0
 - name: kube-prometheus-stack
   repository: https://prometheus-community.github.io/helm-charts
   version: 30.0.0
@@ -51,5 +51,5 @@ dependencies:
 - name: tigera-operator
   repository: https://projectcalico.docs.tigera.io/charts
   version: v3.22.2
-digest: sha256:d5e93771fd4dba01fcb0d0d88d32ab7bc06aa2807bdc326a4eaaddb0d5a27c62
-generated: "2022-07-14T11:08:05.177261511+03:00"
+digest: sha256:678736d718edbcb6c3b145ff75f6f157e4412f790b7e420933a3289ec9cedbe0
+generated: "2022-07-18T14:47:51.092045365+03:00"
