@@ -16,3 +16,5 @@ projects:
   dir: terraform/wifi-289708231103/atlantis
 - name: quali
   dir: terraform/wifi-289708231103/quali
+- name: core-dumps-s3
+  dir: terraform/wifi-289708231103/core-dumps-s3
