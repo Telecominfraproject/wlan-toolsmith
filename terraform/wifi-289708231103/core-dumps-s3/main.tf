@@ -52,12 +52,12 @@ resource "aws_iam_user_policy" "openwifi-core-dump-handler" {
   user = aws_iam_user.openwifi-core-dump-handler.name
 
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Effect": "Allow",
-        "Action": "s3:*",
-        "Resource": [
+        "Effect" : "Allow",
+        "Action" : "s3:*",
+        "Resource" : [
           aws_s3_bucket.openwifi-core-dumps.arn,
           "${aws_s3_bucket.openwifi-core-dumps.arn}/*"
         ]
