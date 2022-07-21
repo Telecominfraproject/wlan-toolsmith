@@ -34,8 +34,12 @@ locals {
 
 resource "aws_s3_bucket" "openwifi-core-dumps" {
   bucket = "openwifi-core-dumps"
-  acl    = "private"
   tags   = local.common_tags
+}
+
+resource "aws_s3_bucket_acl" "openwifi-core-dumps" {
+  bucket = aws_s3_bucket.openwifi-core-dumps.id
+  acl    = "private"
 }
 
 resource "aws_iam_user" "openwifi-core-dump-handler" {
