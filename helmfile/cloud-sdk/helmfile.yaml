@@ -101,6 +101,8 @@ environments:
         enabled: true
     - calico:
         enabled: true
+    - core-dump-handler:
+        enabled: true
 
 helmDefaults:
   force: false
