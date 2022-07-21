@@ -15,6 +15,9 @@ dependencies:
 - name: cluster-autoscaler
   repository: https://kubernetes.github.io/autoscaler/
   version: 9.11.0
+- name: core-dump-handler
+  repository: https://ibm.github.io/core-dump-handler
+  version: v8.6.0
 - name: elasticsearch
   repository: https://charts.helm.sh/stable
   version: 1.32.5
@@ -51,5 +54,5 @@ dependencies:
 - name: tigera-operator
   repository: https://projectcalico.docs.tigera.io/charts
   version: v3.22.2
-digest: sha256:678736d718edbcb6c3b145ff75f6f157e4412f790b7e420933a3289ec9cedbe0
-generated: "2022-07-18T14:47:51.092045365+03:00"
+digest: sha256:19f237181943ecc55a944a648240bdc21e78d2795b7d1b1c5cbd4f26b34e6e3a
+generated: "2022-07-21T15:43:59.17512049+02:00"

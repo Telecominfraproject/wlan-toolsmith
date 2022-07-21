@@ -27,6 +27,8 @@ repositories:
   url: https://projectcalico.docs.tigera.io/charts
 - name: braedon
   url: https://braedon.github.io/helm
+- name: core-dump-handler
+  url: https://ibm.github.io/core-dump-handler
 
 environments:
   azure:
@@ -55,6 +57,7 @@ environments:
       - secrets/alertmanager.yaml
       - secrets/actions-runner-controller.yaml
       - secrets/ucentral-ap-firmware-logstash.yaml
+      - secrets/core-dump-handler.yaml
     values:
     - eks:
         clusterName: tip-wlan-main
@@ -97,6 +100,8 @@ environments:
     - cert-manager:
         enabled: true
     - calico:
+        enabled: true
+    - core-dump-handler:
         enabled: true
 
 helmDefaults:
@@ -1048,3 +1053,16 @@ releases:
               }
             }
 
+- name: core-dump-handler
+  condition: core-dump-handler.enabled
+  chart: core-dump-handler/core-dump-handler
+  version: v8.6.0
+  namespace: ibm-observe
+  labels:
+    app: core-dump-handler
+  values:
+    - daemonset:
+        s3BucketName: openwifi-core-dumps
+        s3AccessKey: {{ .Environment.Values.core_dump_handler.s3_access_key }}
+        s3Secret: {{ .Environment.Values.core_dump_handler.s3_secret }}
+        s3Region: us-east-1
