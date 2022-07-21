@@ -8,19 +8,7 @@ terraform {
   backend "s3" {
     region         = "us-east-1"
     bucket         = "tip-wifi-tfstate"
-    key            = "allure-reports-s3"
-    dynamodb_table = "terraform-state-lock"
-    encrypt        = true
-  }
-}
-
-data "terraform_remote_state" "route_53" {
-  backend = "s3"
-
-  config = {
-    region         = "us-east-1"
-    bucket         = "tip-wifi-tfstate"
-    key            = "dns"
+    key            = "core-dumps-s3"
     dynamodb_table = "terraform-state-lock"
     encrypt        = true
   }
