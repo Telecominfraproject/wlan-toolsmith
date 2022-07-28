@@ -242,8 +242,8 @@ releases:
             annotations:
               title: Node {{`{{ $labels.node }}`}} not becoming ready
               description: The cluster node {{`{{ $labels.node }}`}} is not getting ready since 60 minutes. Please contact the cluster administrators.
-          - alert: Pod terminated
-            expr: (kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1) and ignoring (reason) min_over_time(kube_pod_container_status_last_terminated_reason{reason=~"OOMKilled|Error"}[10m]) == 1
+          - alert: Pod OOM killed
+            expr: (kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1) and ignoring (reason) min_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}[10m]) == 1
             for: 0m
             labels:
               severity: error
@@ -252,8 +252,20 @@ releases:
               pod: "{{`{{ $labels.pod }}`}}"
               reason: "{{`{{ $labels.reason }}`}}"
             annotations:
-              title: Pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* has terminated, the last reason is *{{`{{ $labels.reason }}`}}*
-              description: The pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* terminated because of the above-mentioned reason, please investigate the cause.
+              title: Pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* has been OOM killed
+              description: The pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* has been killed due to reaching its memory limit. Investigate the memory usage or increase the limit to prevent this.
+          - alert: Pod terminated
+            expr: (kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1) and ignoring (reason) min_over_time(kube_pod_container_status_last_terminated_reason{reason="Error"}[10m]) == 1
+            for: 0m
+            labels:
+              severity: error
+              area: testbed
+              namespace: "{{`{{ $labels.namespace }}`}}"
+              pod: "{{`{{ $labels.pod }}`}}"
+              reason: "{{`{{ $labels.reason }}`}}"
+            annotations:
+              title: Pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* terminated due to an error
+              description: The pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* has terminated due to an error, please investigate the cause.
           - alert: Node low on memory
             expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 5
             for: 1m
@@ -1066,3 +1078,5 @@ releases:
         s3AccessKey: {{ .Environment.Values.core_dump_handler.s3_access_key }}
         s3Secret: {{ .Environment.Values.core_dump_handler.s3_secret }}
         s3Region: us-east-1
+        includeCrioExe: true
+        vendor: rhel7
