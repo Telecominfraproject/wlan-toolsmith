@@ -7,6 +7,30 @@ Description: |
   #lb-deployment-with-letsencrypt-certificates).
   **WARNING** You will be billed for the AWS resources used if you create a
   stack from this template.
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Amazon EC2 configuration"
+        Parameters:
+          - InstanceType
+          - LatestUbuntuFocalAMI
+          - KeyName
+          - SSHLocation
+      - Label:
+          default: "Amazon Route53 configuration"
+        Parameters:
+          - CreateRoute53Record
+          - ExistingHostedZoneId
+          - HostedZoneName
+      - Label:
+          default: "OpenWiFi cloud SDK configuration"
+        Parameters:
+          - SDKVersion
+          - SDKHostname
+          - WebsocketCertParameter
+          - WebsocketKeyParameter
+          - TraefikAcmeEmail
 Parameters:
   KeyName:
     Description: Name of the EC2 KeyPair to enable SSH access to the instance.
@@ -131,8 +155,6 @@ Parameters:
     AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
     ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
 Conditions:
-  HasWebsocketCertParameter: !Not [ !Equals [ !Ref WebsocketCertParameter, "" ] ]
-  HasWebsocketKeyParameter: !Not [ !Equals [ !Ref WebsocketKeyParameter, "" ] ]
   HasExistingHostedZoneId: !Not [ !Equals [ !Ref ExistingHostedZoneId, "" ] ]
   HasNotExistingHostedZoneId: !Not [ Condition: HasExistingHostedZoneId ]
   CreateRoute53Record: !Equals [ !Ref CreateRoute53Record, "True" ]
@@ -205,8 +227,8 @@ Resources:
                 DEFAULT_UCENTRALSEC_URL: !Sub "https://${SDKHostname}:16001"
                 SYSTEM_URI_UI: !Sub "https://${SDKHostname}"
                 SDKHOSTNAME: !Sub "${SDKHostname}"
-                WEBSOCKET_CERT: !If [ HasWebsocketCertParameter, !Ref WebsocketCertParameter, !Ref "AWS::NoValue" ]
-                WEBSOCKET_KEY: !If [ HasWebsocketKeyParameter, !Ref WebsocketKeyParameter, !Ref "AWS::NoValue" ]
+                WEBSOCKET_CERT: !Ref WebsocketCertParameter
+                WEBSOCKET_KEY: !Ref WebsocketKeyParameter
                 OWGW_FILEUPLOADER_HOST_NAME: !Sub "${SDKHostname}"
                 OWGW_FILEUPLOADER_URI: !Sub "https://${SDKHostname}:16003"
                 OWGW_SYSTEM_URI_PUBLIC: !Sub "https://${SDKHostname}:16002"
@@ -216,6 +238,8 @@ Resources:
                 OWPROV_SYSTEM_URI_PUBLIC: !Sub "https://${SDKHostname}:16005"
                 OWANALYTICS_SYSTEM_URI_PUBLIC: !Sub "https://${SDKHostname}:16009"
                 OWSUB_SYSTEM_URI_PUBLIC: !Sub "https://${SDKHostname}:16006"
+                OWRRM_SERVICECONFIG_PRIVATEENDPOINT: !Sub "http://owrrm.wlan.local:17007"
+                OWRRM_SERVICECONFIG_PUBLICENDPOINT: !Sub "https://${SDKHostname}:16789"
                 TRAEFIK_ACME_EMAIL: !Sub "${TraefikAcmeEmail}"
               cwd: "~/wlan-cloud-ucentral-deploy/docker-compose"
     Properties:
@@ -271,6 +295,10 @@ Resources:
         - IpProtocol: tcp
           FromPort: "16009"
           ToPort: "16009"
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: "16789"
+          ToPort: "16789"
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
           FromPort: "5912"
