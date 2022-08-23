@@ -25,6 +25,20 @@ resource "aws_s3_bucket" "openwifi-core-dumps" {
   tags   = local.common_tags
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "openwifi-core-dumps" {
+  bucket = aws_s3_bucket.openwifi-core-dumps.id
+
+  rule {
+    id = "core-dumps-retention"
+    filter {}
+    status = "Enabled"
+
+    expiration {
+      days = 14
+    }
+  }
+}
+
 resource "aws_s3_bucket_acl" "openwifi-core-dumps" {
   bucket = aws_s3_bucket.openwifi-core-dumps.id
   acl    = "private"
