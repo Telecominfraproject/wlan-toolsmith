@@ -91,7 +91,7 @@ resource "aws_lambda_permission" "s3_eventnotification_slack" {
 resource "aws_lambda_function" "s3_eventnotification_slack" {
   filename      = "s3_eventnotification_slack.zip"
   function_name = "s3_eventnotification_slack"
-  handler	= "s3_eventnotification_slack.lambda_handler"
+  handler       = "s3_eventnotification_slack.lambda_handler"
   role          = aws_iam_role.s3_eventnotification_slack.arn
   runtime       = "python3.9"
 
