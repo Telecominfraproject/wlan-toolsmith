@@ -1,0 +1,12 @@
+# Custom TIP vendor dictionary (WIFI-10595)
+VENDOR      TIP     58888
+
+#    Standard attribute
+#
+BEGIN-VENDOR    TIP
+
+ATTRIBUTE   TIP-serial              1   string
+ATTRIBUTE   TIP-AAAipaddr           2   ipaddr
+ATTRIBUTE   TIP-AAAipv6addr         3   ipv6addr
+
+END-VENDOR TIP

@@ -45,6 +45,12 @@
     dest: /etc/freeradius/3.0/mods-config/files/authorize
   notify: Restart FreeRADIUS
 
+- name: Copy custom dictionary
+  copy:
+    src: dictionary
+    dest: /etc/freeradius/3.0/dictionary
+  notify: Restart FreeRADIUS
+
 - name: Link user file in freeradius dir to the authorize file
   file:
     src: /etc/freeradius/3.0/mods-config/files/authorize

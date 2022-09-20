@@ -19,3 +19,21 @@ user3 Cleartext-Password := "password", MS-CHAP-Use-NTLM-Auth := 0
 user4 Cleartext-Password := "password", MS-CHAP-Use-NTLM-Auth := 0
   WISPr-Bandwidth-Max-Up := 10000,
   WISPr-Bandwidth-Max-Down := 50000
+
+testing Cleartext-Password := "password"
+
+testingwisprbw Cleartext-Password := "password"
+        WISPr-Bandwidth-Max-Up := 100,
+        WISPr-Bandwidth-Max-Down := 100
+
+testingvlan Cleartext-Password := "password"
+        Tunnel-Type := 13,
+        Tunnel-Medium-Type := 6,
+        Tunnel-Private-Group-Id := 100
+
+testwisprbwvlan Cleartext-Password := "password"
+        WISPr-Bandwidth-Max-Up := 100,
+        WISPr-Bandwidth-Max-Down := 100,
+        Tunnel-Type := 13,
+        Tunnel-Medium-Type := 6,
+        Tunnel-Private-Group-Id := 100
