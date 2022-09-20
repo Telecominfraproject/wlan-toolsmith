@@ -1,4 +1,4 @@
-- hosts: freeradius
+- hosts: freeradius_qa
   become: true
   gather_facts: true
   roles:
