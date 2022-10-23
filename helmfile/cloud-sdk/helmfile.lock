@@ -38,7 +38,7 @@ dependencies:
   version: 4.2.0
 - name: kube-prometheus-stack
   repository: https://prometheus-community.github.io/helm-charts
-  version: 30.0.0
+  version: 41.5.1
 - name: kubernetes-dashboard
   repository: https://kubernetes.github.io/dashboard/
   version: 5.0.5
@@ -54,5 +54,5 @@ dependencies:
 - name: tigera-operator
   repository: https://projectcalico.docs.tigera.io/charts
   version: v3.22.2
-digest: sha256:19f237181943ecc55a944a648240bdc21e78d2795b7d1b1c5cbd4f26b34e6e3a
-generated: "2022-07-21T15:43:59.17512049+02:00"
+digest: sha256:69e04f54513216ab44d36103755ec879a23cb5509432fc20b0dec0bd0eb95748
+generated: "2022-10-21T18:06:15.460046892+02:00"

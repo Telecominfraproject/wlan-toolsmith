@@ -184,7 +184,7 @@ releases:
   condition: prometheus.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: prometheus-community/kube-prometheus-stack
-  version: 30.0.0
+  version: 41.5.1
   labels:
     role: setup
     group: monitoring
