@@ -6,7 +6,7 @@ spec:
   scaleTargetRef:
     name: wlan-testing-small-deployment
   minReplicas: 1
-  maxReplicas: 5
+  maxReplicas: 3
   scaleUpTriggers:
   - githubEvent:
       workflowJob: {}
