@@ -492,6 +492,7 @@ releases:
           memory: 1000Mi
         requests:
           memory: 800Mi
+      heapSize: "1024m"
 
   - master:
       resources:
