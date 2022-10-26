@@ -477,7 +477,7 @@ releases:
 - name: elasticsearch
   condition: elastic.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
-  chart: stable/elasticsearch
+  chart: charts/elasticsearch
   labels:
     role: setup
     group: monitoring
