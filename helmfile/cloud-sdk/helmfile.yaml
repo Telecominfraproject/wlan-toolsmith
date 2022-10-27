@@ -477,7 +477,7 @@ releases:
 - name: elasticsearch
   condition: elastic.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
-  chart: stable/elasticsearch
+  chart: charts/elasticsearch
   labels:
     role: setup
     group: monitoring
@@ -489,9 +489,10 @@ releases:
   - client:
       resources:
         limits:
-          memory: 1000Mi
+          memory: 2Gi
         requests:
-          memory: 800Mi
+          memory: 1024Mi
+      heapSize: "1024m"
 
   - master:
       resources:
@@ -507,7 +508,7 @@ releases:
         size: 650Gi
       resources:
         limits:
-          cpu: 1500m
+          cpu: 3
           memory: 4Gi
         requests:
           cpu: 1500m
