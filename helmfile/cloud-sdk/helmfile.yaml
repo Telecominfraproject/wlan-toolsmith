@@ -318,6 +318,9 @@ releases:
               description: New ElasticSearch logs found with Assertion violation (WIFI-9824)
 
   - grafana:
+      image:
+        repository: grafana/grafana
+        tag: 8.5.13
       grafana.ini:
         users:
           viewers_can_edit: true
@@ -354,6 +357,8 @@ releases:
         default:
           performance:
             url: https://raw.githubusercontent.com/Telecominfraproject/wlan-testing/master/grafana/performance.json
+          qaDebugging:
+            url: https://raw.githubusercontent.com/Telecominfraproject/wlan-testing/master/grafana/qa-debugging.json
 
       datasources:
        datasources.yaml:
@@ -385,6 +390,8 @@ releases:
           jsonData:
             esVersion: 6
             timeField: '@timestamp'
+            logMessageField: message
+            logLevelField: fields.level
 
   - alertmanager:
       config:
@@ -411,6 +418,11 @@ releases:
             text: >-
             {{- readFile "alertmanager-templates/text.tpl" | nindent 14 }}
             title_link: ""
+
+  - kube-state-metrics:
+      image:
+        repository: tip-tip-wlan-cloud-ucentral.jfrog.io/kube-state-metrics
+        tag: v2.6.0-tip20221103
 
 
 - name: prometheus-operator-helper
