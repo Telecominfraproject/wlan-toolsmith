@@ -36,7 +36,9 @@ resource "aws_s3_bucket" "alb_logs" {
     }
   }
 
-  tags = local.common_tags
+  tags = merge({
+    "Name" : "alb-logs-${var.org}-${var.project}-${var.deployment}-${random_string.random_suffix.result}"
+  }, local.common_tags)
 
   lifecycle {
     prevent_destroy = true

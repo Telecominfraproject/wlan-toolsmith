@@ -1,6 +1,9 @@
 resource "aws_s3_bucket" "repo_backup" {
   bucket = var.s3_bucket_backup_name
   acl    = "private"
+  tags   = merge({
+    "Name" : var.s3_bucket_backup_name
+  }, local.common_tags)
 
   versioning {
     enabled = var.s3_bucket_versioning

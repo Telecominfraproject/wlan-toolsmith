@@ -35,7 +35,9 @@ locals {
 resource "aws_s3_bucket" "bucket" {
   bucket = "ucentral-ap-firmware"
   acl    = "public-read"
-  tags   = local.common_tags
+  tags   = merge({
+    "Name" : "ucentral-ap-firmware"
+  }, local.common_tags)
 
   logging {
     target_bucket = aws_s3_bucket.log_bucket.id
@@ -70,7 +72,9 @@ resource "aws_s3_bucket" "bucket" {
 resource "aws_s3_bucket" "log_bucket" {
   bucket = "ucentral-ap-firmware-logs"
   acl    = "log-delivery-write"
-  tags   = local.common_tags
+  tags   = merge({
+    "Name" : "ucentral-ap-firmware-logs"
+  }, local.common_tags)
 
   lifecycle_rule {
     id      = "log_retention"

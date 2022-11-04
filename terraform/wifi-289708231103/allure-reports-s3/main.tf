@@ -29,6 +29,7 @@ data "terraform_remote_state" "route_53" {
 locals {
   common_tags = {
     "ManagedBy" = "terraform"
+    "Name"      = aws_s3_bucket.bucket.bucket
   }
 }
 
