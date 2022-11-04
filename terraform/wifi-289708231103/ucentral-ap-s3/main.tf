@@ -71,6 +71,15 @@ resource "aws_s3_bucket" "log_bucket" {
   bucket = "ucentral-ap-firmware-logs"
   acl    = "log-delivery-write"
   tags   = local.common_tags
+
+  lifecycle_rule {
+    id      = "log_retention"
+    enabled = true
+
+    expiration {
+      days = 1
+    }
+  }
 }
 
 resource "aws_s3_bucket_object" "directory_listing" {
