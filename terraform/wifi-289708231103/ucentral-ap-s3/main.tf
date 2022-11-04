@@ -35,7 +35,7 @@ locals {
 resource "aws_s3_bucket" "bucket" {
   bucket = "ucentral-ap-firmware"
   acl    = "public-read"
-  tags   = merge({
+  tags = merge({
     "Name" : "ucentral-ap-firmware"
   }, local.common_tags)
 
@@ -72,7 +72,7 @@ resource "aws_s3_bucket" "bucket" {
 resource "aws_s3_bucket" "log_bucket" {
   bucket = "ucentral-ap-firmware-logs"
   acl    = "log-delivery-write"
-  tags   = merge({
+  tags = merge({
     "Name" : "ucentral-ap-firmware-logs"
   }, local.common_tags)
 
