@@ -29,14 +29,15 @@ data "terraform_remote_state" "route_53" {
 locals {
   common_tags = {
     "ManagedBy" = "terraform"
-    "Name"      = aws_s3_bucket.bucket.bucket
   }
 }
 
 resource "aws_s3_bucket" "bucket" {
   bucket = "openwifi-allure-reports"
   acl    = "public-read"
-  tags   = local.common_tags
+  tags = merge({
+    "Name" : "openwifi-allure-reports"
+  }, local.common_tags)
 
   website {
     index_document = "index.html"
