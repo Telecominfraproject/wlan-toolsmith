@@ -13,8 +13,4 @@ spec:
       protocol: TCP
     to:
     - ipBlock:
-        cidr: 172.20.0.1/32
-    - ipBlock:
-        cidr: 10.10.11.166/32
-    - ipBlock:
-        cidr: 10.10.12.140/32
+        cidr: 0.0.0.0/0
