@@ -358,7 +358,7 @@ releases:
           performance:
             url: https://raw.githubusercontent.com/Telecominfraproject/wlan-testing/master/grafana/performance.json
           qaDebugging:
-            url: https://raw.githubusercontent.com/Telecominfraproject/wlan-testing/master/grafana/qa-debugging.json
+            url: https://raw.githubusercontent.com/Telecominfraproject/wlan-cloud-ucentral-analytics/main/grafana/qa-debugging.json
 
       datasources:
        datasources.yaml:
