@@ -38,6 +38,13 @@ resource "aws_s3_bucket" "repo_backup" {
 
 }
 
+resource "aws_s3_bucket_versioning" "repo_backup" {
+  bucket = aws_s3_bucket.repo_backup.id
+  versioning_configuration {
+    status = "Suspended"
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "repo_backup" {
   bucket                  = aws_s3_bucket.repo_backup.id
   block_public_acls       = true
