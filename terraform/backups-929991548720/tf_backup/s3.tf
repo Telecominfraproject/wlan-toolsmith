@@ -5,10 +5,6 @@ resource "aws_s3_bucket" "repo_backup" {
     "Name" : var.s3_bucket_backup_name
   }, local.common_tags)
 
-  versioning {
-    enabled = var.s3_bucket_versioning
-  }
-
   lifecycle_rule {
     prefix  = ""
     enabled = true

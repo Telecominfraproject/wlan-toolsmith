@@ -3,16 +3,11 @@ resource "random_string" "random_suffix" {
   special = false
   upper   = false
   lower   = true
-  number  = false
 }
 
 resource "aws_s3_bucket" "alb_logs" {
   bucket = "alb-logs-${var.org}-${var.project}-${var.deployment}-${random_string.random_suffix.result}"
   acl    = "private"
-
-  versioning {
-    enabled = false
-  }
 
   lifecycle_rule {
     prefix  = ""

@@ -81,7 +81,7 @@ resource "aws_s3_bucket" "log_bucket" {
     enabled = true
 
     expiration {
-      days = 1
+      days = 14
     }
   }
 }
