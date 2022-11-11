@@ -12,7 +12,7 @@ budget_monthly_limit = {
 org_accounts = {
   "cicd" = {
     "email"          = "cicd-admin@telecominfraproject.com"
-    "monthly_budget" = "7000.0"
+    "monthly_budget" = "500.0"
     "billing_alarm_notify_emails" = [
       "dorongivoni@fb.com",
       "jcrosby@launchcg.com",
@@ -23,17 +23,15 @@ org_accounts = {
     "email"          = "wifi-admin@telecominfraproject.com"
     "monthly_budget" = "5000.0"
     "billing_alarm_notify_emails" = [
-      "jaspreetsachdev@fb.com",
+      "jaspreetsachdev@meta.com",
       "tip-alerts@opsfleet.com",
-      "jcrosby@launchcg.com",
-      "dmitry.toptygin@connectus.ai",
-      "chrisbusch@fb.com",
+      "chrisbusch@meta.com",
     ]
   }
 
   "openautomation" = {
     "email"          = "netauto-admin@telecominfraproject.com"
-    "monthly_budget" = "800.0"
+    "monthly_budget" = "500.0"
     "billing_alarm_notify_emails" = [
       "dorongivoni@fb.com",
       "jcrosby@launchcg.com",
