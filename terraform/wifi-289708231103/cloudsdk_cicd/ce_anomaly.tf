@@ -46,20 +46,11 @@ data "aws_iam_policy_document" "sns_topic_policy" {
       "SNS:AddPermission",
     ]
 
-    condition {
-      test     = "StringEquals"
-      variable = "AWS:SourceOwner"
-
-      values = [
-        var.account-id,
-      ]
-    }
-
     effect = "Allow"
 
     principals {
       type        = "AWS"
-      identifiers = ["*"]
+      identifiers = ["289708231103"]
     }
 
     resources = [
