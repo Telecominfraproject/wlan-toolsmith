@@ -1,10 +1,9 @@
 resource "aws_s3_bucket" "repo_backup" {
   bucket = var.s3_bucket_backup_name
   acl    = "private"
-
-  versioning {
-    enabled = var.s3_bucket_versioning
-  }
+  tags = merge({
+    "Name" : var.s3_bucket_backup_name
+  }, local.common_tags)
 
   lifecycle_rule {
     prefix  = ""
@@ -37,6 +36,13 @@ resource "aws_s3_bucket" "repo_backup" {
     }
   }
 
+}
+
+resource "aws_s3_bucket_versioning" "repo_backup" {
+  bucket = aws_s3_bucket.repo_backup.id
+  versioning_configuration {
+    status = "Suspended"
+  }
 }
 
 resource "aws_s3_bucket_public_access_block" "repo_backup" {

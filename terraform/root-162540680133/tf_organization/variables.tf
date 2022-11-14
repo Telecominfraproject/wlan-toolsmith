@@ -8,8 +8,8 @@ variable "billing_alarm_notify_emails" {
   type        = set(string)
 }
 
-variable "budget_montly_limit" {
-  description = "Montly budget limit, USD"
+variable "budget_monthly_limit" {
+  description = "Monthly budget limit, USD"
   type        = map(string)
 }
 

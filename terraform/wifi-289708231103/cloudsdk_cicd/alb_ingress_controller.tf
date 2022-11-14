@@ -16,5 +16,5 @@ data "http" "alb_ingress_policy_json" {
 resource "aws_iam_policy" "alb_ingress_iam_policy" {
   name_prefix = "alb-ingress-iam-policy-"
   description = "ALB ingress policy for cluster ${local.cluster_name}"
-  policy      = data.http.alb_ingress_policy_json.body
+  policy      = data.http.alb_ingress_policy_json.response_body
 }

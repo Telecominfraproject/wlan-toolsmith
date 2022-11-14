@@ -33,7 +33,9 @@ data "sops_file" "secrets" {
 
 resource "aws_s3_bucket" "openwifi-core-dumps" {
   bucket = "openwifi-core-dumps"
-  tags   = local.common_tags
+  tags = merge({
+    "Name" : "openwifi-core-dumps"
+  }, local.common_tags)
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "openwifi-core-dumps" {

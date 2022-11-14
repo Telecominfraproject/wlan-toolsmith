@@ -44,12 +44,6 @@ variable "s3_bucket_backup_name" {
   type        = string
 }
 
-variable "s3_bucket_versioning" {
-  description = "Enables/disables s3 bucket versioning"
-  type        = bool
-  default     = false
-}
-
 variable "repo_blacklist" {
   description = "Comma separated list of repositories to exclude from backup"
   type        = set(string)

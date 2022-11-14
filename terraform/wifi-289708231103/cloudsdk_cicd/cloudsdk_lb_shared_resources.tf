@@ -3,20 +3,36 @@ resource "random_string" "random_suffix" {
   special = false
   upper   = false
   lower   = true
-  number  = false
+  numeric = false
 }
 
 resource "aws_s3_bucket" "alb_logs" {
   bucket = "alb-logs-${var.org}-${var.project}-${var.deployment}-${random_string.random_suffix.result}"
-  acl    = "private"
 
-  versioning {
-    enabled = false
+  tags = merge({
+    "Name" : "alb-logs-${var.org}-${var.project}-${var.deployment}-${random_string.random_suffix.result}"
+  }, local.common_tags)
+
+  lifecycle {
+    prevent_destroy = true
   }
+}
 
-  lifecycle_rule {
-    prefix  = ""
-    enabled = true
+resource "aws_s3_bucket_versioning" "alb_logs" {
+  bucket = aws_s3_bucket.alb_logs.id
+  versioning_configuration {
+    status = "Suspended"
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "alb_logs" {
+  bucket = aws_s3_bucket.alb_logs.id
+
+  rule {
+    id     = "logs_retention"
+    status = "Enabled"
+
+    filter {}
 
     transition {
       days          = 30
@@ -27,20 +43,21 @@ resource "aws_s3_bucket" "alb_logs" {
       days = 60
     }
   }
+}
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
+resource "aws_s3_bucket_server_side_encryption_configuration" "alb_logs" {
+  bucket = aws_s3_bucket.alb_logs.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
     }
   }
+}
 
-  tags = local.common_tags
-
-  lifecycle {
-    prevent_destroy = true
-  }
+resource "aws_s3_bucket_acl" "alb_logs" {
+  bucket = aws_s3_bucket.alb_logs.id
+  acl    = "private"
 }
 
 resource "aws_s3_bucket_public_access_block" "alb_logs" {
