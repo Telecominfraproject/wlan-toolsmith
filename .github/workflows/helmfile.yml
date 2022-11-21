@@ -18,7 +18,7 @@ jobs:
   helmfile:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: install helmfile
         run: |
           sudo wget https://github.com/roboll/helmfile/releases/download/v0.139.7/helmfile_linux_amd64 -O /usr/local/bin/helmfile
