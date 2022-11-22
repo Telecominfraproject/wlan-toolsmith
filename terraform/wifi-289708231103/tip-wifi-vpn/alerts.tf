@@ -128,7 +128,7 @@ resource "aws_cloudformation_stack" "atlassian_cloud_backup_email_notification" 
   template_body = <<EOT
 AWSTemplateFormatVersion: 2010-09-09
 Resources:
-%{~for subscription in var.sns_alarm_subscriptions}
+%{~for subscription in jsondecode(data.sops_file.secrets.raw).sns_alarm_subscriptions}
   Subscription${md5(subscription["endpoint"])}:
     Type: AWS::SNS::Subscription
     Properties:

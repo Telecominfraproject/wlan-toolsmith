@@ -12,6 +12,13 @@ terraform {
     dynamodb_table = "terraform-state-lock"
     encrypt        = true
   }
+
+  required_providers {
+    sops = {
+      source  = "carlpett/sops"
+      version = "~> 0.5"
+    }
+  }
 }
 
 data "terraform_remote_state" "wlan_main" {
@@ -24,6 +31,10 @@ data "terraform_remote_state" "wlan_main" {
     dynamodb_table = "terraform-state-lock"
     encrypt        = true
   }
+}
+
+data "sops_file" "secrets" {
+  source_file = "secrets.enc.json"
 }
 
 locals {
