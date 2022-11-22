@@ -1,6 +1,6 @@
 resource "aws_customer_gateway" "tunnel_tip_wifi_nrg" {
   bgp_asn    = 65000
-  ip_address = var.nrg_vpn_endpoint_ip
+  ip_address = data.sops_file.secrets.data["nrg_vpn_endpoint_ip"]
   type       = "ipsec.1"
   tags       = merge({ Name = "tip-wifi-fre" }, local.common_tags)
 }

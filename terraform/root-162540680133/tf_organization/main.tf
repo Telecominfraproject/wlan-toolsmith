@@ -8,9 +8,20 @@ terraform {
     dynamodb_table = "terraform-state-lock"
     encrypt        = true
   }
+
+  required_providers {
+    sops = {
+      source  = "carlpett/sops"
+      version = "~> 0.5"
+    }
+  }
 }
 
 provider "aws" {
   version = ">= 2.63.0"
   region  = var.aws_region
+}
+
+data "sops_file" "secrets" {
+  source_file = "secrets.enc.json"
 }

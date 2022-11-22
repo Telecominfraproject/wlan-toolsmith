@@ -1,0 +1,2 @@
+creation_rules:
+- kms: 'arn:aws:kms:us-east-1:162540680133:alias/helm-secrets'

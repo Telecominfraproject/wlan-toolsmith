@@ -31,25 +31,6 @@ repositories:
   url: https://ibm.github.io/core-dump-handler
 
 environments:
-  azure:
-    values:
-    - monitoring:
-        namespace: monitoring
-    - domain: tip.4c74356b41.com
-    - storageClass: default
-    - autoscaler:
-        enabled: true
-    - ingress:
-        enabled: true
-    - elastic:
-        enabled: true
-    - kibana:
-        enabled: true
-    - prometheus:
-        enabled: true
-    - external-dns:
-        enabled: true
-
   amazon-cicd:
     secrets:
       - secrets/influxdb.yaml
