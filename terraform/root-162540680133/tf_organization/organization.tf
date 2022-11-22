@@ -13,7 +13,7 @@ resource "aws_organizations_organizational_unit" "default" {
 }
 
 resource "aws_organizations_account" "default" {
-  for_each  = var.org_accounts
+  for_each  = jsondecode(data.sops_file.secrets.raw).org_accounts
   name      = each.key
   email     = each.value["email"]
   parent_id = aws_organizations_organizational_unit.default.id

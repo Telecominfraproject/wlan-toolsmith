@@ -1,5 +1,5 @@
 resource "aws_budgets_budget" "default" {
-  for_each          = var.org_accounts
+  for_each          = jsondecode(data.sops_file.secrets.raw).org_accounts
   name              = "${each.key}-budget"
   budget_type       = "COST"
   limit_amount      = each.value["monthly_budget"]
