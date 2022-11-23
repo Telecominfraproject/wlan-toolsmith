@@ -2,7 +2,7 @@
 # TODO increase disk size
 resource "aws_instance" "wlan_demo" {
   ami                    = "ami-00399ec92321828f5" # Ubuntu 20.04 amd64
-  instance_type          = "t2.xlarge"
+  instance_type          = "t3a.xlarge"
   subnet_id              = module.vpc_main.public_subnets[1]
   vpc_security_group_ids = [aws_security_group.wlan.id]
   key_name               = aws_key_pair.dunaev_wifi_3714.id
