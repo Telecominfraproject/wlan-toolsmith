@@ -507,8 +507,7 @@ releases:
           cpu: 1500m
           memory: 4Gi
       heapSize: "2048m"
-      readinessProbe:
-        timeoutSeconds: 30
+      readinessProbe: null
 
 - name: elasticsearch-curator
   condition: elastic.enabled
