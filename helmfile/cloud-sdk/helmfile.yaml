@@ -502,10 +502,10 @@ releases:
       resources:
         limits:
           cpu: 3
-          memory: 6Gi
+          memory: 4Gi
         requests:
           cpu: 1500m
-          memory: 6Gi
+          memory: 4Gi
       heapSize: "3000m"
       readinessProbe: null
 
