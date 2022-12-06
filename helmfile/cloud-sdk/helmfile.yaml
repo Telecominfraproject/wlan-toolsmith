@@ -482,10 +482,10 @@ releases:
   - client:
       resources:
         limits:
-          memory: 2Gi
+          memory: 3Gi
         requests:
-          memory: 1024Mi
-      heapSize: "1024m"
+          memory: 3Gi
+      heapSize: "1500m"
 
   - master:
       resources:
@@ -506,9 +506,8 @@ releases:
         requests:
           cpu: 1500m
           memory: 4Gi
-      heapSize: "2048m"
-      readinessProbe:
-        timeoutSeconds: 30
+      heapSize: "3000m"
+      readinessProbe: null
 
 - name: elasticsearch-curator
   condition: elastic.enabled
