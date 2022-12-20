@@ -66,20 +66,54 @@ output "wlan_freeradius_qa_instance" {
   value = aws_eip.wlan_freeradius_qa.public_ip
 }
 
+# This instance is required for OWGW radius proxy testing and was created for WIFI-10965 task
+resource "aws_instance" "wlan_freeradius_proxy" {
+  ami                    = "ami-00399ec92321828f5" # Ubuntu 20.04 amd64
+  instance_type          = "t2.micro"
+  subnet_id              = module.vpc_main.public_subnets[1]
+  vpc_security_group_ids = [aws_security_group.wlan.id]
+  key_name               = aws_key_pair.dunaev_wifi_3714.id
+
+  lifecycle {
+    ignore_changes = [ami]
+  }
+
+  root_block_device {
+    delete_on_termination = true
+  }
+
+  tags = merge({
+    "Name" : "${var.org}-${var.project}-${var.env} FreeRADIUS server for OWGW radius proxy (WIFI-10965)"
+  }, local.common_tags)
+}
+
+resource "aws_eip" "wlan_freeradius_proxy" {
+  vpc      = true
+  instance = aws_instance.wlan_freeradius_proxy.id
+  tags     = local.common_tags
+}
+
+output "wlan_freeradius_instance_proxy" {
+  value = aws_eip.wlan_freeradius_proxy.public_ip
+}
+
+# Generated Ansible hosts file
 resource "null_resource" "ansible_inventory_generate" {
   triggers = {
-    freeradius_instance_arn    = aws_instance.wlan_freeradius.arn
-    freeradius_eip_id          = aws_eip.wlan_freeradius.id
-    freeradius_qa_instance_arn = aws_instance.wlan_freeradius_qa.arn
-    freeradius_qa_eip_id       = aws_eip.wlan_freeradius_qa.id
-    demo_instance_arn          = aws_instance.wlan_demo.arn
-    demo_eip_id                = aws_eip.wlan_demo.id
+    freeradius_instance_arn       = aws_instance.wlan_freeradius.arn
+    freeradius_eip_id             = aws_eip.wlan_freeradius.id
+    freeradius_qa_instance_arn    = aws_instance.wlan_freeradius_qa.arn
+    freeradius_qa_eip_id          = aws_eip.wlan_freeradius_qa.id
+    demo_instance_arn             = aws_instance.wlan_demo.arn
+    demo_eip_id                   = aws_eip.wlan_demo.id
+    freeradius_proxy_instance_arn = aws_instance.wlan_freeradius.arn
+    freeradius_proxy_eip_id       = aws_eip.wlan_freeradius.id
   }
 
   # Generate Ansible inventory file
   provisioner "local-exec" {
     command = <<-EOA
-    echo "${templatefile("${path.module}/templates/ansible_inventory.yml.tpl", { freeradius_eip = aws_eip.wlan_freeradius, freeradius_eip_qa = aws_eip.wlan_freeradius_qa, demo_eip = aws_eip.wlan_demo })}" > ansible/hosts.yml
+    echo "${templatefile("${path.module}/templates/ansible_inventory.yml.tpl", { freeradius_eip = aws_eip.wlan_freeradius, freeradius_eip_qa = aws_eip.wlan_freeradius_qa, demo_eip = aws_eip.wlan_demo, freeradius_proxy_eip = aws_eip.wlan_freeradius_proxy })}" > ansible/hosts.yml
     EOA
   }
 }
