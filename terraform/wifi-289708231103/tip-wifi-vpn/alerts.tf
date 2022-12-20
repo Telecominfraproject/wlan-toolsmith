@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_metric_alarm" "vpn_state" {
-  for_each            = { for vpn in [aws_vpn_connection.tunnel_tip_wifi_nrg, aws_vpn_connection.tunnel-perfecto] : vpn.id => vpn }
+  for_each            = { for vpn in [aws_vpn_connection.tunnel_tip_wifi_fre, aws_vpn_connection.tunnel-perfecto] : vpn.id => vpn }
   alarm_name          = "vpn-state-${each.key}"
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = "3"
@@ -18,7 +18,7 @@ resource "aws_cloudwatch_metric_alarm" "vpn_state" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "vpn_outgoing_data" {
-  for_each            = { for vpn in [aws_vpn_connection.tunnel_tip_wifi_nrg, aws_vpn_connection.tunnel-perfecto] : vpn.id => vpn }
+  for_each            = { for vpn in [aws_vpn_connection.tunnel_tip_wifi_fre, aws_vpn_connection.tunnel-perfecto] : vpn.id => vpn }
   alarm_name          = "vpn-outgoing-data-${each.key}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
@@ -139,3 +139,9 @@ Resources:
 EOT
 }
 
+resource "aws_cloudwatch_log_group" "vpn_logs" {
+  name              = "VPNLogs"
+  retention_in_days = 30
+
+  tags = local.common_tags
+}

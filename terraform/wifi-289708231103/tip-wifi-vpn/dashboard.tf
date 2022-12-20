@@ -164,7 +164,7 @@ resource "aws_cloudwatch_dashboard" "vpn_tg" {
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "AWS/VPN", "TunnelDataOut", "VpnId", "${aws_vpn_connection.tunnel_tip_wifi_nrg.id}" ],
+                    [ "AWS/VPN", "TunnelDataOut", "VpnId", "${aws_vpn_connection.tunnel_tip_wifi_fre.id}" ],
                     [ ".", "TunnelDataIn", ".", "." ]
                 ],
                 "view": "timeSeries",
@@ -183,7 +183,7 @@ resource "aws_cloudwatch_dashboard" "vpn_tg" {
             "properties": {
                 "metrics": [
                     [ { "expression": "IF(m2 > 0.5, 0.5, m2)*2*100", "label": "Uptime", "id": "e1", "region": "us-east-2" } ],
-                    [ "AWS/VPN", "TunnelState", "VpnId", "${aws_vpn_connection.tunnel_tip_wifi_nrg.id}", { "id": "m2", "visible": false, "period": 300 } ]
+                    [ "AWS/VPN", "TunnelState", "VpnId", "${aws_vpn_connection.tunnel_tip_wifi_fre.id}", { "id": "m2", "visible": false, "period": 300 } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
