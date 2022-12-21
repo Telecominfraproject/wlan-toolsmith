@@ -122,7 +122,7 @@ releases:
   <<: *default
   <<: *external-dns
   chart: bitnami/external-dns
-  version: 6.1.0
+  version: 6.12.2
   labels:
     role: setup
     group: system
@@ -835,7 +835,7 @@ releases:
   condition: metrics-server.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: bitnami/metrics-server
-  version: 5.10.13
+  version: 6.2.4
   labels:
     role: setup
     group: monitoring
