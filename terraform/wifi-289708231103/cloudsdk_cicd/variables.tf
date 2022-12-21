@@ -59,6 +59,11 @@ variable "testing_big_instance_type" {
   default = "m5a.xlarge"
 }
 
+variable "testing_owls_instance_type" {
+  type    = string
+  default = "c6a.2xlarge"
+}
+
 variable "spot_instance_types" {
   type    = list(string)
   default = ["t3.small"]
