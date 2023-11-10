@@ -12,7 +12,9 @@ terraform {
     dynamodb_table = "terraform-state-lock"
     encrypt        = true
   }
-}
+#}
+# DISABLED - It's not safe to run any of this terraform
+# EKS cluster was built with ../../../eksctl/wifi-289708231103/tip-wlan-main instead of this
 
 resource "aws_key_pair" "wlan" {
   key_name   = "wlan"
