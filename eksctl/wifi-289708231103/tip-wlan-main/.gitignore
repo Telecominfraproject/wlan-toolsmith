@@ -1,0 +1,8 @@
+.cluster.yaml.*
+*-kube-config
+*-logs
+env_cs
+future
+id_rsa*
+kms-key-for-encryption-on-ebs.json
+route53policy.json

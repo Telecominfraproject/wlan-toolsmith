@@ -1,0 +1,206 @@
+#!/bin/bash
+
+. ./utils.sh
+
+check_env
+echo "Creating cluster:"
+show_env
+echo "Press ENTER to continue [or CTRL-C to exit]"
+read enter
+
+function cleanup()
+{
+    #echo "Cleanup $cstep err $have_err!"
+    if [[ "$cstep" -ge 0 && "$have_err" -eq 1 ]] ; then
+        local nextstep
+        ((nextstep=cstep + 1))
+        echo "To retry after the failed step, resume your install via $0 $nextstep"
+    fi
+}
+
+function nextstep()
+{
+    ((cstep++))
+    if [[ "${steps[$cstep]}" == "echo" ]] ; then
+        f=" - SKIPPED"
+    else
+        f=""
+    fi
+    logx "[$cstep] Starting step: $1$f"
+}
+
+function enabled()
+{
+    if [[ "${steps[$cstep]}" == "echo" ]] ; then
+        return 1
+    fi
+    [ -n "$1" ] && logx "[$cstep] $1"
+    return 0
+}
+
+function err_handler()
+{
+    have_err=1
+    #echo "Error!"
+}
+
+have_err=0
+cstep=-1
+
+trap cleanup EXIT
+trap err_handler ERR
+
+declare -a steps
+max_steps=10
+for ((i=0; i < $max_steps; i++)) ; do
+    steps[$i]=""
+done
+if [ -n "$1" ] ; then
+    for ((i=0; i < $1; i++)) ; do
+        steps[$i]="echo"
+    done
+fi
+logv start_install "$(date)"
+cstep=0
+
+#----------------------------------
+# start the show:
+set -e
+set -x
+
+#----------------------------------
+echo "Determine caller identity"
+if [ -n "$AWS_PROFILE" ] ; then
+    account_id=$(aws sts get-caller-identity --query Account --output text --profile $AWS_PROFILE)
+else
+    account_id=$(aws sts get-caller-identity --query Account --output text)
+fi
+logv accountid $account_id
+if [ -z "$account_id" ] ; then
+    echo "Unable to determine caller-identity!"
+    exit 1
+fi
+#----------------------------------
+nextstep "Skip generating SSH Keypair id_rsa_${CLUSTER_NAME}"
+if [ ! -f "id_rsa_${CLUSTER_NAME}" ] ; then
+    if enabled ; then
+        ssh-keygen -q -t rsa -N '' -f id_rsa_${CLUSTER_NAME} <<<y >/dev/null 2>&1
+    fi
+else
+    echo "Skip generating SSH Keypair id_rsa_${CLUSTER_NAME} - exists"
+fi
+
+#----------------------------------
+config_file="cluster.$CLUSTER_NAME.yaml"
+nextstep "Generating cluster.yml file -> $config_file"
+if enabled ; then
+    envsubst < cluster.yaml > $config_file
+fi
+
+#----------------------------------
+nextstep "Creating $CLUSTER_NAME EKS cluster"
+${steps[$cstep]} eksctl create cluster -f $config_file
+
+#echo "Press ENTER to continue" ; read a
+
+#----------------------------------
+nextstep "Creating EBS CSI policy and SA"
+role_name="${CLUSTER_NAME}-ebs-csi"
+sa_name=ebs-csi-controller-sa
+arn="arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+${steps[$cstep]} eksctl create iamserviceaccount \
+    --name $sa_name \
+    --namespace kube-system \
+    --cluster $CLUSTER_NAME \
+    --role-name $role_name \
+    --role-only \
+    --attach-policy-arn $arn \
+    --approve
+#aws iam create-policy \
+#    --policy-name KMS_Key_For_Encryption_On_EBS_Policy \
+#    --policy-document file://kms-key-for-encryption-on-ebs.json \
+#    --no-cli-pager
+#aws iam attach-role-policy \
+#    --policy-arn arn:aws:iam::$account_id:policy/KMS_Key_For_Encryption_On_EBS_Policy \
+#    --role-name AmazonEKS_EBS_CSI_DriverRole
+arn="arn:aws:iam::${account_id}:role/${role_name}"
+${steps[$cstep]} eksctl create addon \
+    --name aws-ebs-csi-driver \
+    --cluster $CLUSTER_NAME \
+    --service-account-role-arn $arn \
+    --force
+oidc_id=$(aws eks describe-cluster --name $CLUSTER_NAME --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
+if [ -n "$oidc_id" ] ; then
+    oidc_id=$(aws iam list-open-id-connect-providers | grep $oidc_id | cut -d "/" -f4)
+fi
+if [ -z "$oidc_id" ] ; then
+    ${steps[$cstep]} eksctl utils associate-iam-oidc-provider --cluster $CLUSTER_NAME --approve
+fi
+#----------------------------------
+nextstep "Creating External DNS policy"
+role_name="${CLUSTER_NAME}-external-dns"
+sa_name="${role_name}-sa"
+arn="arn:aws:iam::${account_id}:policy/${role_name}"
+# replace zone id
+[ -z "$CLUSTER_ZONE_ID" ] && CLUSTER_ZONE_ID='*'
+envsubst < route53policy.json.tpl > route53policy.json
+${steps[$cstep]} aws iam create-policy \
+    --policy-name $role_name \
+    --policy-document file://route53policy.json \
+    --no-cli-pager
+${steps[$cstep]} eksctl create iamserviceaccount \
+    --name $sa_name \
+    --namespace kube-system \
+    --cluster $CLUSTER_NAME \
+    --role-name $role_name \
+    --attach-policy-arn $arn \
+    --override-existing-serviceaccounts \
+    --approve
+
+#----------------------------------
+nextstep "Creating ALB policy"
+role_name="${CLUSTER_NAME}-alb-ingress"
+sa_name="${role_name}-sa"
+arn="arn:aws:iam::${account_id}:policy/${role_name}"
+${steps[$cstep]} aws iam create-policy \
+    --policy-name $role_name \
+    --policy-document file://alb_ingress_policy.json \
+    --no-cli-pager
+${steps[$cstep]} eksctl create iamserviceaccount \
+    --cluster $CLUSTER_NAME \
+    --namespace kube-system \
+    --name $sa_name \
+    --role-name $role_name \
+    --attach-policy-arn $arn \
+    --override-existing-serviceaccounts \
+    --approve
+
+#----------------------------------
+nextstep "Updating kube config file"
+#aws eks update-kubeconfig --name $CLUSTER_NAME --region $AWS_REGION
+${steps[$cstep]} aws eks update-kubeconfig \
+    --kubeconfig ./${CLUSTER_NAME}-kube-config \
+    --region $AWS_REGION \
+    --name $CLUSTER_NAME
+
+#----------------------------------
+set +xe
+cstep=-1
+logv endinstall "$(date)"
+echo
+echo "Cluster creation completed!"
+echo
+echo "Cluster info:"
+kubectl cluster-info
+echo
+echo "Nodes:"
+kubectl get nodes
+echo
+echo "Storage classes:"
+kubectl get sc
+echo
+echo "All pods:"
+kubectl get po -A
+echo
+echo "To update your current kube config run:"
+echo "  aws eks update-kubeconfig --name $CLUSTER_NAME --region $AWS_REGION"

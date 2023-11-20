@@ -1,0 +1,53 @@
+#!/bin/bash
+
+. ./utils.sh
+
+check_env
+echo "Cleaning up cluster:"
+show_env
+echo "Press ENTER to continue [or CTRL-C to exit]"
+read enter
+
+declare -a steps
+max_steps=10
+for ((i=0; i < $max_steps; i++)) ; do
+    steps[$i]=""
+done
+if [ -n "$1" ] ; then
+    for ((i=0; i < $1; i++)) ; do
+        steps[$i]="echo"
+    done
+fi
+cstep=1
+logv startclean "$(date)"
+#set -x
+echo "Determine caller identity"
+if [ -n "$AWS_PROFILE" ] ; then
+    account_id=$(aws sts get-caller-identity --query Account --output text --profile $AWS_PROFILE)
+else
+    account_id=$(aws sts get-caller-identity --query Account --output text)
+fi
+logv accountid $account_id
+if [ -z "$account_id" ] ; then
+    echo "Unable to determine caller-identity!"
+    exit 1
+fi
+${steps[$cstep]} eksctl \
+    delete cluster --name $CLUSTER_NAME --region $AWS_REGION --wait
+logv deleted $CLUSTER_NAME
+#----------------------------------
+((cstep++))
+role_name="${CLUSTER_NAME}-alb-ingress"
+arn="arn:aws:iam::${account_id}:policy/${role_name}"
+logv delete "$arn"
+${steps[$cstep]} aws iam delete-policy \
+    --policy-arn $arn
+role_name="${CLUSTER_NAME}-external-dns"
+arn="arn:aws:iam::${account_id}:policy/${role_name}"
+logv delete "$arn"
+${steps[$cstep]} aws iam delete-policy \
+    --policy-arn $arn
+#set +x
+cstep=-1
+
+logv endclean "$(date)"

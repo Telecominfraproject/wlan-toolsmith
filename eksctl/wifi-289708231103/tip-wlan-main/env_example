@@ -1,0 +1,18 @@
+# if using a SAML profile:
+#export AWS_PROFILE="personal"
+#otherwise unset this and make sure session token and other access key information is set:
+unset AWS_PROFILE
+# eg.
+#export AWS_ACCESS_KEY_ID="ASKU..."
+#export AWS_SECRET_ACCESS_KEY="z6bl3..."
+#export AWS_SESSION_TOKEN="Igo..."
+export AWS_DEFAULT_REGION="ap-south-1"
+export AWS_ACCOUNT_ID="289708231103"
+export CLUSTER_DOMAIN="lab.wlan.tip.build"
+export CLUSTER_ZONE_ID="Z213ADJASKDA1345" # zone id of $CLUSTER_DOMAIN zone
+export CLUSTER_INSTANCE_TYPE="c5.xlarge"
+export CLUSTER_NAME="tip-wlan-main"
+export CLUSTER_NODES=3
+export CLUSTER_MIN_NODES=3
+export CLUSTER_MAX_NODES=8
+export CLUSTER_VOLUME_SIZE=100
