@@ -98,7 +98,7 @@ nodeGroups:
   amiFamily: AmazonLinux2
   minSize: 3
   maxSize: 8
-  desiredCapacity: 4
+  desiredCapacity: 6
   volumeSize: 100
   ssh: # import public key from file
     allow: true
