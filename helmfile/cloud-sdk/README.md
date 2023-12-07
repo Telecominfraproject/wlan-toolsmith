@@ -52,7 +52,8 @@ releases:
 
 1. Set credentials that are required to connect to Kubernetes cluster
 2. (optional) If you are going to use environment with secrets, make sure that you also have credentials required for access to AWS KMS key
-3. Run `helmfile --environment $ENVIRONMENT diff` to see changes that would be applied
-4. If everything is correct, run `helmfile --environment $ENVIRONMENT apply` to see changes that would be applied
+3. Run `./predeploy.sh` to install pre-requisites.
+4. Run `helmfile --environment $ENVIRONMENT diff` to see changes that would be applied
+5. If everything is correct, run `helmfile --environment $ENVIRONMENT apply` to see changes that would be applied
 
 If you would like to limit releasae that you would like to affect, you may use labels. For example, if you want to see changes that would be done only to **influxdb** release in **amazon-cicd** environment, you may run `helmfile --environment amazon-cicd --selector app=influxdb diff`
