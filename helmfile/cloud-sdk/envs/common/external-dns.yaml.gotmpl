@@ -1,7 +1,7 @@
 podAnnotations:
-  iam.amazonaws.com/role: arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/tip-wlan-main-external-dns
+  iam.amazonaws.com/role: arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/{{ .Environment.Values.eks.clusterName }}-external-dns
 aws:
-  region: us-east-1
+  region: {{ .Environment.Values.eks.dnsRegion }}
   evaluateTargetHealth: false
 domainFilters:
 - {{ .Environment.Values.domain }}
@@ -14,5 +14,7 @@ extraArgs:
 txtOwnerId: /hostedzone/{{ .Environment.Values.eks.hostedZoneId }}
 policy: sync
 serviceAccount:
+  create: false
+  name: {{ .Environment.Values.eks.clusterName }}-external-dns-sa
   annotations:
     eks.amazonaws.com/role-arn: "arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/{{ .Environment.Values.eks.clusterName }}-external-dns"

@@ -1,3 +1,73 @@
+environments:
+  amazon-cicd:
+    secrets:
+      - secrets/influxdb.yaml
+      - secrets/sso.yaml
+      - secrets/alertmanager.yaml
+      - secrets/actions-runner-controller.yaml
+      - secrets/ucentral-ap-firmware-logstash.yaml
+      - secrets/core-dump-handler.yaml
+    values:
+    - eks:
+        clusterName: tip-wlan-main
+        region: ap-south-1
+        dnsRegion: us-east-1
+        accountID: 289708231103
+        hostedZoneId: cicd
+        certificateARNCICD: arn:aws:acm:ap-south-1:289708231103:certificate/2cc8c764-11fd-411d-bf7d-a93f488f3f6c
+        certificateARNLab: arn:aws:acm:ap-south-1:289708231103:certificate/5281be14-c5e6-45c5-8d5c-e8660c76fbcb
+    - monitoring:
+        namespace: monitoring
+        publicNamespaces: ['openwifi-qa01', 'openwifi-dev01', 'openwifi-demo']
+    - domain: lab.wlan.tip.build
+    - storageClass: gp2
+    - autoscaler:
+        #TODO:
+        #enabled: true
+        enabled: false
+    - ingress:
+        enabled: true
+    - elastic:
+        #TODO:
+        #enabled: true
+        enabled: false
+    - kibana:
+        #TODO:
+        #enabled: true
+        enabled: false
+    - logstash:
+        #TODO:
+        #enabled: true
+        enabled: false
+    - prometheus:
+        #TODO:
+        #enabled: true
+        enabled: false
+    - k8s-dashboard:
+        enabled: true
+    - metrics-server:
+        enabled: true
+    - external-dns:
+        enabled: true
+    - alb-ingress:
+        enabled: true
+    - node-termination-handler:
+        enabled: true
+    - influxdb:
+        #skip this one for now
+        enabled: false
+    - actions-runner-controller:
+        enabled: true
+    - cert-manager:
+        enabled: true
+    - calico:
+        enabled: true
+    - core-dump-handler:
+        #skip this one now
+        enabled: false
+
+---
+
 repositories:
 - name: stable
   url: https://charts.helm.sh/stable
@@ -30,61 +100,6 @@ repositories:
 - name: core-dump-handler
   url: https://ibm.github.io/core-dump-handler
 
-environments:
-  amazon-cicd:
-    secrets:
-      - secrets/influxdb.yaml
-      - secrets/sso.yaml
-      - secrets/alertmanager.yaml
-      - secrets/actions-runner-controller.yaml
-      - secrets/ucentral-ap-firmware-logstash.yaml
-      - secrets/core-dump-handler.yaml
-    values:
-    - eks:
-        clusterName: tip-wlan-main
-        region: us-east-2
-        accountID: 289708231103
-        hostedZoneId: cicd
-        certificateARNCICD: arn:aws:acm:us-east-2:289708231103:certificate/bfa89c7a-5b64-4a8a-bcfe-ffec655b5285
-        certificateARNLab: arn:aws:acm:us-east-2:289708231103:certificate/510429bd-1a3d-4c43-90ce-8e340795a888
-    - monitoring:
-        namespace: monitoring
-        publicNamespaces: ['openwifi-qa01', 'openwifi-dev01']
-    - domain: lab.wlan.tip.build
-    - storageClass: gp2
-    - autoscaler:
-        enabled: true
-    - ingress:
-        enabled: true
-    - elastic:
-        enabled: true
-    - kibana:
-        enabled: true
-    - logstash:
-        enabled: true
-    - prometheus:
-        enabled: true
-    - k8s-dashboard:
-        enabled: true
-    - metrics-server:
-        enabled: true
-    - external-dns:
-        enabled: true
-    - alb-ingress:
-        enabled: true
-    - node-termination-handler:
-        enabled: true
-    - influxdb:
-        enabled: true
-    - actions-runner-controller:
-        enabled: true
-    - cert-manager:
-        enabled: true
-    - calico:
-        enabled: true
-    - core-dump-handler:
-        enabled: true
-
 helmDefaults:
   force: false
   timeout: 300
@@ -108,7 +123,7 @@ templates:
 releases:
 - name: cluster-autoscaler
   condition: autoscaler.enabled
-  <<: *default 
+  <<: *default
   <<: *cluster-autoscaler
   chart: autoscaler/cluster-autoscaler
   version: 9.11.0
@@ -132,29 +147,46 @@ releases:
   condition: ingress.enabled
   <<: *default
   chart: nginx/ingress-nginx
-  version: 4.2.0
+  #version: 4.2.0
+  version: 4.8.2
   labels:
     role: setup
     group: system
     app: ingress
   values:
   - controller:
+      # TEST:
+      ingressClassResource:
+        name: nginx-sso
       ingressClass: nginx-sso
+      #ingressClass: nginx
       service:
         annotations:
           service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Environment.Values.eks.certificateARNLab }}
           service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
           service.beta.kubernetes.io/aws-load-balancer-type: elb
           service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+          #MAYBE TRY THESE:
+          #service.beta.kubernetes.io/aws-load-balancer-name: apps-ingress
+          #service.beta.kubernetes.io/aws-load-balancer-type: external
+          #service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+          #service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+          #service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: http
+          #service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: /healthz
+          #service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: 10254
         targetPorts:
           http: http
           https: http
       publishService:
         enabled: true
       metrics:
-        enabled: true
+        #TODO:
+        #enabled: true
+        enabled: false
         serviceMonitor:
-          enabled: true
+          #TODO:
+          #enabled: true
+          enabled: false
           additionalLabels:
             release: prometheus-operator
   - defaultBackend:
@@ -405,7 +437,6 @@ releases:
         repository: tip-tip-wlan-cloud-ucentral.jfrog.io/kube-state-metrics
         tag: v2.6.0-tip20221103
 
-
 - name: prometheus-operator-helper
   condition: prometheus.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
@@ -641,6 +672,17 @@ releases:
             client_id => "openwifi-qa01"
             add_field => { "instance" => "openwifi-qa01" }
           }
+
+          kafka {
+            bootstrap_servers => "kafka-headless.openwifi-demo.svc.cluster.local:9092"
+            topics => ["state", "healthcheck", "device_event_queue"]
+            tags => ["openwifi-kafka"]
+            #codec => json
+            decorate_events => true
+            auto_offset_reset => "latest"
+            client_id => "openwifi-demo"
+            add_field => { "instance" => "openwifi-demo" }
+          }
         }
 
         filter {
@@ -815,6 +857,7 @@ releases:
       externalPort: 80
   - protocolHttp: true
   - ingress:
+      className: nginx-sso
       enabled: true
       paths:
         - /
@@ -848,13 +891,15 @@ releases:
   <<: *default
   condition: alb-ingress.enabled
   chart: eks/aws-load-balancer-controller
-  version: 1.4.2
+  version: 1.6.1
   labels:
     role: setup
     group: system
     app: aws-load-balancer-controller
   values:
   - serviceAccount:
+      create: false
+      name: {{ .Values.eks.clusterName }}-alb-ingress-sa
       annotations:
         eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Values.eks.accountID }}:role/{{ .Values.eks.clusterName }}-alb-ingress
     clusterName: {{ .Values.eks.clusterName }}
@@ -867,7 +912,7 @@ releases:
   <<: *default
   condition: node-termination-handler.enabled
   chart: eks/aws-node-termination-handler
-  version: 0.16.0
+  version: 0.21.0
   labels:
     role: setup
     group: system
@@ -963,12 +1008,13 @@ releases:
   chart: charts/actions-runner-controller-addon
   labels:
     app: actions-runner-controller
+  disableValidation: true
 
 - name: cert-manager
   condition: cert-manager.enabled
-  namespace: kube-system
+  namespace: cert-manager
   chart: jetstack/cert-manager
-  version: v1.6.1
+  version: v1.13.0
   labels:
     app: cert-manager
   values:
@@ -982,17 +1028,21 @@ releases:
           cpu: 500m
           memory: 150Mi
 
-
 - name: calico
   condition: calico.enabled
   chart: projectcalico/tigera-operator
-  version: v3.22.2
-  namespace: kube-system
+  version: v3.26.1
+  namespace: tigera-operator
+  disableValidation: true
   labels:
     app: calico
+  values:
+    - installation:
+        kubernetesProvider: EKS
 
 - name: github-actions-network-policies
-  condition: calico.enabled
+  #condition: calico.enabled
+  condition: actions-runner-controller.enabled
   namespace: actions-runner-controller
   chart: charts/github-actions-network-policies
   labels:

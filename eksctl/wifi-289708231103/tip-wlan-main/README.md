@@ -34,7 +34,7 @@ The scripts should work on MacOS and Linux (as of yet untested).
 
 ## Scaling nodegroups
 
-Set the desiredCapacity for the nodegroup in cluster.CLUSTER_NAME.yaml and run:
+Set CLUSTER_NODES in your env\_FILE and also set the desiredCapacity for the nodegroup in cluster.CLUSTER_NAME.yaml and run:
 ```bash
 source env\_FILE
 eksctl scale nodegroup -f cluster.$CLUSTER_NAME.yaml
