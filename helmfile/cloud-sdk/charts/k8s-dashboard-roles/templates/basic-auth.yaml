@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: k8s-dashboard-basic-auth
+  namespace: {{ .Release.Namespace }}
+data:
+  auth: cWE6JGFwcjEkUkZFUW5nSzkkYUV6R0hhYmpqb0VBQjlqYy9GQldPMAo=

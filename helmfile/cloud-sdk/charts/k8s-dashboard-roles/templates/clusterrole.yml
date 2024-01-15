@@ -25,9 +25,9 @@ rules:
 
 - apiGroups:
   - ""
-  resources: 
+  resources:
   - "pods/exec"
-  verbs: 
+  verbs:
   - "create"
 
 - apiGroups:
