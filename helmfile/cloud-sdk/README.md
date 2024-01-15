@@ -20,7 +20,7 @@ Currently all secrets are stored in [secrets](./secrets) directory, where you ca
 
 To work with secret, you need to have your AWS credentials set with administrator role in wifi account, then you would be able to make operations with files (for example to edit secret use `helm secrets edit $SECRET_FILE`).
 
-If you need to encrypt new file, you simply need to write it in plaintext, then run `helm secrets enc $PLAINTEXT_SECRET_FILE` - helm secrets will automatically use encryption key defined in `.sops.yaml`
+If you need to encrypt new file, you simply need to write it in plaintext, then run `helm secrets encrypt $PLAINTEXT_SECRET_FILE` - helm secrets will automatically use encryption key defined in `.sops.yaml`
 
 You can use secrets in Helmfile the same way as values:
 
@@ -47,6 +47,17 @@ releases:
   values:
   - secretKey: {{ .Environment.Values.example.secretKey }}
 ```
+
+### K8S Dashboard Login
+
+To replace or set the users that may login to the dashboard (via basic auth):
+
+```
+htpasswd -c auth qa
+```
+Then copy base64 version of this file into: data.auth in charts/k8s-dashboard-roles/templates/basic-auth.yaml.
+The current password is encoded in secrets/dashboard.yaml.
+
 
 ## Usage
 

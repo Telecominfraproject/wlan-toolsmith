@@ -10,6 +10,7 @@ metadata:
   labels:
     k8s-app: oauth2-proxy
 spec:
+  ingressClassName: nginx-sso
   rules:
   - host: k8s-dashboard.{{ .Values.monitoring.domain }}
     http:

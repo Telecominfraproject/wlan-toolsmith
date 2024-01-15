@@ -18,7 +18,7 @@ environments:
         certificateARNLab: arn:aws:acm:ap-south-1:289708231103:certificate/5281be14-c5e6-45c5-8d5c-e8660c76fbcb
     - monitoring:
         namespace: monitoring
-        publicNamespaces: ['openwifi-qa01', 'openwifi-dev01', 'openwifi-demo']
+        publicNamespaces: ['openwifi-qa01', 'openwifi-qa02', 'openwifi-dev01', 'openwifi-demo']
     - domain: lab.wlan.tip.build
     - storageClass: gp2
     - autoscaler:
@@ -45,6 +45,8 @@ environments:
         enabled: false
     - k8s-dashboard:
         enabled: true
+    - portainer:
+        enabled: false
     - metrics-server:
         enabled: true
     - external-dns:
@@ -99,6 +101,8 @@ repositories:
   url: https://braedon.github.io/helm
 - name: core-dump-handler
   url: https://ibm.github.io/core-dump-handler
+- name: portainer
+  url: https://portainer.github.io/k8s/
 
 helmDefaults:
   force: false
@@ -166,14 +170,7 @@ releases:
           service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
           service.beta.kubernetes.io/aws-load-balancer-type: elb
           service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
-          #MAYBE TRY THESE:
-          #service.beta.kubernetes.io/aws-load-balancer-name: apps-ingress
-          #service.beta.kubernetes.io/aws-load-balancer-type: external
-          #service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
-          #service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
-          #service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: http
-          #service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: /healthz
-          #service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: 10254
+          service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
         targetPorts:
           http: http
           https: http
@@ -821,6 +818,30 @@ releases:
           targetPort: 5514
           protocol: TCP
 
+- name: portainer
+  condition: portainer.enabled
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+  chart: portainer/portainer
+  version: 1.0.49
+  labels:
+    role: setup
+    group: monitoring
+    app: portainer
+  values:
+    - service:
+        type: ClusterIP
+    - tls:
+        force: true
+    - ingress:
+        ingressClassName: nginx-sso
+        enabled: true
+        annotations:
+          nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+        hosts:
+        - host: k8s-admin.{{ .Environment.Values.domain }}
+          paths:
+          - path: "/"
+
 - name: k8s-dashboard-roles
   condition: k8s-dashboard.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
@@ -863,14 +884,11 @@ releases:
         - /
         - /*
       annotations:
-        #alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
-        #alb.ingress.kubernetes.io/group.name: wlan-cicd
-        #alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
-        #alb.ingress.kubernetes.io/scheme: internet-facing
-        #kubernetes.io/ingress.class: alb
-        nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
-        nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
-        kubernetes.io/ingress.class: nginx-sso
+        #nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+        #nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+        nginx.ingress.kubernetes.io/auth-type: basic
+        nginx.ingress.kubernetes.io/auth-secret: k8s-dashboard-basic-auth
+        nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required'
       hosts:
         - k8s-dashboard.{{ .Environment.Values.domain }}
 
