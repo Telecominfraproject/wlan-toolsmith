@@ -40,9 +40,7 @@ environments:
         #enabled: true
         enabled: false
     - prometheus:
-        #TODO:
-        #enabled: true
-        enabled: false
+        enabled: true
     - k8s-dashboard:
         enabled: true
     - portainer:
@@ -151,7 +149,6 @@ releases:
   condition: ingress.enabled
   <<: *default
   chart: nginx/ingress-nginx
-  #version: 4.2.0
   version: 4.8.2
   labels:
     role: setup
@@ -177,24 +174,29 @@ releases:
       publishService:
         enabled: true
       metrics:
-        #TODO:
-        #enabled: true
-        enabled: false
+        enabled: true
         serviceMonitor:
-          #TODO:
-          #enabled: true
-          enabled: false
+          enabled: true
           additionalLabels:
             release: prometheus-operator
   - defaultBackend:
       enabled: true
 
 # monitoring
+- name: prometheus-operator-crds
+  chart: prometheus-community/prometheus-operator-crds
+  condition: prometheus.enabled
+  version: 8.0.1
+  labels:
+    role: setup
+    group: monitoring
+    app: prometheus-operator
+
 - name: prometheus-operator
   condition: prometheus.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: prometheus-community/kube-prometheus-stack
-  version: 41.5.1
+  version: 55.8.1
   labels:
     role: setup
     group: monitoring
@@ -220,10 +222,14 @@ releases:
                   storage: 50Gi
       ingress:
         enabled: true
+        ingressClassName: nginx-sso
         annotations:
-          nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
-          nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
-          kubernetes.io/ingress.class: nginx-sso
+          nginx.ingress.kubernetes.io/auth-type: basic
+          nginx.ingress.kubernetes.io/auth-secret: k8s-dashboard-basic-auth
+          nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required'
+          #nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+          #nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+          #kubernetes.io/ingress.class: nginx-sso
         hosts:
         - prometheus.{{ .Environment.Values.domain }}
   - additionalPrometheusRulesMap:
@@ -316,21 +322,22 @@ releases:
             annotations:
               title: PVC *{{`{{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }}`}}* has less than 20% free storage
               description: "The PVC *{{`{{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }}`}}* only has {{`{{ $value }}`}}% capacity left. Please increase its size or clean it up."
-          - alert: ElasticSearch new assert_violation errors found
-            expr: rate(assert_violation_errors_hits[1m]) > 0
-            labels:
-              severity: warning
-              area: testbed
-              service: elasticsearch
-              namespace: "{{`{{ $labels.namespace }}`}}"
-            annotations:
-              title: New ElasticSearch logs found with Assertion violation (WIFI-9824)
-              description: New ElasticSearch logs found with Assertion violation (WIFI-9824)
+# Not doing ES (currently)
+#          - alert: ElasticSearch new assert_violation errors found
+#            expr: rate(assert_violation_errors_hits[1m]) > 0
+#            labels:
+#              severity: warning
+#              area: testbed
+#              service: elasticsearch
+#              namespace: "{{`{{ $labels.namespace }}`}}"
+#            annotations:
+#              title: New ElasticSearch logs found with Assertion violation (WIFI-9824)
+#              description: New ElasticSearch logs found with Assertion violation (WIFI-9824)
 
   - grafana:
-      image:
-        repository: grafana/grafana
-        tag: 8.5.13
+      #image:
+        #repository: grafana/grafana
+        #tag: 8.5.13
       grafana.ini:
         users:
           viewers_can_edit: true
@@ -344,10 +351,14 @@ releases:
         enabled: false
       ingress:
         enabled: true
+        ingressClassName: nginx-sso
         annotations:
-          nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
-          nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
-          kubernetes.io/ingress.class: nginx-sso
+          nginx.ingress.kubernetes.io/auth-type: basic
+          nginx.ingress.kubernetes.io/auth-secret: k8s-dashboard-basic-auth
+          nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required'
+          #nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+          #nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+          #kubernetes.io/ingress.class: nginx-sso
         hosts:
         - grafana.{{ .Environment.Values.domain }}
       dashboardProviders:
@@ -363,12 +374,12 @@ releases:
             options:
               path: /var/lib/grafana/dashboards/default
 
-      dashboards:
-        default:
-          performance:
-            url: https://raw.githubusercontent.com/Telecominfraproject/wlan-testing/master/grafana/performance.json
-          qaDebugging:
-            url: https://raw.githubusercontent.com/Telecominfraproject/wlan-cloud-ucentral-analytics/main/grafana/qa-debugging.json
+      #dashboards:
+      #  default:
+      #    performance:
+      #      url: https://raw.githubusercontent.com/Telecominfraproject/wlan-testing/master/grafana/performance.json
+      #    qaDebugging:
+      #      url: https://raw.githubusercontent.com/Telecominfraproject/wlan-cloud-ucentral-analytics/main/grafana/qa-debugging.json
 
       datasources:
        datasources.yaml:
@@ -379,36 +390,36 @@ releases:
           url: http://prometheus-operated:9090
           access: proxy
           isDefault: false
-        - name: InfluxDB
-          type: influxdb
-          access: proxy
-          url: https://influx.cicd.{{ .Environment.Values.domain }}
-          user: tip
-          secureJsonData:
-            token: {{ .Environment.Values.influxdb.adminUser.token }}
-            password: {{ .Environment.Values.influxdb.adminUser.password }}
-          jsonData:
-            version: Flux
-            organization: tip
-            defaultBucket: tip-cicd
-        - name: ES
-          type: elasticsearch
-          access: proxy
-          url: http://elasticsearch-client.monitoring.svc:9200
-          database: logstash-*
-          isDefault: false
-          jsonData:
-            esVersion: 6
-            timeField: '@timestamp'
-            logMessageField: message
-            logLevelField: fields.level
+# Not doing influx and ES anymore (for now)
+#        - name: InfluxDB
+#          type: influxdb
+#          access: proxy
+#          url: https://influx.cicd.{{ .Environment.Values.domain }}
+#          user: tip
+#          secureJsonData:
+#            token: {{ .Environment.Values.influxdb.adminUser.token }}
+#            password: {{ .Environment.Values.influxdb.adminUser.password }}
+#          jsonData:
+#            version: Flux
+#            organization: tip
+#            defaultBucket: tip-cicd
+#        - name: ES
+#          type: elasticsearch
+#          access: proxy
+#          url: http://elasticsearch-client.monitoring.svc:9200
+#          database: logstash-*
+#          isDefault: false
+#          jsonData:
+#            esVersion: 6
+#            timeField: '@timestamp'
+#            logMessageField: message
+#            logLevelField: fields.level
 
   - alertmanager:
       config:
         global:
           resolve_timeout: 1m
           slack_api_url: {{ .Environment.Values.alertmanager.slack_api_url }}
-
         route:
           receiver: "null"
           routes:
@@ -429,10 +440,10 @@ releases:
             {{- readFile "alertmanager-templates/text.tpl" | nindent 14 }}
             title_link: ""
 
-  - kube-state-metrics:
-      image:
-        repository: tip-tip-wlan-cloud-ucentral.jfrog.io/kube-state-metrics
-        tag: v2.6.0-tip20221103
+#  - kube-state-metrics:
+#      image:
+#        repository: tip-tip-wlan-cloud-ucentral.jfrog.io/kube-state-metrics
+#        tag: v2.6.0-tip20221103
 
 - name: prometheus-operator-helper
   condition: prometheus.enabled
@@ -450,24 +461,24 @@ releases:
   - proxy:
       namespace: kube-system
 
-- name: prometheus-operator-ingress-auth
-  condition: prometheus.enabled
-  namespace: kube-system
-  chart: charts/sso
-  labels:
-    role: setup
-    group: monitoring
-    app: prometheus-operator
-    sub: oAuth
-  values:
-  - monitoring:
-      domain: example.com
-      namespace: {{ .Environment.Values.monitoring.namespace }}
-  - oidc:
-      issuerUrl: {{ .Environment.Values.sso.oidc.issuerUrl }}
-      clientId: {{ .Environment.Values.sso.oidc.clientId }}
-      clientSecret: {{ .Environment.Values.sso.oidc.clientSecret }}
-      cookieSecret: {{ .Environment.Values.sso.oidc.cookieSecret }}
+#- name: prometheus-operator-ingress-auth
+#  condition: prometheus.enabled
+#  namespace: kube-system
+#  chart: charts/sso
+#  labels:
+#    role: setup
+#    group: monitoring
+#    app: prometheus-operator
+#    sub: oAuth
+#  values:
+#  - monitoring:
+#      domain: example.com
+#      namespace: {{ .Environment.Values.monitoring.namespace }}
+#  - oidc:
+#      issuerUrl: {{ .Environment.Values.sso.oidc.issuerUrl }}
+#      clientId: {{ .Environment.Values.sso.oidc.clientId }}
+#      clientSecret: {{ .Environment.Values.sso.oidc.clientSecret }}
+#      cookieSecret: {{ .Environment.Values.sso.oidc.cookieSecret }}
 
 - name: fluentd
   condition: elastic.enabled
