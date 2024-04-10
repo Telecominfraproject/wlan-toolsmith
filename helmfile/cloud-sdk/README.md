@@ -67,4 +67,33 @@ The current password is encoded in secrets/dashboard.yaml.
 4. Run `helmfile --environment $ENVIRONMENT diff` to see changes that would be applied
 5. If everything is correct, run `helmfile --environment $ENVIRONMENT apply` to see changes that would be applied
 
-If you would like to limit releasae that you would like to affect, you may use labels. For example, if you want to see changes that would be done only to **influxdb** release in **amazon-cicd** environment, you may run `helmfile --environment amazon-cicd --selector app=influxdb diff`
+If you would like to limit release that you would like to affect, you may use labels. For example, if you want to see changes that would be done only to **influxdb** release in **amazon-cicd** environment, you may run `helmfile --environment amazon-cicd --selector app=influxdb diff`
+
+### First install
+
+Upon first install there is usually a back and forth with dependencies, so it helps to install
+things in a certain order. This is the suggested order:
+
+```
+./predeploy.sh
+helmfile --environment $ENVIRONMENT -l app=aws-load-balancer-controller apply
+helmfile --environment $ENVIRONMENT --skip-deps -l app=metrics-server apply
+helmfile --environment $ENVIRONMENT --skip-deps -l app=node-termination-handler apply
+helmfile --environment $ENVIRONMENT --skip-deps -l app=cert-manager apply
+helmfile --environment $ENVIRONMENT --skip-deps -l app=external-dns apply
+helmfile --environment $ENVIRONMENT --skip-deps -l crd=prometheus-operator-crd apply
+helmfile --environment $ENVIRONMENT --skip-deps -l app=prometheus-operator apply
+helmfile --environment $ENVIRONMENT --skip-deps -l app=ingress apply
+# anything not covered previously
+helmfile --environment $ENVIRONMENT --skip-deps apply
+```
+
+## First time - post installation activities
+
+```
+kubectl edit sc gp2
+# add at root level: allowVolumeExpansion: true
+kubectl edit ingressclass alb
+# add under: metadata.annotations:
+#   ingressclass.kubernetes.io/is-default-class: "true"
+```

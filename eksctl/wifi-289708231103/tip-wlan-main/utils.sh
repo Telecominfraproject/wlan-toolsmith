@@ -36,8 +36,12 @@ function check_env()
         echo "Default CLUSTER_MIN_NODES to $CLUSTER_MIN_NODES"
     fi
     if [ -z "$CLUSTER_MAX_NODES" ] ; then
-        export CLUSTER_MAX_NODES="3"
+        export CLUSTER_MAX_NODES="$(expr $CLUSTER_NODES + 2)"
         echo "Default CLUSTER_MAX_NODES to $CLUSTER_MAX_NODES"
+    fi
+    if [ "$CLUSTER_MAX_NODES" -lt "$CLUSTER_NODES" ] ; then
+        echo "CLUSTER_MAX_NODES [$CLUSTER_MAX_NODES] is < CLUSTER_NODES [$CLUSTER_NODES]"
+        exit 1
     fi
     if [ -z "$CLUSTER_VOLUME_SIZE" ] ; then
         export CLUSTER_VOLUME_SIZE="100"

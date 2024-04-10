@@ -1,12 +1,13 @@
 unset AWS_PROFILE
-export AWS_DEFAULT_REGION="ap-south-1"
+export AWS_DEFAULT_REGION="us-east-2"
 export AWS_REGION="$AWS_DEFAULT_REGION"
 export AWS_ACCOUNT_ID="289708231103"
 export CLUSTER_DOMAIN="lab.wlan.tip.build"
 export CLUSTER_ZONE_ID="Z09534373UTXT2L1YL912"
 export CLUSTER_INSTANCE_TYPE="c5.xlarge"
-export CLUSTER_NAME="tip-wlan-main"
-export CLUSTER_NODES=6
-export CLUSTER_MIN_NODES=3
+export CLUSTER_INSTANCE_TYPE="m5.2xlarge"
+export CLUSTER_NAME="tip-wlan-qa"
+export CLUSTER_NODES=2
+export CLUSTER_MIN_NODES=2
 export CLUSTER_MAX_NODES=8
 export CLUSTER_VOLUME_SIZE=100

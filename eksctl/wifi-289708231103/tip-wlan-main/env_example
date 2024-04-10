@@ -7,6 +7,7 @@ unset AWS_PROFILE
 #export AWS_SECRET_ACCESS_KEY="z6bl3..."
 #export AWS_SESSION_TOKEN="Igo..."
 export AWS_DEFAULT_REGION="ap-south-1"
+export AWS_REGION="$AWS_DEFAULT_REGION"
 export AWS_ACCOUNT_ID="289708231103"
 export CLUSTER_DOMAIN="lab.wlan.tip.build"
 export CLUSTER_ZONE_ID="Z213ADJASKDA1345" # zone id of $CLUSTER_DOMAIN zone
