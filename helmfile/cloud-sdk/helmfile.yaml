@@ -83,14 +83,16 @@ environments:
         dnsRegion: us-east-1
         accountID: 289708231103
         hostedZoneId: cicd
-        certificateARNCICD: arn:aws:acm:ap-south-1:289708231103:certificate/2cc8c764-11fd-411d-bf7d-a93f488f3f6c
-        certificateARNLab: arn:aws:acm:ap-south-1:289708231103:certificate/5281be14-c5e6-45c5-8d5c-e8660c76fbcb
+        # note these are both the same.
+        # there isn't a lab cert in this region
+        certificateARNCICD: arn:aws:acm:us-east-2:289708231103:certificate/299d7444-acc4-46c2-ae83-40d2cd5f49be
+        certificateARNLab: arn:aws:acm:us-east-2:289708231103:certificate/299d7444-acc4-46c2-ae83-40d2cd5f49be
     - monitoring:
         namespace: monitoring
-        publicNamespaces: ['openwifi-qa02']
+        publicNamespaces: ['openwifi-qa03', 'openwifi-dev03']
         clusterName: TIP QA
     - domain: lab.wlan.tip.build
-    - hostSuffix: "-qa02.lab.wlan.tip.build"
+    - hostSuffix: "-qa02.cicd.lab.wlan.tip.build"
     - storageClass: gp2
     - autoscaler:
         #TODO:
@@ -113,7 +115,7 @@ environments:
     - prometheus:
         enabled: true
     - k8s-dashboard:
-        enabled: false
+        enabled: true
     - portainer:
         enabled: false
     - metrics-server:
@@ -227,11 +229,9 @@ releases:
     app: ingress
   values:
   - controller:
-      # TEST:
       ingressClassResource:
         name: nginx-sso
       ingressClass: nginx-sso
-      #ingressClass: nginx
       service:
         annotations:
           service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Environment.Values.eks.certificateARNLab }}
