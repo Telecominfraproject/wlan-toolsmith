@@ -7,16 +7,18 @@ The scripts should work on MacOS and Linux (as of yet untested).
 ## Requirements
 
 ### MacOS
-- Homebrew (Mac)
+
+- Homebrew
 - gettext for envsubst (via Homebrew v0.21.1)
 
 ### General
-- eksctl (v0.157.0+)
-- aws-cli (v2.13.19)
+
+- eksctl (v0.175.0+)
+- aws-cli (v2.15.34+)
 
 ## Setup
 
-- Prepare an environment file (see [env\_example](./env_example).
+- Prepare an environment file - see [env\_example](./env_example).
 - Make sure all required utilities are installed.
 - Make sure that you can run "aws --version" and "eksctl version"
 - Make sure that any AWS SSO environment variables are set.
@@ -34,10 +36,10 @@ The scripts should work on MacOS and Linux (as of yet untested).
 
 ## Scaling nodegroups
 
-Set CLUSTER_NODES in your env\_FILE and also set the desiredCapacity for the nodegroup in cluster.CLUSTER_NAME.yaml and run:
+Set CLUSTER\_NODES in your env\_FILE and run:
 ```bash
-source env\_FILE
-eksctl scale nodegroup -f cluster.$CLUSTER_NAME.yaml
+source env_FILE
+./scaleit
 ```
 
 ## Next Steps
@@ -50,8 +52,7 @@ shared services.
 - Run "source env\_FILE ; ./cleaner" (using the env file you created above)
 
 Note that sometimes AWS has trouble cleaning up when things are or appear in-use. The eksctl
-command to delete the cluster may thus fail requiring chasing down the noted rewsources. One of the
+command to delete the cluster may thus fail requiring chasing down the noted resources. One of the
 resources that seems to always linger are LBs. Deleting these manually and restarting cleanup,
 sometimes works. Other times inspecting the CloudFormation resource for this cluster for errors
 will lead to discovery of the problematic resources. After you delete these resources manually, you may retry deletion of the CloudFormation stack. That should take care of deleting any remaining resources.
-

@@ -19,7 +19,9 @@ environments:
     - monitoring:
         namespace: monitoring
         publicNamespaces: ['openwifi-qa01', 'openwifi-qa02', 'openwifi-dev01', 'openwifi-demo']
+        clusterName: TIP WLAN CI/CD
     - domain: lab.wlan.tip.build
+    - hostSuffix: ".lab.wlan.tip.build"
     - storageClass: gp2
     - autoscaler:
         #TODO:
@@ -62,6 +64,77 @@ environments:
         enabled: true
     - calico:
         enabled: true
+    - core-dump-handler:
+        #skip this one now
+        enabled: false
+  amazon-qa2:
+    secrets:
+      - secrets/influxdb.yaml
+      - secrets/sso.yaml
+      - secrets/alertmanager.yaml
+      - secrets/actions-runner-controller.yaml
+      - secrets/ucentral-ap-firmware-logstash.yaml
+      - secrets/core-dump-handler.yaml
+    values:
+    - eks:
+        clusterName: tip-wlan-qa
+        #region: ap-south-1
+        region: us-east-2
+        dnsRegion: us-east-1
+        accountID: 289708231103
+        hostedZoneId: cicd
+        # note these are both the same.
+        # there isn't a lab cert in this region
+        certificateARNCICD: arn:aws:acm:us-east-2:289708231103:certificate/299d7444-acc4-46c2-ae83-40d2cd5f49be
+        certificateARNLab: arn:aws:acm:us-east-2:289708231103:certificate/299d7444-acc4-46c2-ae83-40d2cd5f49be
+    - monitoring:
+        namespace: monitoring
+        publicNamespaces: ['openwifi-qa03', 'openwifi-dev03']
+        clusterName: TIP QA
+    - domain: lab.wlan.tip.build
+    - hostSuffix: "-qa02.cicd.lab.wlan.tip.build"
+    - storageClass: gp2
+    - autoscaler:
+        #TODO:
+        #enabled: true
+        enabled: false
+    - ingress:
+        enabled: true
+    - elastic:
+        #TODO:
+        #enabled: true
+        enabled: false
+    - kibana:
+        #TODO:
+        #enabled: true
+        enabled: false
+    - logstash:
+        #TODO:
+        #enabled: true
+        enabled: false
+    - prometheus:
+        enabled: true
+    - k8s-dashboard:
+        enabled: true
+    - portainer:
+        enabled: false
+    - metrics-server:
+        enabled: true
+    - external-dns:
+        enabled: true
+    - alb-ingress:
+        enabled: true
+    - node-termination-handler:
+        enabled: false
+    - influxdb:
+        #skip this one for now
+        enabled: false
+    - actions-runner-controller:
+        enabled: false
+    - cert-manager:
+        enabled: true
+    - calico:
+        enabled: false
     - core-dump-handler:
         #skip this one now
         enabled: false
@@ -156,11 +229,9 @@ releases:
     app: ingress
   values:
   - controller:
-      # TEST:
       ingressClassResource:
         name: nginx-sso
       ingressClass: nginx-sso
-      #ingressClass: nginx
       service:
         annotations:
           service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Environment.Values.eks.certificateARNLab }}
@@ -191,6 +262,7 @@ releases:
     role: setup
     group: monitoring
     app: prometheus-operator
+    crd: prometheus-operator-crd
 
 - name: prometheus-operator
   condition: prometheus.enabled
@@ -231,7 +303,7 @@ releases:
           #nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
           #kubernetes.io/ingress.class: nginx-sso
         hosts:
-        - prometheus.{{ .Environment.Values.domain }}
+        - prometheus{{ .Environment.Values.hostSuffix }}
   - additionalPrometheusRulesMap:
       testbed:
         groups:
@@ -303,7 +375,7 @@ releases:
               title: Pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* is crash looping
               description: "The pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* is crash looping. Please check its logs to see what is going on."
           - alert: Pod restarted many times
-            expr: kube_pod_container_status_restarts_total > 5
+            expr: (sum(increase(kube_pod_container_status_restarts_total[10m])) by (container)) > 0
             labels:
               severity: warning
               area: testbed
@@ -360,7 +432,7 @@ releases:
           #nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
           #kubernetes.io/ingress.class: nginx-sso
         hosts:
-        - grafana.{{ .Environment.Values.domain }}
+        - grafana{{ .Environment.Values.hostSuffix }}
       dashboardProviders:
         dashboardproviders.yaml:
           apiVersion: 1
@@ -394,7 +466,7 @@ releases:
 #        - name: InfluxDB
 #          type: influxdb
 #          access: proxy
-#          url: https://influx.cicd.{{ .Environment.Values.domain }}
+#          url: https://influx.cicd{{ .Environment.Values.hostSuffix }}
 #          user: tip
 #          secureJsonData:
 #            token: {{ .Environment.Values.influxdb.adminUser.token }}
@@ -606,7 +678,7 @@ releases:
         nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
         kubernetes.io/ingress.class: nginx-sso
       hosts:
-      - kibana.{{ .Environment.Values.domain }}
+      - kibana{{ .Environment.Values.hostSuffix }}
   - lifecycle:
       postStart:
         exec:
@@ -849,18 +921,18 @@ releases:
         annotations:
           nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         hosts:
-        - host: k8s-admin.{{ .Environment.Values.domain }}
+        - host: k8s-admin{{ .Environment.Values.hostSuffix }}
           paths:
           - path: "/"
 
-- name: k8s-dashboard-roles
-  condition: k8s-dashboard.enabled
+- name: simple-auth-roles
+  condition: ingress.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
   chart: charts/k8s-dashboard-roles
   labels:
     role: setup
-    group: monitoring
-    app: k8s-dashboard
+    group: system
+    app: ingress
 
 - name: k8s-dashboard
   condition: k8s-dashboard.enabled
@@ -876,10 +948,10 @@ releases:
       defaultNamespace: {{ index .Environment.Values.monitoring.publicNamespaces 0 }}
       namespaceFallbackList: {{ .Environment.Values.monitoring.publicNamespaces | toJson }}
       itemsPerPage: 25
-      clusterName: TIP WLAN CI/CD
+      clusterName: {{ .Environment.Values.monitoring.clusterName }}
   - extraArgs:
     - --enable-skip-login
-    - --system-banner=Welcome to the TIP WLAN CI/CD Kubernetes cluster. If you are missing your namespace in the above select box, please <a href="https://telecominfraproject.atlassian.net/browse/WIFI">create a ticket</a>.
+    - --system-banner=Welcome to the {{ .Environment.Values.monitoring.clusterName}} Kubernetes cluster. If you are missing your namespace in the above select box, please <a href="https://telecominfraproject.atlassian.net/browse/WIFI">create a ticket</a>.
   - rbac:
       create: false
       clusterRoleMetrics: true
@@ -901,7 +973,7 @@ releases:
         nginx.ingress.kubernetes.io/auth-secret: k8s-dashboard-basic-auth
         nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required'
       hosts:
-        - k8s-dashboard.{{ .Environment.Values.domain }}
+        - k8s-dashboard{{ .Environment.Values.hostSuffix }}
 
 - name: metrics-server
   condition: metrics-server.enabled
@@ -993,8 +1065,8 @@ releases:
           alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
           alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_302"}}'
           alb.ingress.kubernetes.io/healthcheck-path: /health
-          external-dns.alpha.kubernetes.io/hostname: influx.cicd.{{ .Environment.Values.domain }}
-        hostname: influx.cicd.{{ .Environment.Values.domain }}
+          external-dns.alpha.kubernetes.io/hostname: influx.cicd{{ .Environment.Values.hostSuffix }}
+        hostname: influx.cicd{{ .Environment.Values.hostSuffix }}
         path: "/*"
 
 - name: actions-runner-controller

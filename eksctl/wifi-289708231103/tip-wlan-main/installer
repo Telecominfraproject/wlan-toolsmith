@@ -98,6 +98,8 @@ if enabled ; then
 fi
 
 #----------------------------------
+nextstep "Creating $CLUSTER_NAME EKS cluster in 10 seconds..."
+sleep 10
 nextstep "Creating $CLUSTER_NAME EKS cluster"
 ${steps[$cstep]} eksctl create cluster -f $config_file
 
@@ -146,8 +148,7 @@ arn="arn:aws:iam::${account_id}:policy/${role_name}"
 envsubst < route53policy.json.tpl > route53policy.json
 ${steps[$cstep]} aws iam create-policy \
     --policy-name $role_name \
-    --policy-document file://route53policy.json \
-    --no-cli-pager
+    --policy-document file://route53policy.json
 ${steps[$cstep]} eksctl create iamserviceaccount \
     --name $sa_name \
     --namespace kube-system \
@@ -164,8 +165,7 @@ sa_name="${role_name}-sa"
 arn="arn:aws:iam::${account_id}:policy/${role_name}"
 ${steps[$cstep]} aws iam create-policy \
     --policy-name $role_name \
-    --policy-document file://alb_ingress_policy.json \
-    --no-cli-pager
+    --policy-document file://alb_ingress_policy.json
 ${steps[$cstep]} eksctl create iamserviceaccount \
     --cluster $CLUSTER_NAME \
     --namespace kube-system \

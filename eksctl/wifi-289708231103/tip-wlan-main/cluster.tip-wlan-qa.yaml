@@ -1,0 +1,150 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: tip-wlan-qa
+  region: us-east-2
+  version: "1.27"
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+  - metadata:
+      name: aws-load-balancer-controller
+      namespace: kube-system
+    wellKnownPolicies:
+      awsLoadBalancerController: true
+  #- metadata:
+  #    name: ebs-csi-controller-sa
+  #    namespace: kube-system
+  #  wellKnownPolicies:
+  #    ebsCSIController: true
+  #- metadata:
+  #    name: efs-csi-controller-sa
+  #    namespace: kube-system
+  #  wellKnownPolicies:
+  #    efsCSIController: true
+  #- metadata:
+  #    name: external-dns
+  #    namespace: kube-system
+  #  wellKnownPolicies:
+  #    externalDNS: true
+  #- metadata:
+  #    name: cert-manager
+  #    namespace: cert-manager
+  #  wellKnownPolicies:
+  #    certManager: true
+  - metadata:
+      name: cluster-autoscaler
+      namespace: kube-system
+      labels: {aws-usage: "cluster-ops"}
+    wellKnownPolicies:
+      autoScaler: true
+  - metadata:
+      name: autoscaler-service
+      namespace: kube-system
+    attachPolicy: # inline policy can be defined along with `attachPolicyARNs`
+      Version: "2012-10-17"
+      Statement:
+      - Effect: Allow
+        Action:
+        - "autoscaling:DescribeAutoScalingGroups"
+        - "autoscaling:DescribeAutoScalingInstances"
+        - "autoscaling:DescribeLaunchConfigurations"
+        - "autoscaling:DescribeTags"
+        - "autoscaling:SetDesiredCapacity"
+        - "autoscaling:TerminateInstanceInAutoScalingGroup"
+        - "ec2:DescribeLaunchTemplateVersions"
+        Resource: '*'
+
+availabilityZones:
+  - us-east-2a
+  - us-east-2b
+  - us-east-2c
+
+vpc:
+  cidr: 10.10.0.0/16
+  clusterEndpoints:
+    publicAccess: true
+    privateAccess: true
+
+#managedNodeGroups:
+#- name: def
+#  instanceType: m5.2xlarge
+#  amiFamily: AmazonLinux2
+#  #Try this next time with unsafe-sysctls:
+#  #ami: ami-0c92ea9c7c0380b66
+#  #ami: ami-03a6eaae9938c858c
+#  minSize: 2
+#  maxSize: 8
+#  volumeSize: 100
+#  ssh: # import public key from file
+#    allow: true
+#    publicKeyPath: id_rsa_tip-wlan-qa.pub
+#  # This does not work for managed node groups:
+#  #overrideBootstrapCommand: |
+#  #  #!/bin/bash
+#  #  /etc/eks/bootstrap.sh tip-wlan-qa --kubelet-extra-args "--allowed-unsafe-sysctls 'net.*'"
+#  tags:
+#    # EC2 tags required for cluster-autoscaler auto-discovery
+#    k8s.io/cluster-autoscaler/enabled: "true"
+#    k8s.io/cluster-autoscaler/tip-wlan-qa: "owned"
+#    kubernetes.io/cluster-autoscaler/enabled: "true"
+#    kubernetes.io/cluster-autoscaler/tip-wlan-qa: "owned"
+
+nodeGroups:
+- name: def
+  instanceType: m5.2xlarge
+  amiFamily: AmazonLinux2
+  minSize: 2
+  maxSize: 8
+  desiredCapacity: 2
+  volumeSize: 100
+  ssh: # import public key from file
+    allow: true
+    publicKeyPath: id_rsa_tip-wlan-qa.pub
+  kubeletExtraConfig:
+    allowedUnsafeSysctls:
+      - "net.ipv4.tcp_keepalive_intvl"
+      - "net.ipv4.tcp_keepalive_probes"
+      - "net.ipv4.tcp_keepalive_time"
+  tags:
+    # EC2 tags required for cluster-autoscaler auto-discovery
+    k8s.io/cluster-autoscaler/enabled: "true"
+    k8s.io/cluster-autoscaler/tip-wlan-qa: "owned"
+    kubernetes.io/cluster-autoscaler/enabled: "true"
+    kubernetes.io/cluster-autoscaler/tip-wlan-qa: "owned"
+
+iamIdentityMappings:
+  - arn: arn:aws:iam::289708231103:user/gha-wlan-testing
+    username: gha-wlan-testing
+    noDuplicateARNs: true # prevents shadowing of ARNs
+    groups:
+      - system:masters
+  - arn: arn:aws:iam::289708231103:user/gha-toolsmith
+    username: gha-toolsmith
+    noDuplicateARNs: true
+    groups:
+      - system:masters
+  - arn: arn:aws:iam::289708231103:user/gha-wlan-cloud-helm
+    username: gha-wlan-cloud-helm
+    noDuplicateARNs: true
+    groups:
+      - system:masters
+  - arn: arn:aws:iam::289708231103:role/AWSReservedSSO_SystemAdministrator_622371b0ceece6f8
+    groups:
+      - system:masters
+    username: admin
+    noDuplicateARNs: true
+
+addons:
+- name: vpc-cni # no version is specified so it deploys the default version
+  attachPolicyARNs:
+  - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+- name: coredns
+  version: latest # auto discovers the latest available
+- name: kube-proxy
+  version: latest
+#- name: aws-ebs-csi-driver
+#  wellKnownPolicies:      # add IAM and service account
+#    ebsCSIController: true
