@@ -114,6 +114,31 @@ nodeGroups:
     k8s.io/cluster-autoscaler/${CLUSTER_NAME}: "owned"
     kubernetes.io/cluster-autoscaler/enabled: "true"
     kubernetes.io/cluster-autoscaler/${CLUSTER_NAME}: "owned"
+- name: gw
+  instanceType: ${CLUSTER_INSTANCE_TYPE2}
+  amiFamily: AmazonLinux2
+  minSize: 1
+  maxSize: ${CLUSTER_MAX_NODES}
+  desiredCapacity: ${CLUSTER_NODES2}
+  volumeSize: ${CLUSTER_VOLUME_SIZE}
+  ssh: # import public key from file
+    allow: true
+    publicKeyPath: id_rsa_${CLUSTER_NAME}.pub
+  kubeletExtraConfig:
+    allowedUnsafeSysctls:
+      - "net.ipv4.tcp_keepalive_intvl"
+      - "net.ipv4.tcp_keepalive_probes"
+      - "net.ipv4.tcp_keepalive_time"
+  taints:
+    - key: tip.main/onlygw
+      value: "true"
+      effect: NoSchedule
+  tags:
+    # EC2 tags required for cluster-autoscaler auto-discovery
+    k8s.io/cluster-autoscaler/enabled: "true"
+    k8s.io/cluster-autoscaler/${CLUSTER_NAME}: "owned"
+    kubernetes.io/cluster-autoscaler/enabled: "true"
+    kubernetes.io/cluster-autoscaler/${CLUSTER_NAME}: "owned"
 
 iamIdentityMappings:
   - arn: arn:aws:iam::${AWS_ACCOUNT_ID}:user/gha-wlan-testing

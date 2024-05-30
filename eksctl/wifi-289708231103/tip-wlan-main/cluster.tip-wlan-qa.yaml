@@ -114,6 +114,31 @@ nodeGroups:
     k8s.io/cluster-autoscaler/tip-wlan-qa: "owned"
     kubernetes.io/cluster-autoscaler/enabled: "true"
     kubernetes.io/cluster-autoscaler/tip-wlan-qa: "owned"
+- name: gw
+  instanceType: m5.4xlarge
+  amiFamily: AmazonLinux2
+  minSize: 1
+  maxSize: 8
+  desiredCapacity: 1
+  volumeSize: 100
+  ssh: # import public key from file
+    allow: true
+    publicKeyPath: id_rsa_tip-wlan-qa.pub
+  kubeletExtraConfig:
+    allowedUnsafeSysctls:
+      - "net.ipv4.tcp_keepalive_intvl"
+      - "net.ipv4.tcp_keepalive_probes"
+      - "net.ipv4.tcp_keepalive_time"
+  taints:
+    - key: tip.main/onlygw
+      value: "true"
+      effect: NoSchedule
+  tags:
+    # EC2 tags required for cluster-autoscaler auto-discovery
+    k8s.io/cluster-autoscaler/enabled: "true"
+    k8s.io/cluster-autoscaler/tip-wlan-qa: "owned"
+    kubernetes.io/cluster-autoscaler/enabled: "true"
+    kubernetes.io/cluster-autoscaler/tip-wlan-qa: "owned"
 
 iamIdentityMappings:
   - arn: arn:aws:iam::289708231103:user/gha-wlan-testing

@@ -34,9 +34,10 @@ if [ -z "$account_id" ] ; then
 fi
 
 config_file="cluster.$CLUSTER_NAME.yaml"
-nextstep "Generating cluster.yml file -> $config_file"
+echo "Generating cluster.yml file -> $config_file"
 envsubst < cluster.yaml > $config_file
 
+#eksctl create nodegroup -f cluster.$CLUSTER_NAME.yaml
 eksctl scale nodegroup -f cluster.$CLUSTER_NAME.yaml
 logv scaled $CLUSTER_NAME
 logv endscale "$(date)"
