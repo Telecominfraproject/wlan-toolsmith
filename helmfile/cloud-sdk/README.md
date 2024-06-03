@@ -97,3 +97,7 @@ kubectl edit ingressclass alb
 # add under: metadata.annotations:
 #   ingressclass.kubernetes.io/is-default-class: "true"
 ```
+
+## Known issues
+
+- When installing prometheus-operator the ingress class is not properly set and the host names may be wrong. To work this out run `kubectl -n monitoring edit ingress` and make sure each has ingressClassName set, and all host names are set appropriately. This is more likely for any other environment other than the default environment.

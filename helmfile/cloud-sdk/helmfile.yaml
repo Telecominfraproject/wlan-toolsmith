@@ -17,6 +17,7 @@ environments:
         certificateARNCICD: arn:aws:acm:ap-south-1:289708231103:certificate/2cc8c764-11fd-411d-bf7d-a93f488f3f6c
         certificateARNLab: arn:aws:acm:ap-south-1:289708231103:certificate/5281be14-c5e6-45c5-8d5c-e8660c76fbcb
     - monitoring:
+        receiver: "slack-notifications"
         namespace: monitoring
         publicNamespaces: ['openwifi-qa01', 'openwifi-qa02', 'openwifi-dev01', 'openwifi-demo']
         clusterName: TIP WLAN CI/CD
@@ -45,8 +46,6 @@ environments:
         enabled: true
     - k8s-dashboard:
         enabled: true
-    - portainer:
-        enabled: false
     - metrics-server:
         enabled: true
     - external-dns:
@@ -89,6 +88,7 @@ environments:
         certificateARNLab: arn:aws:acm:us-east-2:289708231103:certificate/299d7444-acc4-46c2-ae83-40d2cd5f49be
     - monitoring:
         namespace: monitoring
+        receiver: "null"
         publicNamespaces: ['openwifi-qa03', 'openwifi-dev03']
         clusterName: TIP QA
     - domain: lab.wlan.tip.build
@@ -116,8 +116,6 @@ environments:
         enabled: true
     - k8s-dashboard:
         enabled: true
-    - portainer:
-        enabled: false
     - metrics-server:
         enabled: true
     - external-dns:
@@ -172,8 +170,6 @@ repositories:
   url: https://braedon.github.io/helm
 - name: core-dump-handler
   url: https://ibm.github.io/core-dump-handler
-- name: portainer
-  url: https://portainer.github.io/k8s/
 
 helmDefaults:
   force: false
@@ -497,7 +493,7 @@ releases:
           routes:
           - match:
               area: testbed
-            receiver: "slack-notifications"
+            receiver: "{{ .Environment.Values.monitoring.receiver }}"
 
         receivers:
         - name: "null"
@@ -901,30 +897,6 @@ releases:
           targetPort: 5514
           protocol: TCP
 
-- name: portainer
-  condition: portainer.enabled
-  namespace: {{ .Environment.Values.monitoring.namespace }}
-  chart: portainer/portainer
-  version: 1.0.49
-  labels:
-    role: setup
-    group: monitoring
-    app: portainer
-  values:
-    - service:
-        type: ClusterIP
-    - tls:
-        force: true
-    - ingress:
-        ingressClassName: nginx-sso
-        enabled: true
-        annotations:
-          nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-        hosts:
-        - host: k8s-admin{{ .Environment.Values.hostSuffix }}
-          paths:
-          - path: "/"
-
 - name: simple-auth-roles
   condition: ingress.enabled
   namespace: {{ .Environment.Values.monitoring.namespace }}
@@ -992,7 +964,7 @@ releases:
   <<: *default
   condition: alb-ingress.enabled
   chart: eks/aws-load-balancer-controller
-  version: 1.6.1
+  version: 1.6.2
   labels:
     role: setup
     group: system
