@@ -3,6 +3,7 @@ kind: RunnerDeployment
 metadata:
   name: wlan-testing-small-deployment
 spec:
+  replicas: 2
   template:
     metadata:
       annotations:
