@@ -1,0 +1,14 @@
+# new cluster to replace old env_qa cluster
+unset AWS_PROFILE
+export CLUSTER_VERSION=1.35
+export AWS_DEFAULT_REGION="ap-south-1"
+export AWS_REGION="$AWS_DEFAULT_REGION"
+export AWS_ACCOUNT_ID="289708231103"
+export CLUSTER_DOMAIN="lab.openlan.org"
+export CLUSTER_ZONE_ID="Z0678605KU8WQ0W4TD1W"
+export CLUSTER_INSTANCE_TYPE="c5.2xlarge"
+export CLUSTER_NAME="tip-openlan-lab"
+export CLUSTER_NODES=1
+export CLUSTER_MIN_NODES=1
+export CLUSTER_MAX_NODES=8
+export CLUSTER_VOLUME_SIZE=100

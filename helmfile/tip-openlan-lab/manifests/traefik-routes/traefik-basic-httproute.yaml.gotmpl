@@ -1,0 +1,115 @@
+# vim: ft=yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: gateway-api
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+spec:
+  gatewayClassName: traefik
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: k8s-dashboard-route
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+spec:
+  parentRefs:
+  - name: gateway-api
+    sectionName: http
+    kind: Gateway
+  hostnames:
+  - k8s-dashboard.{{ .Environment.Values.hostSuffix }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /api/v1/login
+    - path:
+        type: PathPrefix
+        value: /api/v1/csrftoken/login
+    - path:
+        type: PathPrefix
+        value: /api/v1/me
+    backendRefs:
+    - name: k8s-dashboard-kubernetes-dashboard-auth
+      port: 8000
+      weight: 1
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /api
+    backendRefs:
+    - name: k8s-dashboard-kubernetes-dashboard-api
+      port: 8000
+      weight: 1
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    filters:
+    - type: ExtensionRef
+      extensionRef:
+        group: traefik.io
+        kind: Middleware
+        name: basic-auth
+    backendRefs:
+    - name: k8s-dashboard-kubernetes-dashboard-web
+      port: 8000
+      weight: 1
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: basic-auth
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+spec:
+  basicAuth:
+    secret: basic-auth
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: basic-auth
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+type: kubernetes.io/basic-auth
+stringData:
+  username: "{{ .Environment.Values.dashboard.user }}"
+  password: "{{ .Environment.Values.dashboard.password }}"
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: alb-traefik-gateway
+  namespace: traefik
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: instance
+
+    # Manage SSL Termination at the ALB layer
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: {{ .Environment.Values.eks.certificateARN }}
+
+    # Automatically redirect HTTP requests to HTTPS
+    alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+
+    # Health checks hitting Traefik's default ping endpoint
+    alb.ingress.kubernetes.io/healthcheck-path: /ping
+    alb.ingress.kubernetes.io/healthcheck-port: "32080"
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+spec:
+  ingressClassName: alb
+  rules:
+    - host: k8s-dashboard.{{ .Environment.Values.hostSuffix }}
+      http:
+        paths:
+          - path: /*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: traefik
+                port:
+                  number: 80

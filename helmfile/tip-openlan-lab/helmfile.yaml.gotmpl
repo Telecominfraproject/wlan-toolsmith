@@ -1,0 +1,445 @@
+# vim: ft=yaml
+environments:
+  default:
+    secrets:
+      - secrets/alertmanager.yaml
+      - secrets/actions-runner-controller.yaml
+      - secrets/dashboard.yaml
+    values:
+    - eks:
+        clusterName: tip-openlan-lab
+        region: ap-south-1
+        dnsRegion: us-east-1
+        accountID: 289708231103
+        hostedZoneId: Z09534373UTXT2L1YL912
+        certificateARN: arn:aws:acm:ap-south-1:289708231103:certificate/2da39707-c340-48ec-a819-0014126548af
+    - monitoring:
+        receiver: "slack-notifications"
+        namespace: monitoring
+        publicNamespaces: ['openwifi-qa01', 'openwifi-dev01']
+        clusterName: TIP OpenLAN Lab
+    - domain: lab.open-lan.org
+    - hostSuffix: lab.open-lan.org
+    - storageClass: gp2
+    - external-dns:
+        enabled: true
+    - traefik:
+        enabled: true
+    - k8s-dashboard:
+        enabled: true
+    - prometheus:
+        enabled: false
+    - alb-ingress:
+        enabled: true
+    - cert-manager:
+        enabled: true
+    - actions-runner-controller:
+        enabled: true
+
+---
+
+repositories:
+- name: traefik
+  url: https://traefik.github.io/charts
+- name: eks
+  url: https://aws.github.io/eks-charts
+#- name: prometheus-community
+#  url: https://prometheus-community.github.io/helm-charts
+
+helmDefaults:
+  force: false
+  timeout: 300
+
+releases:
+- name: external-dns
+  chart: oci://registry-1.docker.io/bitnamicharts/external-dns
+  version: 9.0.3
+  condition: external-dns.enabled
+  namespace: kube-system
+  missingFileHandler: Warn
+  labels:
+    role: setup
+    group: system
+    app: external-dns
+  values:
+    - values/external-dns.yaml.gotmpl
+
+- name: traefik
+  chart: traefik/traefik
+  version: 40.2.0
+  condition: traefik.enabled
+  namespace: traefik
+  createNamespace: true
+  missingFileHandler: Warn
+  labels:
+    role: install
+    group: system
+    app: traefik
+  values:
+    - values/traefik.yaml
+    - service:
+        annotations:
+          service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Environment.Values.eks.certificateARN }}
+
+- name: traefik-gateway-class
+  chart: ./manifests/traefik
+  condition: traefik.enabled
+  namespace: traefik
+  labels:
+    role: class
+    group: system
+    app: traefik
+
+- name: traefik-routes
+  chart: ./manifests/traefik-routes
+  condition: traefik.enabled
+  namespace: traefik
+  labels:
+    role: routes
+    group: system
+    app: traefik
+
+- name: aws-load-balancer-controller
+  namespace: kube-system
+  missingFileHandler: Warn
+  condition: alb-ingress.enabled
+  chart: eks/aws-load-balancer-controller
+  version: 3.3.0
+  labels:
+    role: setup
+    group: system
+    app: aws-load-balancer-controller
+  values:
+  - serviceAccount:
+      create: false
+      name: {{ .Values.eks.clusterName }}-alb-ingress-sa
+      annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Values.eks.accountID }}:role/{{ .Values.eks.clusterName }}-alb-ingress
+    clusterName: {{ .Values.eks.clusterName }}
+    enableShield: false
+    enableWaf: false
+    enableWafv2: false
+    logLevel: info
+    enableServiceMutatorWebhook: false
+
+- name: cert-manager
+  condition: cert-manager.enabled
+  namespace: cert-manager
+  createNamespace: true
+  chart: oci://quay.io/jetstack/charts/cert-manager
+  version: v1.20.2
+  labels:
+    app: cert-manager
+
+# monitoring
+# TODO: upgrade
+- name: prometheus-operator-crds
+  chart: prometheus-community/prometheus-operator-crds
+  condition: prometheus.enabled
+  version: 8.0.1
+  labels:
+    role: setup
+    group: monitoring
+    app: prometheus-operator
+    crd: prometheus-operator-crd
+
+# TODO: upgrade
+- name: prometheus-operator
+  condition: prometheus.enabled
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+  chart: prometheus-community/kube-prometheus-stack
+  version: 55.8.1
+  labels:
+    role: setup
+    group: monitoring
+    app: prometheus-operator
+  values:
+  - nameOverride: prometheus-operator
+  - prometheus:
+      enabled: true
+      prometheusSpec:
+        retention: 31d
+        resources:
+          requests:
+            memory: 1400Mi
+          limits:
+            memory: 3000Mi
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: gp2
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 50Gi
+      ingress:
+        enabled: true
+        ingressClassName: nginx-sso
+        annotations:
+          nginx.ingress.kubernetes.io/auth-type: basic
+          nginx.ingress.kubernetes.io/auth-secret: k8s-dashboard-basic-auth
+          nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required'
+          #nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+          #nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+          #kubernetes.io/ingress.class: nginx-sso
+        hosts:
+        - prometheus.{{ .Environment.Values.hostSuffix }}
+  - additionalPrometheusRulesMap:
+      testbed:
+        groups:
+        - name: Testbed alerts
+          rules:
+          - alert: Waiting pod
+            expr: sum(kube_pod_container_status_waiting_reason{namespace=~".*nola.*", reason!="ContainerCreating"}) by (namespace, pod) > 0
+            for: 5m
+            labels:
+              severity: warning
+              area: testbed
+              namespace: "{{`{{ $labels.namespace }}`}}"
+              pod: "{{`{{ $labels.pod }}`}}"
+            annotations:
+              title: Pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* is in waiting state
+              description: The pod {{`{{ $labels.namespace }}/{{ $labels.pod }}`}} is in waiting state for at least 5 minutes. Please check for image pull issues.
+          - alert: Node not ready
+            expr: sum(kube_node_status_condition{condition="Ready", status!="true"}) by (node) > 0
+            for: 60m
+            labels:
+              severity: error
+              area: testbed
+              node: "{{`{{ $labels.node }}`}}"
+            annotations:
+              title: Node {{`{{ $labels.node }}`}} not becoming ready
+              description: The cluster node {{`{{ $labels.node }}`}} is not getting ready since 60 minutes. Please contact the cluster administrators.
+          - alert: Pod OOM killed
+            expr: (kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1) and ignoring (reason) min_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}[10m]) == 1
+            for: 0m
+            labels:
+              severity: error
+              area: testbed
+              namespace: "{{`{{ $labels.namespace }}`}}"
+              pod: "{{`{{ $labels.pod }}`}}"
+              reason: "{{`{{ $labels.reason }}`}}"
+            annotations:
+              title: Pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* has been OOM killed
+              description: The pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* has been killed due to reaching its memory limit. Investigate the memory usage or increase the limit to prevent this.
+          - alert: Pod exited with a segfault
+            expr: (kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1) and min_over_time(kube_pod_container_status_last_terminated_exitcode[10m]) == 139
+            for: 0m
+            labels:
+              severity: error
+              area: testbed
+              namespace: "{{`{{ $labels.namespace }}`}}"
+              pod: "{{`{{ $labels.pod }}`}}"
+              reason: "{{`{{ $labels.reason }}`}}"
+            annotations:
+              title: Pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* exited with a segfault
+              description: The pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* exited with a segmentation fault, please examine the coredump.
+          - alert: Node low on memory
+            expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 5
+            for: 1m
+            labels:
+              severity: warning
+              area: testbed
+            annotations:
+              title: Node {{`{{ $labels.instance }}`}} has very little memory capacity left
+              description: The cluster node {{`{{ $labels.instance }}`}} has less than 5% memory available.
+          - alert: Pod stuck in crash loop
+            expr: increase(kube_pod_container_status_restarts_total[1m]) > 3
+            for: 2m
+            labels:
+              severity: error
+              area: testbed
+              namespace: "{{`{{ $labels.namespace }}`}}"
+              pod: "{{`{{ $labels.pod }}`}}"
+            annotations:
+              title: Pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* is crash looping
+              description: "The pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* is crash looping. Please check its logs to see what is going on."
+          - alert: Pod restarted many times
+            expr: (sum(increase(kube_pod_container_status_restarts_total[10m])) by (container)) > 0
+            labels:
+              severity: warning
+              area: testbed
+              namespace: "{{`{{ $labels.namespace }}`}}"
+              pod: "{{`{{ $labels.pod }}`}}"
+            annotations:
+              title: Pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* was restarted many times
+              description: "The pod *{{`{{ $labels.namespace }}/{{ $labels.pod }}`}}* was restarted more than 5 times. Please check its logs to see what is going on."
+          - alert: PVC running out of space
+            expr: kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes * 100 < 20
+            labels:
+              severity: warning
+              area: testbed
+              namespace: "{{`{{ $labels.namespace }}`}}"
+              persistentvolumeclaim: "{{`{{ $labels.persistentvolumeclaim }}`}}"
+            annotations:
+              title: PVC *{{`{{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }}`}}* has less than 20% free storage
+              description: "The PVC *{{`{{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }}`}}* only has {{`{{ $value }}`}}% capacity left. Please increase its size or clean it up."
+
+# TODO: upgrade
+  - grafana:
+      grafana.ini:
+        users:
+          viewers_can_edit: true
+        auth:
+          disable_login_form: true
+          disable_signout_menu: true
+        auth.anonymous:
+          enabled: true
+          org_role: Viewer
+      testFramework:
+        enabled: false
+      ingress:
+        enabled: true
+        ingressClassName: nginx-sso
+        annotations:
+          nginx.ingress.kubernetes.io/auth-type: basic
+          nginx.ingress.kubernetes.io/auth-secret: k8s-dashboard-basic-auth
+          nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required'
+          #nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+          #nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+          #kubernetes.io/ingress.class: nginx-sso
+        hosts:
+        - grafana.{{ .Environment.Values.hostSuffix }}
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+          - name: 'default'
+            orgId: 1
+            folder: imported
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
+
+      #dashboards:
+      #  default:
+      #    performance:
+      #      url: https://raw.githubusercontent.com/Telecominfraproject/wlan-testing/master/grafana/performance.json
+      #    qaDebugging:
+      #      url: https://raw.githubusercontent.com/Telecominfraproject/wlan-cloud-ucentral-analytics/main/grafana/qa-debugging.json
+
+      datasources:
+       datasources.yaml:
+        apiVersion: 1
+        datasources:
+        - name: Prometheus
+          type: prometheus
+          url: http://prometheus-operated:9090
+          access: proxy
+          isDefault: false
+
+  - alertmanager:
+      config:
+        global:
+          resolve_timeout: 1m
+          slack_api_url: {{ .Environment.Values.alertmanager.slack_api_url }}
+        route:
+          receiver: "null"
+          routes:
+          - match:
+              area: testbed
+            receiver: "{{ .Environment.Values.monitoring.receiver }}"
+
+        receivers:
+        - name: "null"
+        - name: "slack-notifications"
+          slack_configs:
+          - channel: "#open-wifi-testbed-alerts"
+            send_resolved: true
+            icon_url: https://avatars3.githubusercontent.com/u/3380462
+            title: |-
+            {{- readFile "alertmanager-templates/title.tpl" | nindent 14 }}
+            text: >-
+            {{- readFile "alertmanager-templates/text.tpl" | nindent 14 }}
+            title_link: ""
+
+- name: prometheus-operator-helper
+  condition: prometheus.enabled
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+  chart: charts/standalone-monitoring
+  labels:
+    role: setup
+    group: monitoring
+    app: prometheus-operator
+    sub: helper
+  values:
+  - monitoring:
+      namespace: {{ .Environment.Values.monitoring.namespace }}
+      domain: {{ .Environment.Values.domain }}
+  - proxy:
+      namespace: kube-system
+
+- name: simple-auth-roles
+  condition: k8s-dashboard.enabled
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+  chart: charts/k8s-dashboard-roles
+  labels:
+    role: setup
+    group: system
+    app: basicauth
+
+- name: k8s-dashboard
+  condition: k8s-dashboard.enabled
+  namespace: {{ .Environment.Values.monitoring.namespace }}
+  # https://artifacthub.io/packages/helm/k8s-dashboard/kubernetes-dashboard
+  chart: kubernetes-dashboard/kubernetes-dashboard
+  version: 7.14.0
+  labels:
+    role: setup
+    group: monitoring
+    app: k8s-dashboard
+  values:
+  - nginx:
+      enabled: false
+  - kong:
+      enabled: false
+  - cert-manager:
+      enabled: false
+  - app:
+      settings:
+        defaultNamespace: {{ index .Environment.Values.monitoring.publicNamespaces 0 }}
+        namespaceFallbackList: {{ .Environment.Values.monitoring.publicNamespaces | toJson }}
+        itemsPerPage: 25
+        clusterName: {{ .Environment.Values.monitoring.clusterName }}
+      ingress:
+        enabled: false
+  - web:
+      containers:
+        args:
+          - --system-banner=Welcome to the {{ .Environment.Values.monitoring.clusterName}} Kubernetes cluster.
+
+- name: actions-runner-controller
+  condition: actions-runner-controller.enabled
+  namespace: actions-runner-system
+  createNamespace: true
+  chart: oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
+  version: 0.14.2
+  labels:
+    app: actions-runner-controller
+
+- name: actions-runner-set-secrets
+  condition: actions-runner-controller.enabled
+  chart: ./manifests/actions-runners
+  namespace: action-runners
+  createNamespace: true
+  labels:
+    app: actions-runner-set-secrets
+
+- name: tip-openlan-lab-runners
+  condition: actions-runner-controller.enabled
+  chart: oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+  version: 0.14.2
+  namespace: action-runners
+  createNamespace: true
+  labels:
+    app: actions-runner-set
+  values:
+    - githubConfigUrl: "https://github.com/Telecominfraproject/wlan-testing"
+    - githubConfigSecret: pre-defined-secret
+    - controllerServiceAccount:
+        namespace: actions-runner-system
+        name: actions-runner-controller-gha-rs-controller
+    - minRunners: 5
+    - maxRunners: 10

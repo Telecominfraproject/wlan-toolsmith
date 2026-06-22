@@ -24,7 +24,7 @@ function check_env()
         #echo "Default AWS_DEFAULT_REGION to $AWS_DEFAULT_REGION"
     fi
     if [ -z "$CLUSTER_VERSION" ] ; then
-        export CLUSTER_VERSION="1.27"
+        export CLUSTER_VERSION="1.35"
         echo "Default CLUSTER_VERSION to $CLUSTER_VERSION"
     fi
     if [ -z "$CLUSTER_NODES" ] ; then
@@ -85,4 +85,13 @@ function logv()
 
     echo "-> $nm = $val"
     echo "${nm}=\"$val\"" >> ${CLUSTER_NAME}-logs
+}
+
+function wait_enter()
+{
+    local what="$1"
+
+    echo "---> About to: $what"
+    echo "Press ENTER to continue [or CTRL-C to exit]"
+    read -r
 }

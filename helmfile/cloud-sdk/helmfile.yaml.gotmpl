@@ -179,23 +179,14 @@ helmDefaults:
   # recreatePods: true
   # verify: true
 
-templates:
-  default: &default
-    namespace: kube-system
-    missingFileHandler: Warn
-  cluster-autoscaler: &cluster-autoscaler
-    values:
-    - envs/common/cluster-autoscaler.yaml.gotmpl
-  external-dns: &external-dns
-    values:
-    - envs/common/external-dns.yaml.gotmpl
-
 # core setup
 releases:
 - name: cluster-autoscaler
   condition: autoscaler.enabled
-  <<: *default
-  <<: *cluster-autoscaler
+  namespace: kube-system
+  missingFileHandler: Warn
+  values:
+  - envs/common/cluster-autoscaler.yaml.gotmpl
   chart: autoscaler/cluster-autoscaler
   version: 9.11.0
   labels:
@@ -205,8 +196,10 @@ releases:
 
 - name: external-dns
   condition: external-dns.enabled
-  <<: *default
-  <<: *external-dns
+  namespace: kube-system
+  missingFileHandler: Warn
+  values:
+  - envs/common/external-dns.yaml.gotmpl
   chart: bitnami/external-dns
   version: 6.12.2
   labels:
@@ -216,7 +209,8 @@ releases:
 
 - name: nginx-ingress
   condition: ingress.enabled
-  <<: *default
+  namespace: kube-system
+  missingFileHandler: Warn
   chart: nginx/ingress-nginx
   version: 4.8.2
   labels:
@@ -842,7 +836,7 @@ releases:
                 pattern_definitions => {
                  "UPLOAD_DATE" => "%{YEAR}%{MONTHNUM}%{MONTHDAY}"
                  "AP_MODEL" => "[a-z0-9]+_[a-z0-9]+(-|_)?[a-z0-9]+(-|_)?[a-z0-9]+"
-                 "GIT_REV" => "[a-z0-9]{4,8}" 
+                 "GIT_REV" => "[a-z0-9]{4,8}"
                 }
                 add_field => { "timestamp_clientip" => "%{@timestamp} %{clientip}" }
               }
@@ -961,7 +955,8 @@ releases:
       create: true
 
 - name: aws-load-balancer-controller
-  <<: *default
+  namespace: kube-system
+  missingFileHandler: Warn
   condition: alb-ingress.enabled
   chart: eks/aws-load-balancer-controller
   version: 1.6.2
@@ -982,7 +977,8 @@ releases:
     logLevel: info
 
 - name: aws-node-termination-handler
-  <<: *default
+  namespace: kube-system
+  missingFileHandler: Warn
   condition: node-termination-handler.enabled
   chart: eks/aws-node-termination-handler
   version: 0.21.0

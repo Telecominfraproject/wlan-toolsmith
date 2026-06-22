@@ -1,7 +1,7 @@
 # EKSCTL Based Cluster Installation
 
 The script and associated files should make it possible to deploy an EKS cluster and
-a few nodes. It sets up the EKS cluster bsaed on provided environment variables.
+a few nodes. It sets up the EKS cluster based on provided environment variables.
 The scripts should work on MacOS and Linux (as of yet untested).
 
 ## Requirements
@@ -9,19 +9,19 @@ The scripts should work on MacOS and Linux (as of yet untested).
 ### MacOS
 
 - Homebrew
-- gettext for envsubst (via Homebrew v0.21.1)
+- gettext for envsubst
 
 ### General
 
-- eksctl (v0.175.0+)
-- aws-cli (v2.15.34+)
+- eksctl (v0.227.0+)
+- aws-cli (v2.34.58+)
 
 ## Setup
 
 - Prepare an environment file - see [env\_example](./env_example).
 - Make sure all required utilities are installed.
 - Make sure that you can run "aws --version" and "eksctl version"
-- Make sure that any AWS SSO environment variables are set.
+- Make sure that any AWS environment variables are set.
 
 ## Installation
 
@@ -39,13 +39,12 @@ The scripts should work on MacOS and Linux (as of yet untested).
 Set CLUSTER\_NODES in your env\_FILE and run:
 ```bash
 source env_FILE
-./scaleit
+./scale_it
 ```
 
 ## Next Steps
 
-After creating the cluster proceed to [helmfile/cloud-sdk](../../../helmfile/cloud-sdk) to install
-shared services.
+After creating the cluster proceed to [helmfile/tip-openlan-lab](../../../helmfile/cloud-sdk) to install shared services.
 
 ## Cleanup
 
