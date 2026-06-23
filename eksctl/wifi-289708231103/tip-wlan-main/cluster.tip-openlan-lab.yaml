@@ -1,0 +1,77 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: tip-openlan-lab
+  region: ap-south-1
+  version: "1.35"
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+  - metadata:
+      name: aws-load-balancer-controller
+      namespace: kube-system
+    wellKnownPolicies:
+      awsLoadBalancerController: true
+
+availabilityZones:
+  - ap-south-1a
+  - ap-south-1b
+  - ap-south-1c
+
+vpc:
+  cidr: 10.10.0.0/16
+  clusterEndpoints:
+    publicAccess: true
+    privateAccess: true
+
+nodeGroups:
+- name: def
+  instanceType: c5.2xlarge
+  amiFamily: AmazonLinux2023
+  minSize: 1
+  maxSize: 8
+  desiredCapacity: 1
+  volumeSize: 100
+  ssh: # import public key from file
+    allow: true
+    publicKeyPath: id_rsa_tip-openlan-lab.pub
+  kubeletExtraConfig:
+    allowedUnsafeSysctls:
+      - "net.ipv4.tcp_keepalive_intvl"
+      - "net.ipv4.tcp_keepalive_probes"
+      - "net.ipv4.tcp_keepalive_time"
+
+iamIdentityMappings:
+  - arn: arn:aws:iam::289708231103:user/gha-wlan-testing
+    username: gha-wlan-testing
+    noDuplicateARNs: true # prevents shadowing of ARNs
+    groups:
+      - system:masters
+  - arn: arn:aws:iam::289708231103:user/gha-toolsmith
+    username: gha-toolsmith
+    noDuplicateARNs: true
+    groups:
+      - system:masters
+  - arn: arn:aws:iam::289708231103:user/gha-wlan-cloud-helm
+    username: gha-wlan-cloud-helm
+    noDuplicateARNs: true
+    groups:
+      - system:masters
+  - arn: arn:aws:iam::289708231103:role/AWSReservedSSO_SystemAdministrator_622371b0ceece6f8
+    groups:
+      - system:masters
+    username: admin
+    noDuplicateARNs: true
+
+addons:
+- name: vpc-cni # no version is specified so it deploys the default version
+  attachPolicyARNs:
+  - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+- name: coredns
+  version: latest # auto discovers the latest available
+- name: kube-proxy
+  version: latest
+# do this in installer as we need to create a service account first
+#- name: aws-ebs-csi-driver

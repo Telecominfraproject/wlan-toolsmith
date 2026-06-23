@@ -1,0 +1,47 @@
+logs:
+  access:
+    enabled: true
+    format: json
+    fields:
+      general:
+        # full field list
+        # https://doc.traefik.io/traefik/reference/install-configuration/observability/logs-and-accesslogs/#json-format-fields
+        names:
+          RouterName: drop
+
+ingressClass:
+  enabled: true
+  isDefaultClass: false
+
+service:
+  type: NodePort
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
+    service.beta.kubernetes.io/aws-load-balancer-type: elb
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+
+ports:
+  web:
+    port: 80
+    nodePort: 32080 # Static port for ALB HTTP routing
+  #websecure:
+  #  port: 443
+  #  exposedPort: 443
+
+# we enable gateway-api features
+providers:
+  kubernetesGateway:
+    enabled: true
+    experimentalChannel: true
+  kubernetesCRD:
+    # -- Load Kubernetes IngressRoute provider
+    enabled: true
+
+# we disable gateway-api defaults because we want to provide our own
+gatewayClass:
+  enabled: false
+
+# we disable gateway-api defaults because we want to provide our own
+gateway:
+  enabled: false

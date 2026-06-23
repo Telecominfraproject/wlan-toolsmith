@@ -1,0 +1,22 @@
+podAnnotations:
+  iam.amazonaws.com/role: arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/{{ .Environment.Values.eks.clusterName }}-external-dns
+image:
+  repository: bitnamilegacy/external-dns
+aws:
+  region: {{ .Environment.Values.eks.dnsRegion }}
+  evaluateTargetHealth: false
+domainFilters:
+- {{ .Environment.Values.domain }}
+triggerLoopOnEvent: true
+sources:
+- ingress
+- service
+extraArgs:
+  aws-zones-cache-duration: 1h
+txtOwnerId: /hostedzone/{{ .Environment.Values.eks.hostedZoneId }}
+policy: sync
+serviceAccount:
+  create: false
+  name: {{ .Environment.Values.eks.clusterName }}-external-dns-sa
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::{{ .Environment.Values.eks.accountID }}:role/{{ .Environment.Values.eks.clusterName }}-external-dns"
